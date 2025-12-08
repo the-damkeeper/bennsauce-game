@@ -927,16 +927,18 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
         { x: 0, y: baseGroundY, width: mapWidth, isGround: true }
     ];
     
-    // Add platforms with GROUND_LEVEL_OFFSET applied
+    // Add platforms (NO offset needed - monster Y coordinates already match platform collision Y)
     if (mapData.platforms) {
         for (const p of mapData.platforms) {
             if (!p.noSpawn && p.width >= 100) {
+                // Platforms are already adjusted by GROUND_LEVEL_OFFSET in the platforms array used for collision
+                // Monster spawn Y must match the collision Y, which is p.y + GROUND_LEVEL_OFFSET
                 allSpawnSurfaces.push({ ...p, y: p.y + GROUND_LEVEL_OFFSET, isGround: false });
             }
         }
     }
     
-    // Add structures with GROUND_LEVEL_OFFSET applied
+    // Add structures (same as platforms)
     if (mapData.structures) {
         for (const s of mapData.structures) {
             if (!s.noSpawn && s.width >= 100) {
@@ -999,8 +1001,8 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
                     spawnX = minX + (Math.random() * randomRange);
                     // Spawn monsters ABOVE the surface so they fall naturally via physics
                     // Physics will land them at: m.y = surfaceY - anchorY
-                    // So spawn them a few pixels higher to trigger the fall
-                    const spawnAboveOffset = 5; // Spawn 5px above landing position
+                    // Spawn them higher to ensure they're above the platform and fall down
+                    const spawnAboveOffset = 20; // Spawn 20px above landing position to ensure clearance
                     const groundOffset = spawnSurface.isGround ? 3 : 0;
                     spawnY = spawnSurface.y - anchorY - groundOffset - spawnAboveOffset;
                     attempts++;
