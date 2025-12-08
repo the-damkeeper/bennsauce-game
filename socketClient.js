@@ -229,6 +229,11 @@ function setupSocketListeners() {
         const remotePlayer = remotePlayers[data.odId];
         if (remotePlayer && remotePlayer.element) {
             showRemotePlayerChat(remotePlayer, data.message);
+            
+            // Also add to chat log
+            if (typeof addChatMessage === 'function') {
+                addChatMessage(`${data.name}: ${data.message}`, 'map');
+            }
         } else {
             console.warn('[Client] Could not show chat - remote player not found:', data.odId);
         }
