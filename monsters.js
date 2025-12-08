@@ -1542,6 +1542,9 @@ function createMonster(type, x, y, initialState = null) {
         chaseStartTime: 0, // Track when chase started
         lastInteractionTime: 0 // Track last damage dealt/received
     };
+    
+    // Log spawn event for position tracker
+    console.log(`%c[MONSTER CREATE] ${type} created at (${x.toFixed(1)}, ${y.toFixed(1)}) with velocityY=${newMonster.velocityY}`, 'background: #0f0; color: #000;');
 
     const monsterHitbox = document.createElement('div');
     monsterHitbox.className = 'debug-hitbox';
@@ -1847,13 +1850,12 @@ function updateMonsters() {
             if (p.isLadder || p.y === undefined) return;
             if (isColliding(m, p) && m.velocityY >= 0 && (m.y - m.velocityY + anchorY) <= p.y) {
                 const oldY = m.y;
+                const deltaY = Math.abs(oldY - (p.y - anchorY));
                 m.y = p.y - anchorY;
                 m.velocityY = 0;
                 m.isJumping = false;
                 onAnySurface = true;
-                if (Math.abs(oldY - m.y) > 10) {
-                    console.log(`[PLATFORM COLLISION] Monster: ${m.type}, OldY: ${oldY.toFixed(1)}, NewY: ${m.y.toFixed(1)}, PlatformY: ${p.y.toFixed(1)}, AnchorY: ${anchorY.toFixed(1)}`);
-                }
+                console.log(`%c[COLLISION SNAP] ${m.type} | Before: ${oldY.toFixed(1)} → After: ${m.y.toFixed(1)} | ΔY: ${deltaY.toFixed(1)}px | Platform: ${p.y.toFixed(1)} | Anchor: ${anchorY.toFixed(1)}`, deltaY > 10 ? 'color: #f00; font-weight: bold;' : 'color: #888;');
             }
         });
 

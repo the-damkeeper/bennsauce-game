@@ -262,6 +262,8 @@ if (typeof window.debugGame !== 'undefined') {
 
 // Debug functions for monster troubleshooting
 window.DEBUG_MONSTERS = false;
+window.MONSTER_POSITION_TRACKER = null;
+
 window.toggleMonsterDebug = function() {
     window.DEBUG_MONSTERS = !window.DEBUG_MONSTERS;
     console.log(`[DEBUG] Monster debug overlay: ${window.DEBUG_MONSTERS ? 'ENABLED' : 'DISABLED'}`);
@@ -270,6 +272,113 @@ window.toggleMonsterDebug = function() {
         document.querySelectorAll('.monster-debug-overlay').forEach(el => el.remove());
     }
     return window.DEBUG_MONSTERS;
+};
+
+// Monster position tracking system
+window.startMonsterPositionTracking = function() {
+    if (window.MONSTER_POSITION_TRACKER) {
+        console.log('[TRACKER] Already running');
+        return;
+    }
+    
+    console.log('%c[TRACKER] STARTED - Logging all monster positions every 1 second', 'background: #ff0; color: #000; font-weight: bold; padding: 4px;');
+    console.log('[TRACKER] Use stopMonsterPositionTracking() to stop');
+    
+    const monsterSpawnLog = new Map(); // Track spawn info per monster
+    
+    window.MONSTER_POSITION_TRACKER = setInterval(() => {
+        if (!window.game || !window.game.monsters) return;
+        
+        const monsters = window.game.monsters;
+        if (monsters.length === 0) {
+            console.log('[TRACKER] No monsters spawned yet');
+            return;
+        }
+        
+        console.group(`%c[TRACKER] ${new Date().toLocaleTimeString()} - ${monsters.length} monster(s)`, 'color: #0ff; font-weight: bold;');
+        
+        monsters.forEach((m, idx) => {
+            const mId = m.id;
+            
+            // Check if this is a newly spawned monster
+            if (!monsterSpawnLog.has(mId)) {
+                monsterSpawnLog.set(mId, {
+                    spawnX: m.x,
+                    spawnY: m.y,
+                    spawnTime: Date.now(),
+                    type: m.type,
+                    lastY: m.y,
+                    teleportCount: 0,
+                    maxYDelta: 0
+                });
+                console.log(`%c[SPAWN] Monster #${idx} (${m.type}) spawned at (${m.x.toFixed(1)}, ${m.y.toFixed(1)})`, 'background: #0f0; color: #000; font-weight: bold;');
+            }
+            
+            const spawnInfo = monsterSpawnLog.get(mId);
+            const deltaY = Math.abs(m.y - spawnInfo.lastY);
+            const totalYChange = Math.abs(m.y - spawnInfo.spawnY);
+            
+            // Detect teleportation (sudden Y change > 50px)
+            if (deltaY > 50) {
+                spawnInfo.teleportCount++;
+                console.warn(`%c[TELEPORT] Monster #${idx} jumped ${deltaY.toFixed(1)}px! From ${spawnInfo.lastY.toFixed(1)} to ${m.y.toFixed(1)}`, 'background: #f00; color: #fff; font-weight: bold;');
+            }
+            
+            // Track max delta
+            if (deltaY > spawnInfo.maxYDelta) {
+                spawnInfo.maxYDelta = deltaY;
+            }
+            
+            // Build status line
+            const age = ((Date.now() - spawnInfo.spawnTime) / 1000).toFixed(1);
+            const status = [
+                `#${idx} ${m.type}`,
+                `Pos: (${m.x.toFixed(1)}, ${m.y.toFixed(1)})`,
+                `Vel: (${m.velocityX.toFixed(2)}, ${m.velocityY.toFixed(2)})`,
+                `ΔY: ${deltaY.toFixed(1)}px`,
+                `Total ΔY: ${totalYChange.toFixed(1)}px`,
+                `Age: ${age}s`,
+                m.onPlatform ? `[ON PLATFORM]` : `[AIRBORNE]`,
+                spawnInfo.teleportCount > 0 ? `⚠️ ${spawnInfo.teleportCount} teleports` : ''
+            ].filter(Boolean).join(' | ');
+            
+            // Color code by status
+            let color = '#fff';
+            if (spawnInfo.teleportCount > 0) {
+                color = '#f00'; // Red for teleporting monsters
+            } else if (totalYChange > 20) {
+                color = '#ff0'; // Yellow for significant movement
+            } else if (!m.onPlatform) {
+                color = '#fa0'; // Orange for airborne
+            }
+            
+            console.log(`%c${status}`, `color: ${color}`);
+            
+            // Update last position
+            spawnInfo.lastY = m.y;
+        });
+        
+        console.groupEnd();
+        
+        // Cleanup dead monsters from tracking
+        const activeIds = new Set(monsters.map(m => m.id));
+        for (const [id, info] of monsterSpawnLog.entries()) {
+            if (!activeIds.has(id)) {
+                monsterSpawnLog.delete(id);
+            }
+        }
+        
+    }, 1000);
+};
+
+window.stopMonsterPositionTracking = function() {
+    if (window.MONSTER_POSITION_TRACKER) {
+        clearInterval(window.MONSTER_POSITION_TRACKER);
+        window.MONSTER_POSITION_TRACKER = null;
+        console.log('%c[TRACKER] STOPPED', 'background: #f00; color: #fff; font-weight: bold; padding: 4px;');
+    } else {
+        console.log('[TRACKER] Not running');
+    }
 };
 
 // Auto-run tests in development
