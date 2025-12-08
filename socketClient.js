@@ -683,7 +683,7 @@ function updateRemotePlayerAppearance(data) {
  * Send local player appearance update to server
  */
 function sendAppearanceUpdate() {
-    if (!socket || !isConnected) return;
+    if (!socket || !hasJoinedServer) return;
 
     socket.emit('updateAppearance', {
         equipped: player.equipped,
