@@ -326,12 +326,11 @@ function joinGameServer() {
     }
     
     // Also check cosmeticEquipped (cosmetics override)
+    const cosmeticNames = {};
     if (player.cosmeticEquipped) {
         for (const slot in player.cosmeticEquipped) {
             const item = player.cosmeticEquipped[slot];
-            if (item) {
-                equippedNames[slot] = typeof item === 'string' ? item : (item.name || null);
-            }
+            cosmeticNames[slot] = item ? (typeof item === 'string' ? item : (item.name || null)) : null;
         }
     }
 
@@ -358,7 +357,7 @@ function joinGameServer() {
         playerClass: player.class || 'Beginner',
         guild: player.guild || null,
         equipped: equippedNames,
-        cosmeticEquipped: player.cosmeticEquipped || {},
+        cosmeticEquipped: cosmeticNames,
         equippedMedal: player.equippedMedal || null,
         displayMedals: player.displayMedals || [],
         partyId: partyId
@@ -693,9 +692,27 @@ function updateRemotePlayerAppearance(data) {
 function sendAppearanceUpdate() {
     if (!socket || !hasJoinedServer) return;
 
+    // Convert equipped items to names (server expects names, not full objects)
+    const equippedNames = {};
+    if (player.equipped) {
+        for (const slot in player.equipped) {
+            const item = player.equipped[slot];
+            equippedNames[slot] = item ? (typeof item === 'string' ? item : (item.name || null)) : null;
+        }
+    }
+
+    // Convert cosmetic items to names
+    const cosmeticNames = {};
+    if (player.cosmeticEquipped) {
+        for (const slot in player.cosmeticEquipped) {
+            const item = player.cosmeticEquipped[slot];
+            cosmeticNames[slot] = item ? (typeof item === 'string' ? item : (item.name || null)) : null;
+        }
+    }
+
     const appearanceData = {
-        equipped: player.equipped,
-        cosmeticEquipped: player.cosmeticEquipped,
+        equipped: equippedNames,
+        cosmeticEquipped: cosmeticNames,
         guild: player.guild,
         equippedMedal: player.equippedMedal,
         displayMedals: player.displayMedals
