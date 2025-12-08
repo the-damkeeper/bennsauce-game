@@ -1,0 +1,36 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+out/
+bennsauce-game.zip
+*.zip
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Electron build files
+*.exe
+*.dmg
+*.AppImage
+*.deb
+*.rpm
+
+# Game server (in separate repo)
+game-server/
+
+# Firebase deployment
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

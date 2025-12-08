@@ -1,0 +1,19 @@
+# Icon Setup
+
+To complete the Electron app setup, you need an icon file.
+
+## Quick Fix
+1. Create or find a PNG image for your game icon (512x512 recommended)
+2. Save it as `icon.png` in this directory
+3. The build process will use it automatically
+
+## Without an Icon
+The game will still work! Electron will use a default icon.
+
+## Creating an Icon
+- Use your game's logo or a representative image
+- Recommended sizes: 16x16, 32x32, 48x48, 128x128, 256x256, 512x512
+- Format: PNG with transparency
+- Tool suggestion: GIMP (free) or any image editor
+
+For now, the build will work without it, but you'll get a warning.

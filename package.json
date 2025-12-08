@@ -1,0 +1,58 @@
+{
+  "name": "bennsauce-game",
+  "version": "0.852",
+  "description": "BennSauce - A 2D MMORPG-style adventure game",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "build:mac": "electron-builder --mac",
+    "build:all": "electron-builder -wml"
+  },
+  "keywords": [
+    "game",
+    "2d",
+    "rpg",
+    "adventure"
+  ],
+  "author": "Ben",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.0"
+  },
+  "build": {
+    "appId": "com.bennsauce.game",
+    "productName": "BennSauce",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!node_modules/**/*",
+      "!dist/**/*",
+      "!.git/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "icon.png"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Game",
+      "icon": "icon.png"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "icon.png",
+      "category": "public.app-category.games"
+    }
+  }
+}

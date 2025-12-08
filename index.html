@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#000">
+    <title>BennSauce v0.852</title>
+    <link rel="icon" href="data:,">
+    <link rel="icon" type="image/png"
+        href='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAATBJREFUOI3Fk79Lw0AUxz8Rx1pwMKJDEWPJVoK4lE5BaVddHdxF0D8gf0ULHTukg7OrRXF08AfiVixFMiimg1AdhTqkd7lcLq6+7d7d573v+94d/HdYRRubGzszPTd+vc+dXywCrw+mrFS2APjxlwHY3memF7J0+PnMZhKNkkQTGCALiai1Y6nIUuHHC5fP8C6FRQzI5uZFa+04UaB3Pn94B8D2S8Q335nutl9ib7oETdg9LqceTKKRBAF6kQuh7hAQQlwZcsha1sSr8lcKAv1Ow0AncXQKvcjggQpWXY96q8vt5YkExbre6sqbyN1Cv9Og6nrpzKvrOQXxx5ssslCoU4EdL8DxAuOZ3EMyhTqGrsqo4GX4JKUKwDQKpr8gfGBupKmr4wVmE9Uif42k/oVfe4pu9OP8Bp8AAAAASUVORK5CYII='>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+
+<body class="crt-shader">
+
+    <div id="game-container">
+        <div id="scaling-container">
+
+            <div id="game-clock">08:00</div>
+            
+            <div id="hair-debug-panel" style="position: absolute; top: 40px; left: 10px; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; font-family: 'Courier New', monospace; font-size: 10px; z-index: 10000; border: 1px solid #0f0; display: none; max-width: 300px;">
+                <div style="color: #ff0; font-weight: bold; margin-bottom: 5px;">HAIR DEBUG INFO</div>
+                <div id="hair-debug-content"></div>
+            </div>
+
+            <div id="game-world">
+                <div id="world-content">
+                    <canvas id="ground-canvas"></canvas>
+                    <canvas id="platforms-canvas"></canvas>
+                    <canvas id="foliage-background-canvas"></canvas>
+                    <canvas id="foliage-foreground-canvas"></canvas>
+                    <div id="player">
+                        <div id="player-sprite-container"></div>
+                        <div id="player-buff-effects"></div>
+                        <div id="player-chat-bubble"></div>
+                        <div id="player-nameplate"></div>
+                        <div id="guild-nameplate">
+                            <span id="guild-icon"></span>
+                            <span id="guild-name"></span>
+                        </div>
+                        <div id="player-hp-bar-container">
+                            <div id="player-hp-bar-fill"></div>
+                        </div>
+                    </div>
+                    <div class="ground"></div>
+                </div>
+            </div>
+
+            <div id="inventory" class="window">
+                <div class="window-title">
+                    <span>Inventory</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content">
+                    <div id="inventory-tabs"></div>
+                    <div id="inventory-grid"></div>
+                    <div id="inventory-footer">
+                        <span id="inventory-gold">
+                            <span id="gold-coin-icon" style="display: inline-block; width: 28px; height: 28px; overflow: hidden; vertical-align: middle; margin-right: 3px; image-rendering: pixelated;">
+                                <img id="gold-coin-img" style="display: block; image-rendering: pixelated; width: 112px; height: 28px; margin-left: 0;">
+                            </span>
+                            <span id="inventory-gold-amount">0</span>
+                        </span>
+                        <div class="inventory-actions">
+                            <button id="inventory-sort-btn">Sort</button>
+                            <button id="enhance-item-btn" disabled>Enhance</button>
+                            <button id="inventory-trash-btn" class="window-content-button">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="equipment" class="window">
+                <div class="window-title">
+                    <span>Equipment</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content">
+                    <div id="equipment-layout">
+                            <div class="equipment-section">
+                                <h4>Equipped</h4>
+                                <div id="equipment-display">
+                                    <div class="equip-slot" data-slot="earring"></div>
+                                    <div class="equip-slot" data-slot="helmet"></div>
+                                    <div class="equip-slot" data-slot="pendant"></div>
+                                    <div class="equip-slot" data-slot="eye"></div>
+                                    <div class="equip-slot" data-slot="face"></div>
+                                    <div class="equip-slot" data-slot="weapon"></div>
+                                    <div class="equip-slot" data-slot="top"></div>
+                                    <div class="equip-slot" data-slot="shield"></div>
+                                    <div class="equip-slot" data-slot="gloves"></div>
+                                    <div class="equip-slot" data-slot="bottom"></div>
+                                    <div class="equip-slot" data-slot="ring"></div>
+                                    <div class="equip-slot" data-slot="cape"></div>
+                                    <div class="equip-slot" data-slot="shoes"></div>
+                                </div>
+                            </div>
+                            <div class="equipment-section">
+                                <h4>Cosmetic</h4>
+                                <div id="cosmetic-equipment-display">
+                                    <div class="equip-slot cosmetic-slot" data-slot="earring"></div>
+                                    <div class="equip-slot cosmetic-slot" data-slot="helmet"></div>
+                                    <div class="equip-slot cosmetic-slot" data-slot="pendant"></div>
+                                    <div class="equip-slot cosmetic-slot" data-slot="eye"></div>
+                                    <div class="equip-slot cosmetic-slot" data-slot="face"></div>
+                                    <div class="equip-slot cosmetic-slot" data-slot="weapon"></div>
+                                    <div class="equip-slot cosmetic-slot" data-slot="top"></div>
+                                    <div class="equip-slot cosmetic-slot" data-slot="shield"></div>
+                                    <div class="equip-slot cosmetic-slot" data-slot="gloves"></div>
+                                    <div class="equip-slot cosmetic-slot" data-slot="bottom"></div>
+                                    <div class="equip-slot cosmetic-slot" data-slot="ring"></div>
+                                    <div class="equip-slot cosmetic-slot" data-slot="cape"></div>
+                                    <div class="equip-slot cosmetic-slot" data-slot="shoes"></div>
+                                </div>
+                            </div>
+                        </div>
+                    <div id="equipment-footer">
+                        <button id="equipment-enhance-btn" disabled>Enhance</button>
+                    </div>
+                </div>
+            </div>
+            <div id="pet-window" class="window" style="display: none;">
+                <div class="window-title">
+                    <span>Pet Management</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content">
+                    <div class="pet-status-display">
+                        <!-- Pet status will be populated by JavaScript -->
+                    </div>
+                    <div class="pet-loot-toggles">
+                        <!-- Loot toggles will be populated by JavaScript -->
+                    </div>
+                    <div class="pet-list">
+                        <!-- Pet list will be populated by JavaScript -->
+                    </div>
+                    <div class="pet-equipment-section" style="display: none;">
+                        <h4>Pet Equipment</h4>
+                        <div id="pet-equipment-slots">
+                            <!-- Future: Pet equipment slots -->
+                            <p style="text-align: center; color: var(--common-color); font-size: 12px;">Coming Soon!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="gm-window" class="window" style="display: none;">
+                <div class="window-title">
+                    <span>GM Panel</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" id="gm-window-content">
+                    <div class="gm-control-group">
+                        <label for="gm-item-select">Spawn Item:</label>
+                        <select id="gm-item-select"></select>
+                        <button id="gm-spawn-item-btn" class="window-content-button">Spawn Item</button>
+                    </div>
+                    <div class="gm-control-group">
+                        <label for="gm-monster-select">Spawn Monster:</label>
+                        <select id="gm-monster-select"></select>
+                        <button id="gm-spawn-monster-btn" class="window-content-button">Spawn Monster</button>
+                    </div>
+                    <div class="gm-control-group">
+                        <label for="gm-exp-input">Gain EXP:</label>
+                        <input type="number" id="gm-exp-input" value="100"
+                            style="font-family: 'Ari9500', cursive; padding: 5px;">
+                        <button id="gm-gain-exp-btn" class="window-content-button">Gain EXP</button>
+                    </div>
+                    <div class="gm-control-group">
+                        <label for="gm-gold-input">Add Gold:</label>
+                        <input type="number" id="gm-gold-input" value="10000"
+                            style="font-family: 'Ari9500', cursive; padding: 5px;">
+                        <button id="gm-add-gold-btn" class="window-content-button">Add Gold</button>
+                    </div>
+                    <div class="gm-control-group">
+                        <button id="gm-infinite-stats-btn" class="window-content-button">Toggle Infinite HP/MP</button>
+                    </div>
+                    <div class="gm-control-group">
+                        <button id="gm-fma-btn" class="window-content-button">Full Map Attack (FMA)</button>
+                        <button id="gm-fml-btn" class="window-content-button">Full Map Loot (FML)</button>
+                    </div>
+                    <div class="gm-control-group">
+                        <button id="gm-spawn-elite-monster-btn" class="window-content-button">Spawn Elite Monster</button>
+                    </div>
+                </div>
+            </div>
+            <div id="skill-tree" class="window">
+                <div class="window-title">
+                    <span>Skills</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content">
+                    <div id="skill-tree-tabs"></div>
+                    <p id="skill-points-display">SP: 0</p>
+                    <div id="skill-tree-content"></div>
+                </div>
+            </div>
+            <div id="stat-window" class="window">
+                <div class="window-title">
+                    <span>Stats</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" id="stat-window-content"></div>
+            </div>
+            <div id="quest-log" class="window">
+                <div class="window-title">
+                    <span>Quest Log</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content">
+                    <div class="quest-tabs">
+                        <button class="quest-tab-button active" data-tab="available">
+                            Available <span class="quest-count" id="available-count">0</span>
+                        </button>
+                        <button class="quest-tab-button" data-tab="active">
+                            In Progress <span class="quest-count" id="active-count">0</span>
+                        </button>
+                        <button class="quest-tab-button" data-tab="completed">
+                            Completed <span class="quest-count" id="completed-count">0</span>
+                        </button>
+                    </div>
+                    <div id="quest-available-content" class="quest-tab-content active"></div>
+                    <div id="quest-active-content" class="quest-tab-content"></div>
+                    <div id="quest-completed-content" class="quest-tab-content"></div>
+                </div>
+                <div id="quest-log-footer">
+                    <button id="open-quest-helper-btn" class="window-content-button">Open Quest Helper</button>
+                </div>
+            </div>
+            <div id="quest-helper" class="window" data-is-passive="true"
+                style="width: 280px; top: 157px; right: 20px; left: auto; display: none;">
+                <div class="window-title">
+                    <span>Quest Helper</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" id="quest-helper-content" style="max-height: 300px; overflow-y: auto;">
+                </div>
+            </div>
+            <div id="dialogue-window" class="window">
+                <div class="window-title">
+                    <span id="dialogue-title">NPC</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" id="dialogue-content"></div>
+            </div>
+            <div id="shop-window" class="window">
+                <div class="window-title">
+                    <span id="shop-title">Shop</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" id="shop-content"></div>
+            </div>
+            <div id="settings-menu" class="window">
+                <div class="window-title">
+                    <span>Settings</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" id="settings-content">
+                    <div class="shop-tabs">
+                        <button class="tab-button active" data-tab="controls">Keyboard</button>
+                        <button class="tab-button" data-tab="gamepad">Gamepad</button>
+                        <button class="tab-button" data-tab="options">Options</button>
+                    </div>
+                    <div id="settings-controls-content" class="tab-content active">
+                        <div class="controls-section">
+                            <h3><span id="controls-mode-label">Keyboard Controls</span></h3>
+                            <ul class="controls-list" id="controls-list">
+                                <li><span class="control-key" data-action="move">Arrow Keys</span><span>Move</span></li>
+                                <li><span class="control-key" data-action="jump">Alt</span><span>Jump</span></li>
+                                <li><span class="control-key" data-action="attack">Ctrl</span><span>Attack</span></li>
+                                <li><span class="control-key" data-action="skills">1-4</span><span>Use Skill</span></li>
+                                <li><span class="control-key" data-action="hpPotion">5</span><span>Use HP Potion</span></li>
+                                <li><span class="control-key" data-action="mpPotion">6</span><span>Use MP Potion</span></li>
+                                <li><span class="control-key" data-action="inventory">I</span><span>Inventory</span></li>
+                                <li><span class="control-key" data-action="equipment">E</span><span>Equipment</span></li>
+                                <li><span class="control-key" data-action="skills">K</span><span>Skills</span></li>
+                                <li><span class="control-key" data-action="stats">S</span><span>Stats</span></li>
+                                <li><span class="control-key" data-action="achievements">A</span><span>Achievements</span></li>
+                                <li><span class="control-key" data-action="questLog">L</span><span>Quest Log</span></li>
+                                <li><span class="control-key">M</span><span>Toggle Minimap</span></li>
+                                <li><span class="control-key" data-action="worldMap">W</span><span>World Map</span></li>
+                                <li><span class="control-key" data-action="pet">P</span><span>Pet Manager</span></li>
+                                <li><span class="control-key" data-action="social-hub">O</span><span>Social Hub</span></li>
+                                <li><span class="control-key" data-action="interact">Y</span><span>Talk to NPC</span></li>
+                                <li><span class="control-key" data-action="chat">Enter</span><span>Chat</span></li>
+                                <li><span class="control-key" data-action="settings">Esc</span><span>Settings</span></li>
+                                <li><span class="control-key">H</span><span>Hitbox/Collision</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div id="settings-gamepad-content" class="tab-content" style="display: none;">
+                        <h3>Gamepad Controls <span id="gamepad-status-detailed" style="font-size: var(--font-small);;"></span></h3>
+                        <p style="font-size: var(--font-small);; color: #aaa; margin-bottom: 15px;">Select an action for each button. Locked buttons (🔒) cannot be changed.</p>
+                        <div id="gamepad-detailed-mapping-list" class="gamepad-dropdown-list"></div>
+                        <div style="margin-top: 15px; display: flex; gap: 10px;">
+                            <button id="reset-gamepad-detailed-btn" class="window-content-button">Reset to Defaults</button>
+                            <button id="test-gamepad-detailed-btn" class="window-content-button">Test Gamepad</button>
+                        </div>
+                    </div>
+                    <div id="settings-options-content" class="tab-content" style="display: none;">
+                        <h3>Audio</h3>
+                        <div class="option-item">
+                            <label for="bgm-volume-slider">BGM Volume</label>
+                            <input type="range" id="bgm-volume-slider" min="0" max="1" step="0.01">
+                            <button id="bgm-mute-btn" class="window-content-button">Mute</button>
+                        </div>
+                        <div class="option-item">
+                            <label for="sfx-volume-slider">SFX Volume</label>
+                            <input type="range" id="sfx-volume-slider" min="0" max="1" step="0.01">
+                            <button id="sfx-mute-btn" class="window-content-button">Mute</button>
+                        </div>
+                        <div class="option-item">
+                            <button id="fullscreen-btn" class="window-content-button">Toggle Fullscreen</button>
+                        </div>
+                        <h3 style="margin-top: 20px;">UI</h3>
+                        <div class="option-item">
+                            <button id="reset-windows-btn" class="window-content-button">Reset Window Positions</button>
+                        </div>
+                        <h3 style="margin-top: 20px;">Gameplay</h3>
+                        <div class="option-item">
+                            <label for="ghost-players-toggle">
+                                <input type="checkbox" id="ghost-players-toggle" checked>
+                                Enable Ghost Players
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div id="settings-footer">
+                    <button id="main-menu-btn" class="window-content-button">Save & Quit</button>
+                    <button id="resume-btn" class="window-content-button">Save & Continue</button>
+                </div>
+            </div>
+            <div id="enhancement-confirm-modal" class="window" style="display: none;">
+                <div class="window-title">
+                    <span>Enhance Item</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content">
+                    <p>Are you sure you want to enhance this item?</p>
+                    <div id="enhancement-info"></div>
+                    <div id="enhancement-confirm-buttons">
+                        <button id="confirm-enhance-btn">Enhance!</button>
+                        <button id="cancel-enhance-btn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            <div id="achievement-window" class="window">
+                <div class="window-title">
+                    <span>Achievements</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content">
+                    <div class="achievement-tabs">
+                        <button class="achievement-tab-button active" data-tab="achievements">Achievements</button>
+                        <button class="achievement-tab-button" data-tab="medals">Medals</button>
+                    </div>
+                    <div id="achievement-list" class="achievement-tab-content active"></div>
+                    <div id="medals-list" class="achievement-tab-content"></div>
+                </div>
+            </div>
+            <div id="bestiary-window" class="window" style="width: 850px;">
+                <div class="window-title">
+                    <span>Bestiary</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content">
+                    <div class="bestiary-tabs">
+                        <button class="bestiary-tab-button active" data-tab="monsters">Monsters</button>
+                        <button class="bestiary-tab-button" data-tab="bosses">Bosses</button>
+                        <button class="bestiary-tab-button" data-tab="stats">Statistics</button>
+                    </div>
+                    <div class="bestiary-content-container">
+                        <!-- Monsters and Bosses tabs have split view -->
+                        <div class="bestiary-split-layout">
+                            <div class="bestiary-list-panel">
+                                <div id="bestiary-monsters-content" class="bestiary-tab-content active"></div>
+                                <div id="bestiary-bosses-content" class="bestiary-tab-content"></div>
+                            </div>
+                            <div id="bestiary-detail-panel" class="bestiary-detail-panel">
+                                <div class="bestiary-no-selection">Select a monster to view details</div>
+                            </div>
+                        </div>
+                        <!-- Stats tab is full width -->
+                        <div class="bestiary-full-layout">
+                            <div id="bestiary-stats-content" class="bestiary-tab-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rankings Window -->
+            <div id="rankings-window" class="window" style="width: 850px; height: 600px; display: none;">
+                <div class="window-title">
+                    <span>Global Rankings</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content">
+                    <div class="rankings-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 5px;">
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 5px 0; color: var(--exp-color);">Your Stats</h3>
+                            <div id="player-rank-display" style="font-size: 11px; color: #bdc3c7;"></div>
+                        </div>
+                        <button id="submit-ranking-btn" class="window-content-button" style="margin: 0;">Submit/Update Ranking</button>
+                    </div>
+                    
+                    <div class="rankings-tabs" style="display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap;">
+                        <button class="ranking-tab-button active" data-category="combat">Combat Score</button>
+                        <button class="ranking-tab-button" data-category="level">Level</button>
+                        <button class="ranking-tab-button" data-category="kills">Total Kills</button>
+                        <button class="ranking-tab-button" data-category="gold">Gold</button>
+                        <button class="ranking-tab-button" data-category="achievements">Achievements</button>
+                        <button class="ranking-tab-button" data-category="bestiary">Bestiary %</button>
+                        <button class="ranking-tab-button" data-category="bosses">Boss Kills</button>
+                        <button class="ranking-tab-button" data-category="guilds">Guilds</button>
+                    </div>
+                    
+                    <div id="rankings-content" style="height: 400px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px;">
+                        <div style="text-align: center; padding: 50px; color: #bdc3c7;">
+                            <p>Loading rankings...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="rankings-footer" style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; font-size: 10px; color: #7f8c8d;">
+                        <p style="margin: 0;">Rankings update automatically. Your best stats are always displayed.</p>
+                        <p style="margin: 5px 0 0 0;">⚠️ Rankings are public and visible to all players.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Social Hub Window -->
+            <div id="social-hub-window" class="window" style="width: 500px; height: 622px; display: none;">
+                <div class="window-title">
+                    <span>Social Hub</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" style="overflow: hidden; display: flex; flex-direction: column; height: calc(100% - 30px);">
+                    <!-- Tab Navigation -->
+                    <div id="social-hub-tabs" class="social-hub-tabs">
+                        <button class="tab-btn active" data-tab="online">Online</button>
+                        <button class="tab-btn" data-tab="party">Party</button>
+                        <button class="tab-btn" data-tab="buddies">Buddies</button>
+                        <button class="tab-btn" data-tab="guild">Guild</button>
+                    </div>
+                    
+                    <!-- Online Tab -->
+                    <div id="social-tab-online" class="social-tab-content active">
+                        <div class="online-header" style="padding: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; margin-bottom: 10px;">
+                            <p style="margin: 0; color: #2ecc71;">🟢 <span id="online-count">0</span> players online</p>
+                        </div>
+                        <div id="online-players-list" style="flex: 1; overflow-y: auto; padding: 5px;"></div>
+                    </div>
+                    
+                    <!-- Party Tab -->
+                    <div id="social-tab-party" class="social-tab-content">
+                        <div id="party-content"></div>
+                    </div>
+                    
+                    <!-- Buddies Tab -->
+                    <div id="social-tab-buddies" class="social-tab-content">
+                        <div id="buddies-content"></div>
+                    </div>
+                    
+                    <!-- Guild Tab -->
+                    <div id="social-tab-guild" class="social-tab-content">
+                        <div id="guild-content"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Player Inspection Window -->
+            <div id="player-inspect-window" class="window" style="width: 400px; display: none;">
+                <div class="window-title">
+                    <span id="inspect-player-title">Inspect Player</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" id="inspect-content">
+                    <!-- Content populated by JS -->
+                </div>
+            </div>
+            
+            <!-- Global Event Banner -->
+            <div id="global-event-banner" style="display: none;">
+                <div id="event-banner-content">
+                    <span id="event-banner-text">Double EXP Event!</span>
+                    <span id="event-banner-timer"></span>
+                </div>
+            </div>
+            
+            <!-- Player Inspect Popup -->
+            <div id="player-inspect-popup" class="window" style="display: none; width: 400px; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10002;">
+                <div class="window-title">
+                    <span id="inspect-popup-title">Inspecting Player</span>
+                    <button class="close-btn" onclick="closeInspectWindow()">X</button>
+                </div>
+                <div class="window-content" id="player-inspect-content">
+                    <!-- Content populated by JS -->
+                </div>
+            </div>
+            
+            <!-- Trade Window -->
+            <div id="trade-window" class="window" style="width: 650px; display: none;">
+                <div class="window-title">
+                    <span>Trade</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content">
+                    <div class="trade-header">
+                        <p style="margin: 0;">Trading with: <strong id="trade-partner-name">Unknown</strong></p>
+                        <p id="trade-status" style="margin: 5px 0 0 0; color: #f1c40f;">Status: Pending</p>
+                    </div>
+                    
+                    <div class="trade-panels">
+                        <!-- My Offer -->
+                        <div class="trade-panel" style="position: relative;">
+                            <h4 class="trade-panel-title" style="color: #3498db;">Your Offer</h4>
+                            <div id="my-trade-items" class="trade-items-grid">
+                            </div>
+                            <div class="trade-gold-row">
+                                <span class="trade-gold-label">
+                                    <span class="trade-coin-icon-wrapper">
+                                        <img class="trade-coin-img" alt="Gold">
+                                    </span>
+                                    Gold:
+                                </span>
+                                <input type="number" id="my-trade-gold" value="0" min="0">
+                            </div>
+                            <div id="my-trade-confirmed-overlay" class="trade-confirmed-overlay" style="display: none;">
+                                <span>✓ LOCKED IN</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Their Offer -->
+                        <div class="trade-panel" style="position: relative;">
+                            <h4 class="trade-panel-title" style="color: #e74c3c;">Their Offer</h4>
+                            <div id="their-trade-items" class="trade-items-grid">
+                            </div>
+                            <div class="trade-gold-row">
+                                <span class="trade-gold-label">
+                                    <span class="trade-coin-icon-wrapper">
+                                        <img class="trade-coin-img" alt="Gold">
+                                    </span>
+                                    Gold: <strong id="their-trade-gold">0</strong>
+                                </span>
+                            </div>
+                            <div id="their-trade-confirmed-overlay" class="trade-confirmed-overlay" style="display: none;">
+                                <span>✓ LOCKED IN</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="trade-footer">
+                        <button id="add-item-to-trade-btn" class="btn">Add Item</button>
+                        <div>
+                            <button id="confirm-trade-btn" class="btn btn-success">✓ Confirm Trade</button>
+                            <button id="cancel-trade-btn" class="btn btn-danger">✗ Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="world-map-window" class="window">
+                <div class="window-title">
+                    <span>World Map</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" style="display: flex; flex-direction: column; gap: 10px; padding: 10px;">
+                    <!-- Tab Buttons -->
+                    <div id="world-map-tabs" style="display: flex; gap: 5px; border-bottom: 2px solid rgba(255,255,255,0.2); padding-bottom: 10px;">
+                        <button class="world-map-tab active" data-region="dewdrop">Dewdrop Island</button>
+                        <button class="world-map-tab" data-region="victoria">Victoria Island</button>
+                        <button class="world-map-tab" data-region="ludibrium">Ludibrium</button>
+                    </div>
+                    <!-- Map Content -->
+                    <div style="display: flex; gap: 10px; flex: 1;">
+                        <div id="world-map-grid" style="flex: 1; position: relative;"></div>
+                        <div id="world-map-details" style="width: 250px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 5px; display: flex; flex-direction: column; gap: 10px;">
+                            <h3 style="margin: 0 0 10px 0; color: #fff; font-size: 18px;" id="map-detail-name">Select a map</h3>
+                            <div style="flex: 1; overflow-y: auto;">
+                                <div id="map-detail-content" style="color: #fff; font-size: 14px;">
+                                    Click on a map to view details
+                                </div>
+                            </div>
+                            <button id="world-map-warp-btn" style="display: none; padding: 10px; background: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold;">Warp to Map</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="job-advancement-window" class="window"
+                style="width: 600px; height: 450px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10001;">
+                <div class="window-title">
+                    <span id="job-adv-title">Job Advancement</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" id="job-adv-content" style="text-align: center;"></div>
+            </div>
+            <div id="confirmation-modal" class="window"
+                style="display: none; width: 450px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10003;">
+                <div class="window-title">
+                    <span id="confirmation-title">Confirm Action</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" style="text-align: center;">
+                    <div id="confirmation-message" style="margin-bottom: 20px;"></div>
+                    <div id="confirmation-buttons" style="display: flex; justify-content: space-around;">
+                        <button id="confirm-action-btn" class="window-content-button">Confirm</button>
+                        <button id="cancel-action-btn" class="window-content-button"
+                            style="background-color: var(--hp-color);">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="hotbar-assignment-modal" class="window"
+                style="display: none; width: 500px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10004;">
+                <div class="window-title">
+                    <span>Assign Skill to Hotbar</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" style="text-align: center;">
+                    <p id="hotbar-assignment-skill-name" style="margin-bottom: 20px; color: var(--legendary-color); font-size: var(--font-standard);;"></p>
+                    <p style="margin-bottom: 15px;">Choose a hotbar slot:</p>
+                    <div id="hotbar-slot-selection" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
+                        <!-- Slots will be generated dynamically -->
+                    </div>
+                    <button id="cancel-hotbar-assignment-btn" class="window-content-button" style="background-color: var(--hp-color);">Cancel</button>
+                </div>
+            </div>
+
+            <div id="gamepad-remap-modal" class="window"
+                style="display: none; width: 450px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10005;">
+                <div class="window-title">
+                    <span id="gamepad-remap-title">Remap Button</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" style="text-align: center;">
+                    <p id="gamepad-remap-instruction" style="margin: 20px 0; font-size: var(--font-standard);; color: var(--legendary-color);">Press any gamepad button...</p>
+                    <p style="font-size: var(--font-small);; color: #888; margin-bottom: 20px;">Press ESC or click Cancel to abort</p>
+                    <button id="gamepad-remap-cancel-btn" class="window-content-button" style="background-color: var(--hp-color);">Cancel</button>
+                </div>
+            </div>
+
+            <div id="gachapon-window" class="window" style="width: 600px; display: none;">
+                <div class="window-title">
+                    <span>Gachapon</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" id="gachapon-content">
+                    <div id="gachapon-machine">
+                        <div id="gachapon-ticker"></div>
+                        <div id="gachapon-wheel">
+                            <div id="gachapon-wheel-items">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="gachapon-controls">
+                        <p id="gachapon-ticket-count">Tickets: 0</p>
+                        <button id="gachapon-spin-btn" class="window-content-button">Use 1 Ticket</button>
+                    </div>
+                    <div id="gachapon-result">
+                        <h4>You won:</h4>
+                        <div id="gachapon-result-item"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="appearance-window" class="window" style="width: 450px; display: none;">
+                <div class="window-title">
+                    <span>Change Appearance</span>
+                    <button class="close-btn">X</button>
+                </div>
+                <div class="window-content" id="appearance-content">
+                    <div class="appearance-control-group">
+                        <span class="control-label">Hair Style</span>
+                        <div class="custom-control">
+                            <button id="appearance-prev-hair-btn">&lt;</button>
+                            <span id="appearance-hair-name" class="control-value">Default</span>
+                            <button id="appearance-next-hair-btn">&gt;</button>
+                        </div>
+                    </div>
+                    <div class="appearance-control-group">
+                        <span class="control-label">Hair Color</span>
+                        <div class="custom-control">
+                            <button id="appearance-prev-hair-color-btn">&lt;</button>
+                            <div id="appearance-hair-color-box"></div>
+                            <button id="appearance-next-hair-color-btn">&gt;</button>
+                        </div>
+                    </div>
+                    <div class="appearance-control-group">
+                        <span class="control-label">Eye Color</span>
+                        <div class="custom-control">
+                            <button id="appearance-prev-eye-btn">&lt;</button>
+                            <span id="appearance-eye-name" class="control-value">Default</span>
+                            <button id="appearance-next-eye-btn">&gt;</button>
+                        </div>
+                    </div>
+                    <div class="appearance-control-group">
+                        <span class="control-label">Skin Tone</span>
+                        <div class="custom-control">
+                            <button id="appearance-prev-skin-btn">&lt;</button>
+                            <div id="appearance-skin-color-box"></div>
+                            <button id="appearance-next-skin-btn">&gt;</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="appearance-footer">
+                    <p>Cost: 10,000 Gold</p>
+                    <div class="appearance-actions">
+                        <button id="appearance-apply-btn" class="window-content-button">Apply</button>
+                        <button id="appearance-cancel-btn" class="window-content-button">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            <div id="character-creation" class="window" style="display: none;">
+                <img id="creation-bg-image"
+                    src="data:image/png;base64,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"
+                    alt="Character creation background">
+                <div id="creation-layout">
+                    <div id="character-preview-area">
+                    </div>
+                    <div id="creation-controls">
+                        <input type="text" id="character-name" placeholder="Enter Your Name" maxlength="16">
+                        <button id="random-name-btn" class="dice-btn" title="Random Name">🎲</button>
+                        <div id="dice-roll-container">
+                            <button id="roll-dice-btn">Roll Stats</button>
+                            <div id="stat-display">
+                                <span>STR: <b id="str-val">5</b></span>
+                                <span>DEX: <b id="dex-val">5</b></span>
+                                <span>INT: <b id="int-val">5</b></span>
+                                <span>LUK: <b id="luk-val">5</b></span>
+                            </div>
+                        </div>
+                        <span class="control-label">Hair Style</span>
+                        <button id="random-appearance-btn" class="dice-btn" title="Random Appearance">🎲</button>
+                        <div class="custom-control">
+                            <button id="prev-hair-btn">&lt;</button>
+                            <span id="hair-name" class="control-value">Default</span>
+                            <button id="next-hair-btn">&gt;</button>
+                        </div>
+                        <span class="control-label">Hair Color</span>
+                        <div class="custom-control">
+                            <button id="prev-hair-color-btn">&lt;</button>
+                            <div id="hair-color-box"></div>
+                            <button id="next-hair-color-btn">&gt;</button>
+                        </div>
+                        <span class="control-label">Eye Color</span>
+                        <div class="custom-control">
+                            <button id="prev-eye-btn">&lt;</button>
+                            <span id="eye-name" class="control-value">Default</span>
+                            <button id="next-eye-btn">&gt;</button>
+                        </div>
+                        <span class="control-label">Skin Tone</span>
+                        <div class="custom-control">
+                            <button id="prev-skin-btn">&lt;</button>
+                            <div id="skin-color-box"></div>
+                            <button id="next-skin-btn">&gt;</button>
+                        </div>
+                        <div id="creation-actions">
+                            <button id="start-game-btn">Create Character</button>
+                            <button id="back-to-select-btn">Back</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="character-selection-screen" style="display: none;">
+                <h1>Character Select</h1>
+                <div id="character-list"></div>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px;">
+                    <button id="create-new-char-btn">Create New Character</button>
+                    <button id="account-btn" onclick="showAccountModal()">Login / Register</button>
+                    <button id="recovery-code-btn" onclick="showRecoveryCodeModal()">Recovery Code</button>
+                </div>
+            </div>
+            
+            <!-- Account Modal -->
+            <div id="account-modal" class="modal-overlay" style="display: none;">
+                <div class="modal-content" style="max-width: 400px;">
+                    <div class="modal-header">
+                        <h2>Account</h2>
+                        <button class="modal-close" onclick="hideAccountModal()">✖</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="account-logged-out">
+                            <div class="account-tabs">
+                                <button class="account-tab active" onclick="switchAccountTab('login')">Login</button>
+                                <button class="account-tab" onclick="switchAccountTab('register')">Register</button>
+                            </div>
+                            <div id="login-form" class="account-form">
+                                <input type="email" id="login-email" placeholder="Email" class="account-input">
+                                <input type="password" id="login-password" placeholder="Password" class="account-input">
+                                <button onclick="handleLogin()" class="account-btn">Login</button>
+                            </div>
+                            <div id="register-form" class="account-form" style="display: none;">
+                                <input type="email" id="register-email" placeholder="Email" class="account-input">
+                                <input type="password" id="register-password" placeholder="Password (6+ chars)" class="account-input">
+                                <input type="password" id="register-password-confirm" placeholder="Confirm Password" class="account-input">
+                                <button onclick="handleRegister()" class="account-btn">Create Account</button>
+                            </div>
+                            <div id="account-error" class="account-error"></div>
+                        </div>
+                        <div id="account-logged-in" style="display: none;">
+                            <p>Logged in as: <strong id="account-email"></strong></p>
+                            <div class="cloud-save-section">
+                                <h3>Cloud Saves</h3>
+                                <div id="cloud-saves-list"></div>
+                                <button onclick="handleSaveToCloud()" class="account-btn">Save Characters To Cloud</button>
+                            </div>
+                            <button onclick="handleLogout()" class="account-btn secondary">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recovery Code Modal -->
+            <div id="recovery-modal" class="modal-overlay" style="display: none;">
+                <div class="modal-content" style="max-width: 450px;">
+                    <div class="modal-header">
+                        <h2>📝 Recovery Code</h2>
+                        <button class="modal-close" onclick="hideRecoveryCodeModal()">✖</button>
+                    </div>
+                    <div class="modal-body">
+                        <p style="margin-bottom: 15px; color: #bdc3c7;">Recovery codes let you restore your character on any device without creating an account.</p>
+                        
+                        <div class="recovery-section">
+                            <h3>Create New Code</h3>
+                            <p style="font-size: 12px; color: #7f8c8d;">Generate a code to backup your current character:</p>
+                            <button onclick="handleCreateRecoveryCode()" class="account-btn">Generate Recovery Code</button>
+                            <div id="recovery-code-display" style="display: none;">
+                                <p style="color: #f1c40f; font-weight: bold;">Your Recovery Code:</p>
+                                <div id="recovery-code-text" style="font-family: monospace; font-size: 20px; background: #1a1a2e; padding: 15px; border-radius: 5px; letter-spacing: 2px; text-align: center; margin: 10px 0;"></div>
+                                <p style="color: #e74c3c; font-size: 12px;">⚠️ WRITE THIS DOWN! You cannot recover it later!</p>
+                                <button onclick="copyRecoveryCode()" class="account-btn secondary">📋 Copy Code</button>
+                            </div>
+                        </div>
+                        
+                        <hr style="border: 1px solid #34495e; margin: 20px 0;">
+                        
+                        <div class="recovery-section">
+                            <h3>Restore From Code</h3>
+                            <p style="font-size: 12px; color: #7f8c8d;">Enter your recovery code to load your character:</p>
+                            <input type="text" id="recovery-code-input" placeholder="XXXX-XXXX-XXXX-XXXX" class="account-input" style="font-family: monospace; text-transform: uppercase; letter-spacing: 2px;">
+                            <button onclick="handleLoadFromRecoveryCode()" class="account-btn">Load Character</button>
+                        </div>
+                        
+                        <div id="recovery-error" class="account-error"></div>
+                        <div id="current-recovery-code" style="display: none; margin-top: 15px; padding: 10px; background: rgba(46, 204, 113, 0.2); border-radius: 5px;">
+                            <p style="color: #2ecc71; font-size: 12px;">✓ Current saved code: <span id="current-code-display"></span></p>
+                            <button onclick="handleUpdateRecoveryCode()" class="account-btn secondary" style="margin-top: 5px;">Update Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="minimap-container">
+                <div id="minimap-header">
+                    <span id="map-name">Henesys</span>
+                    <button id="toggle-minimap-btn">-</button>
+                </div>
+                <div id="minimap">
+                    <div id="minimap-player"></div>
+                </div>
+                <div id="minimap-resize-handle"></div>
+            </div>
+            <div id="party-overlay" style="display: none;">
+                <div id="party-overlay-header">Party</div>
+                <div id="party-overlay-members"></div>
+            </div>
+            <div id="buff-container"></div>
+        </div>
+        <div id="ui-container">
+            <div id="notification-container"></div>
+            <div id="level-up-notification-container"></div>
+            <div id="global-notification-container"></div>
+            <div id="announcement-container"></div>
+            <div id="player-notification-container"></div>
+            <div id="invite-prompt-container"></div>
+            
+            <!-- Gamepad Hotbar Assignment Menu -->
+            <div id="gamepad-hotbar-menu-backdrop" style="display: none;"></div>
+            <div id="gamepad-hotbar-menu" style="display: none;">
+                <div class="hotbar-menu-header">Assign to Hotbar Slot</div>
+                <div id="hotbar-menu-slots"></div>
+                <div class="hotbar-menu-footer">Press B/O to Cancel</div>
+            </div>
+            
+            <!-- Virtual Mouse Cursor -->
+            <div id="virtual-mouse-cursor"></div>
+            
+            <!-- Virtual Keyboard for Gamepad -->
+            <div id="virtual-keyboard" style="display: none;">
+                <div class="virtual-keyboard-header">
+                    <span id="virtual-keyboard-input-display"></span>
+                    <button id="virtual-keyboard-close">✖</button>
+                </div>
+                <div class="virtual-keyboard-keys"></div>
+            </div>
+            
+            <!-- Ghost Debug Overlay -->
+            <div id="ghost-debug-overlay" style="position: fixed; top: 10px; right: 10px; background: rgba(0, 0, 0, 0.85); color: #00ff00; padding: 10px; font-family: 'Courier New', monospace; font-size: var(--font-small);; border: 2px solid #00ff00; border-radius: 5px; max-width: 350px; max-height: 400px; overflow-y: auto; z-index: 9999; display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #00ff00; padding-bottom: 5px;">
+                    <strong style="color: #00ffff;">👻 GHOST DEBUG</strong>
+                    <div style="display: flex; gap: 5px;">
+                        <button onclick="copyGhostLogs()" style="background: #00ff00; color: #000; border: none; padding: 2px 8px; cursor: pointer; font-size: 10px;">📋 Copy</button>
+                        <button onclick="clearGhostLogs()" style="background: #ffaa00; color: #000; border: none; padding: 2px 8px; cursor: pointer; font-size: 10px;">🗑️ Clear</button>
+                        <button onclick="document.getElementById('ghost-debug-overlay').style.display='none'" style="background: #ff0000; color: #fff; border: none; padding: 2px 8px; cursor: pointer; font-size: 10px;">✖</button>
+                    </div>
+                </div>
+                <div id="ghost-debug-content" style="font-size: 10px; line-height: 1.4;"></div>
+            </div>
+            
+            <div id="main-ui-bar">
+                <div id="chat-log-container">
+                    <div id="chat-log-resize-handle"></div>
+                    <div id="chat-log" tabindex="-1"></div>
+                </div>
+                <div id="chat-input-container">
+                    <span id="chat-channel-indicator" data-channel="global">[Global]</span>
+                    <input type="text" id="chat-input" maxlength="100" placeholder="Say something... (/s /b /g /p to switch)">
+                </div>
+                <div id="ui-layout">
+                    <div id="player-portrait">
+                        <div id="player-level-ui">
+                        </div>
+                    </div>
+                    <div id="player-info-ui">
+                        <span id="player-name-ui"></span>
+                        <span id="player-class-ui"></span>
+                    </div>
+                    <div id="player-stats-bars">
+                        <div id="hp-bar" class="ui-bar">
+                            <div class="ui-bar-fill"></div><span class="ui-bar-text">100 / 100</span>
+                        </div>
+                        <div id="mp-bar" class="ui-bar">
+                            <div class="ui-bar-fill"></div><span class="ui-bar-text">50 / 50</span>
+                        </div>
+                        <div id="exp-bar" class="ui-bar">
+                            <div class="ui-bar-fill"></div>
+                        </div>
+                        <div id="exp-text" class="exp-info">EXP: 0 [0%]</div>
+                    </div>
+                    <div id="skill-hotbar"></div>
+                    <div id="main-hotkey-bar">
+                        <button id="hotkey-k" class="hotkey" title="Open Skills">Skills</button>
+                        <button id="hotkey-s" class="hotkey" title="Open Stats">Stats</button>
+                        <button id="hotkey-a" class="hotkey" title="Open Achievements">Achievements</button>
+                        <button id="hotkey-b" class="hotkey" title="Open Bestiary">Bestiary</button>
+                        <button id="hotkey-r" class="hotkey" title="Open Rankings (R)">Rankings</button>
+                        <button id="hotkey-settings" class="hotkey settings-btn" title="Open Settings (Esc)">⚙️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="loading-screen">
+            <div id="loading-content">
+                <div class="title-card-container">
+                    <img id="loading-title-card" class="title-card" alt="BennSauce">
+                    <span class="version-number">v0.852</span>
+                </div>
+                <div id="loading-indicator">
+                    <div class="loading-spinner"></div>
+                    <p id="loading-text">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="start-screen">
+            <div class="title-card-container">
+                <img id="start-title-card" class="title-card" alt="BennSauce">
+                <span class="version-number">v0.852</span>
+            </div>
+            <button id="start-game-audio-btn">Click to Start</button>
+            <div id="gamepad-status-indicator" style="position: absolute; bottom: 20px; right: 20px; display: none; color: #3498db; font-size: var(--font-small);; opacity: 0.8;">
+                🎮 Controller Connected
+            </div>
+        </div>
+        
+        <!-- Fade Overlay (outside scaling-container to cover entire screen) -->
+        <div id="fade-overlay"></div>
+        
+        <!-- Welcome Popup (outside scaling-container for proper display) -->
+        <div id="welcome-popup" class="window" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; width: 500px; max-width: 90%;">
+            <div class="window-title">
+                <span>Welcome to BennSauce!</span>
+            </div>
+            <div class="window-content" style="padding: 20px; text-align: center;">
+                <h3 style="margin-bottom: 15px; color: var(--exp-color);">Version 0.852</h3>
+                <p style="margin-bottom: 15px; line-height: 1.6;">
+                    Welcome, adventurer! You've entered the world of BennSauce, an early alpha MMORPG that's constantly evolving.
+                </p>
+                <p style="margin-bottom: 15px; line-height: 1.6; color: #e74c3c;">
+                    ⚠️ Everything is a work in progress and in very early stages. Expect bugs, frequent changes, and exciting new features!
+                </p>
+                <p style="margin-bottom: 20px; line-height: 1.6;">
+                    Join our community to report bugs, share feedback, and stay updated:
+                </p>
+                <a href="https://discord.gg/jHrGcM2Fa3" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #5865F2; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 15px; font-weight: bold;">
+                    Join Discord Server
+                </a>
+                <br>
+                <button id="welcome-close-btn" style="padding: 10px 30px; font-size: var(--font-standard); margin-top: 10px;">
+                    Start Adventure
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="constants.js"></script>
+    <script src="errorHandler.js"></script>
+    <script src="memoryManager.js"></script>
+    <script src="objectPools.js"></script>
+    <script src="eventManager.js"></script>
+    <script src="spatialGrid.js"></script>
+    <script src="inputManager.js"></script>
+    <script src="accessibilityManager.js"></script>
+    <script src="performanceMonitor.js"></script>
+
+    <!-- Socket.io Client for Real-time Multiplayer -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="network.js"></script>
+
+    <script src="data.js?v=4"></script>
+
+    <script src="keyMappingManager.js"></script>
+    <script src="gamepadManager.js"></script>
+    <script src="inputDisplayManager.js"></script>
+    <script src="audio.js"></script>
+    <script src="ui.js"></script>
+    <script src="player.js"></script>
+    <script src="monsters.js"></script>
+    <script src="ghostPlayers.js"></script>
+    <script src="socketClient.js"></script>
+    <script src="game.js"></script>
+
+
+
+    <div id="tooltip"></div>
+</body>
+
+</html>

@@ -1,0 +1,109 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Player characters - anyone can read, only owner can write
+    match /players/{playerName} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Characters collection (for cloud sync)
+    match /characters/{characterName} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Global rankings - anyone can read and write
+    match /rankings/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Presence system - anyone can read, write their own presence
+    match /presence/{playerName} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Announcements - anyone can read
+    match /announcements/{announcementId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Global chat - anyone can read and write
+    match /globalChat/{messageId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Buddy chat - players can read their own messages, anyone can write to send messages
+    match /buddyChat/{playerName} {
+      allow read: if true;
+      allow write: if true;
+      
+      match /messages/{messageId} {
+        allow read: if true;
+        allow write: if true;
+      }
+    }
+    
+    // Guild chat - guild members can read/write
+    match /guildChat/{guildName} {
+      allow read: if true;
+      allow write: if true;
+      
+      match /messages/{messageId} {
+        allow read: if true;
+        allow write: if true;
+      }
+    }
+    
+    // Party chat - party members can read/write
+    match /partyChat/{partyId} {
+      allow read: if true;
+      allow write: if true;
+      
+      match /messages/{messageId} {
+        allow read: if true;
+        allow write: if true;
+      }
+    }
+    
+    // Guilds collection
+    match /guilds/{guildName} {
+      allow read: if true;
+      allow write: if true;
+      
+      match /{document=**} {
+        allow read: if true;
+        allow write: if true;
+      }
+    }
+    
+    // Party invites
+    match /partyInvites/{inviteId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Buddy requests
+    match /buddyRequests/{requestId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Trade system
+    match /trades/{tradeId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Allow all other collections (for flexibility during development)
+    match /{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
