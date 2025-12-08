@@ -1005,6 +1005,11 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
                     const spawnAboveOffset = 20; // Spawn 20px above landing position to ensure clearance
                     const groundOffset = spawnSurface.isGround ? 3 : 0;
                     spawnY = spawnSurface.y - anchorY - groundOffset - spawnAboveOffset;
+                    
+                    // DEBUG: Log spawn calculation for first few monsters
+                    if (positions.length < 3) {
+                        console.log(`[SPAWN CALC] Surface type: ${spawnSurface.isGround ? 'ground' : 'platform'}, surfaceY: ${spawnSurface.y}, anchorY: ${anchorY}, spawnY: ${spawnY}`);
+                    }
                     attempts++;
                 } while (spawnSurface.isGround && isPointInsideHill(spawnX) && attempts < maxAttempts);
             }
