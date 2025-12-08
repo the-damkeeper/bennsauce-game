@@ -1146,14 +1146,9 @@ function handleMonsterDamageFromServer(data) {
     if (localMonster.hpBarContainer) localMonster.hpBarContainer.style.display = 'block';
     if (localMonster.nameplateElement) localMonster.nameplateElement.style.display = 'block';
     
-    // Apply knockback from server
+    // Make monster face the direction of attack (opposite of knockback direction)
     if (data.knockbackVelocityX !== undefined && data.knockbackVelocityX !== 0) {
-        localMonster.velocityX = data.knockbackVelocityX;
-        // Clear server target position so knockback isn't overridden
-        localMonster.serverTargetX = localMonster.x;
-        // Make monster face the direction of knockback (opposite of attack direction)
         localMonster.direction = data.knockbackVelocityX > 0 ? 1 : -1;
-        console.log(`[KNOCKBACK] Monster ID: ${data.id}, VelocityX: ${data.knockbackVelocityX}, Current Pos: (${localMonster.x.toFixed(1)}, ${localMonster.y.toFixed(1)})`);
     }
     
     // If this damage wasn't from us, show the damage number
