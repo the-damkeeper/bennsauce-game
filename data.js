@@ -2820,8 +2820,8 @@ const questData = {
         title: "A Snail's Pace",
         npcId: "mayorStan",
         levelReq: 5,
-        startText: "Welcome, new adventurer! To begin your training, please head through the <b>portal on the right</b> to enter Maple Road and defeat <b>10 Snails</b>, <b>10 Blue Snails</b>, and <b>10 Red Snails</b> you find there.",
-        inProgressText: "You can find the Snails on Maple Road, just through the portal to the right of town.",
+        startText: "Welcome, new adventurer! To begin your training, please head through the <b>portal on the right</b> to enter Evergreen Road and defeat <b>10 Snails</b>, <b>10 Blue Snails</b>, and <b>10 Red Snails</b> you find there.",
+        inProgressText: "You can find the Snails on Evergreen Road, just through the portal to the right of town.",
         completeText: "Excellent work! You've taken your first step. Ready for the next?",
         objective: {
             type: 'killMultiple', targets: [
@@ -2839,8 +2839,8 @@ const questData = {
         npcId: "mayorStan",
         levelReq: 5,
         prerequisite: 'snailTraining',
-        startText: "You've proven you can handle the local wildlife. Now for a real challenge. There's a portal high up on the hills of Maple Road. <b>Climb the ladders to find it</b>, and it will take you to a place overrun with Slimes. Defeat <b>10 Slimes</b> for me.",
-        inProgressText: "Have you found the Slime Hunting Ground yet? Remember to climb high up in Maple Road to find the portal.",
+        startText: "You've proven you can handle the local wildlife. Now for a real challenge. There's a portal high up on the hills of Evergreen Road. <b>Climb the ladders to find it</b>, and it will take you to a place overrun with Slimes. Defeat <b>10 Slimes</b> for me.",
+        inProgressText: "Have you found the Slime Hunting Ground yet? Remember to climb high up in Evergreen Road to find the portal.",
         completeText: "You've defeated the slimes! You are quickly becoming a reliable adventurer. Well done! Here is your reward.",
         objective: { type: 'kill', target: 'slime', count: 10 },
         reward: { exp: 150, gold: 400 }
@@ -4815,7 +4815,7 @@ const maps = {
         ],
         portals: [
             { x: 24, targetMap: 'westRockyMountain', targetX: 2100},
-            { x: 1900, targetMap: 'mapleRoad', targetX: 50 },
+            { x: 1900, targetMap: 'evergreenRoad', targetX: 50 },
         ],
         platforms: [
             { x: 300, y: 278, width: 580 },
@@ -4834,7 +4834,7 @@ const maps = {
             { x: 900, tiles: 4, width: 528 }
         ]
     },
-    mapleRoad: {
+    evergreenRoad: {
         width: 2400,
         backgroundColor: '#3498db',
         bgm: 'huntingground',
@@ -4899,7 +4899,7 @@ const maps = {
             { type: 'mano', count: 1 }
         ],
         portals: [
-            { x: 50, targetMap: 'mapleRoad', targetX: 800, targetY: 605 }
+            { x: 50, targetMap: 'evergreenRoad', targetX: 800, targetY: 605 }
         ],
         ladders: [
             { x: 570, y1: 445, y2: 615, },
@@ -4921,7 +4921,7 @@ const maps = {
             { type: 'redSlime', count: 15 }
         ],
         portals: [
-            { x: 50, targetMap: 'mapleRoad', targetX: 1850, targetY: 100 }
+            { x: 50, targetMap: 'evergreenRoad', targetX: 1850, targetY: 100 }
         ],
         ladders: [
             { x: 1050, y1: 445, y2: 615, },
@@ -4946,7 +4946,7 @@ const maps = {
             { type: 'orangeMushroom', count: 8 },
         ],
         portals: [
-            { x: 50, targetMap: 'mapleRoad', targetX: 400 },
+            { x: 50, targetMap: 'evergreenRoad', targetX: 400 },
             { x: 1500, targetMap: 'entranceToSubway', targetX: 100 },
             { x: 1100, y: 350, targetMap: 'sporeHillClearing', targetX: 100 },
             { x: 350, y: 250, targetMap: 'kerningCityJumpQuest', targetX: 875, targetY: 7000 },
@@ -6541,7 +6541,7 @@ const worldMapLayout = {
     'perionTrail': { x: 30, y: 50 },
     'westRockyMountain': { x: 45, y: 50 },
     'henesys': { x: 60, y: 50 },
-    'mapleRoad': { x: 75, y: 50 },
+    'evergreenRoad': { x: 75, y: 50 },
     'slimeHuntingGround': { x: 65, y: 50 },
     'hiddenSlimeGlade': { x: 55, y: 50 },
     'kerningCity': { x: 90, y: 50 },

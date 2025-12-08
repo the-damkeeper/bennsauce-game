@@ -62,7 +62,7 @@ const ghostPhrases = [
     "This music is fire 🔥",
     "Grinding for that sweet loot!",
     "Anyone seen King Slime?",
-    "Maple vibes!",
+    "Evergreen vibes!",
     "This brings back memories!",
     "Epic game!",
     "Time to farm some slimes!",
@@ -80,7 +80,7 @@ const ghostPhrases = [
     "Ellinia is so peaceful!",
     "I love jump quests!",
     "Grinding never felt so good!",
-    "MapleStory forever!",
+    "EvergreenStory forever!",
     "Best game ever!",
     "Can't stop playing!",
     "When's the patch coming out?",
@@ -97,13 +97,13 @@ const ghostPhrases = [
 
 // Random names for ghost players
 const ghostNames = [
-    "xXShadowXx", "l33tN00b", "MapleKing99", "DarkSlayer420",
+    "xXShadowXx", "l33tN00b", "EvergreenKing99", "DarkSlayer420",
     "llDarkKnightll", "Xx_Pro_xX", "SilentAssassin", "D3m0nb0i",
     "MagicGirl", "LuckyThief", "NinjaWarrior", "HolyPriest",
     "DragonSlayer", "IceWizard", "FireMage", "ThunderBolt",
     "SwiftArcher", "SneakyRogue", "BraveHero", "CutiePatootie",
-    "GamerGod", "PixelHunter", "RetroGamer", "MapleAddict",
-    "xXxDarkxXx", "iiLoveMapleii", "ProPlayer123", "N00bMaster",
+    "GamerGod", "PixelHunter", "RetroGamer", "EvergreenAddict",
+    "xXxDarkxXx", "iiLoveEvergreenii", "ProPlayer123", "N00bMaster",
     "Tiger","Suuushi","curryishott","Bushido", "Pizza", "neophyte",
     "OldAndLame", "Herb", "Bane", "MrSalami", "Kromp", "FangBlade",
     "ShadowWalker", "LunarEclipse", "StarGazer", "NightStalker",
@@ -228,7 +228,7 @@ function createGhostPlayer(x, y, mapId) {
  * Checks if ghost players are enabled
  */
 function areGhostPlayersEnabled() {
-    const savedPref = localStorage.getItem('mapleRPG_ghostPlayersEnabled');
+    const savedPref = localStorage.getItem('evergreenRPG_ghostPlayersEnabled');
     return savedPref === null || savedPref === 'true'; // Default to enabled
 }
 

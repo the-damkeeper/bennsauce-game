@@ -78,7 +78,7 @@ function showRecoveryCodeModal() {
         clearRecoveryError();
         
         // Check if there's a stored recovery code
-        const storedCode = localStorage.getItem('mapleRPG_recoveryCode');
+        const storedCode = localStorage.getItem('evergreenRPG_recoveryCode');
         const currentCodeSection = document.getElementById('current-recovery-code');
         const currentCodeDisplay = document.getElementById('current-code-display');
         
@@ -356,7 +356,7 @@ window.selectCharacterForRecovery = selectCharacterForRecovery;
 async function handleUpdateRecoveryCode() {
     clearRecoveryError();
     
-    const storedCode = localStorage.getItem('mapleRPG_recoveryCode');
+    const storedCode = localStorage.getItem('evergreenRPG_recoveryCode');
     if (!storedCode) {
         showRecoveryError('No recovery code found');
         return;
@@ -1048,7 +1048,7 @@ function makeWindowDraggable(element, headerElement) {
         // The saved positions are now correct, un-scaled pixel values
         if (windowPositions) {
             windowPositions[element.id] = { left: element.style.left, top: element.style.top };
-            localStorage.setItem('mapleRPG_windowPositions', JSON.stringify(windowPositions));
+            localStorage.setItem('evergreenRPG_windowPositions', JSON.stringify(windowPositions));
         }
     }
 }
@@ -1250,7 +1250,7 @@ function setupMinimapResize() {
 
         function stopDrag() {
             // Save the final width to localStorage (height will be recalculated per map)
-            localStorage.setItem('mapleRPG_minimapWidth', minimapContainer.style.width);
+            localStorage.setItem('evergreenRPG_minimapWidth', minimapContainer.style.width);
 
             document.removeEventListener('mousemove', doDrag);
             document.removeEventListener('mouseup', stopDrag);
@@ -1540,7 +1540,7 @@ function setupCustomizationControls() {
     updateCreationLabels();
 }
 
-// Random name generator - 2005 MapleStory style
+// Random name generator - 2005 EvergreenStory style
 function generateRandomName() {
     const adjectives = ['Dark', 'Shadow', 'Fire', 'Ice', 'Holy', 'Sin', 'Night', 'Blood', 'Death', 'Soul', 'Demon', 'Angel', 'Dragon', 'Moon', 'Star', 'Storm', 'Thunder', 'Lightning', 'Chaos', 'Silent', 'Fierce', 'Brave', 'Swift', 'Cunning', 'Noble', 'Wild', 'Savage', 'Mighty', 'Vicious', 'Ghostly', 'Phantom', 'Crimson', 'Obsidian', 'Silver', 'Golden', 'Iron', 'Steel', 'Frost', 'Blaze', 'Venom', 'Toxic', 'Rogue', 'Valkyrie', 'Wraith', 'Specter', 'Inferno',
     'Tempest', 'Eclipse', 'Nova', 'Raven', 'Wolf', 'Lion', 'Tiger', 'Bear', 'Hawk', 'Falcon', 'Serpent', 'Phoenix', 'Grim', 'Stinky', 'Fluffy', 'Tiny', 'Giant', 'Mighty', 'Sneaky', 'Brilliant', 'Clever', 'Wise', 'Fierce', 'Bold', 'Daring', 'Fearless', 'Lone'];
@@ -6710,6 +6710,30 @@ function inspectPlayer(playerName) {
     const onlinePlayers = typeof getOnlinePlayers === 'function' ? getOnlinePlayers() : [];
     let targetPlayer = onlinePlayers.find(p => p.playerName === playerName);
     
+    // Check if this is a remote player on the same map
+    if (!targetPlayer && typeof remotePlayers !== 'undefined') {
+        const remotePlayer = Object.values(remotePlayers).find(p => p.name === playerName);
+        if (remotePlayer) {
+            // Convert remote player to inspector format
+            targetPlayer = {
+                playerName: remotePlayer.name,
+                level: remotePlayer.level || 1,
+                class: remotePlayer.class || 'Beginner',
+                customization: remotePlayer.customization || {},
+                equipped: remotePlayer.cosmeticEquipped || remotePlayer.equipped || {},
+                guildName: remotePlayer.guild?.name || null,
+                guildRole: remotePlayer.guild?.role || null,
+                totalKills: 0, // Unknown for remote players
+                achievementCount: 0, // Unknown for remote players
+                combatScore: 0, // Unknown for remote players
+                currentMap: player.currentMapId, // Same map as us
+                mapDisplayName: maps?.[player.currentMapId]?.displayName || player.currentMapId,
+                status: 'online',
+                partyId: remotePlayer.partyId || null
+            };
+        }
+    }
+    
     // If inspecting self, use local player data with cosmetic overrides
     const isSelf = playerName === player.name;
     if (isSelf) {
@@ -11296,7 +11320,7 @@ function setupChatLogResize() {
         
         function stopDrag() {
             // Save the final size to localStorage
-            localStorage.setItem('mapleRPG_chatLogHeight', chatLogContainer.style.height);
+            localStorage.setItem('evergreenRPG_chatLogHeight', chatLogContainer.style.height);
             
             document.removeEventListener('mousemove', doDrag);
             document.removeEventListener('mouseup', stopDrag);
@@ -11307,7 +11331,7 @@ function setupChatLogResize() {
     });
     
     // Load saved height from localStorage
-    const savedHeight = localStorage.getItem('mapleRPG_chatLogHeight');
+    const savedHeight = localStorage.getItem('evergreenRPG_chatLogHeight');
     if (savedHeight) {
         chatLogContainer.style.height = savedHeight;
     }
@@ -12044,7 +12068,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (bgmMuteBtn) bgmMuteBtn.addEventListener('click', toggleBgm);
     if (sfxMuteBtn) sfxMuteBtn.addEventListener('click', toggleSfx);
     document.getElementById('reset-windows-btn').addEventListener('click', () => {
-        localStorage.removeItem('mapleRPG_windowPositions');
+        localStorage.removeItem('evergreenRPG_windowPositions');
         windowPositions = {};
         document.querySelectorAll('.window').forEach(win => {
             if (win.id !== 'controls-popup') {
@@ -12058,7 +12082,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ghostPlayersToggle = document.getElementById('ghost-players-toggle');
     if (ghostPlayersToggle) {
         // Load saved preference
-        const savedPref = localStorage.getItem('mapleRPG_ghostPlayersEnabled');
+        const savedPref = localStorage.getItem('evergreenRPG_ghostPlayersEnabled');
         if (savedPref !== null) {
             ghostPlayersToggle.checked = savedPref === 'true';
         }
@@ -12070,7 +12094,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         ghostPlayersToggle.addEventListener('change', () => {
             const enabled = ghostPlayersToggle.checked;
-            localStorage.setItem('mapleRPG_ghostPlayersEnabled', enabled);
+            localStorage.setItem('evergreenRPG_ghostPlayersEnabled', enabled);
             
             if (enabled) {
                 // Re-enable ghost players - spawn some on current map

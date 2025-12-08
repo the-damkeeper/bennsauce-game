@@ -531,8 +531,16 @@ function addRemotePlayer(playerData) {
     el.style.position = 'absolute';
     el.style.width = '60px';
     el.style.height = '60px';
-    el.style.pointerEvents = 'none';
+    el.style.pointerEvents = 'auto'; // Enable pointer events for clicking
+    el.style.cursor = 'pointer'; // Show pointer cursor on hover
     el.style.zIndex = '10';
+    
+    // Add double-click event to open inspector
+    el.addEventListener('dblclick', () => {
+        if (typeof inspectPlayer === 'function') {
+            inspectPlayer(playerData.name);
+        }
+    });
 
     // Create chat bubble element (hidden by default, same as ghost)
     const chatBubble = document.createElement('div');
@@ -554,6 +562,7 @@ function addRemotePlayer(playerData) {
         chatBubble: chatBubble,
         name: playerData.name || 'Unknown',
         class: playerData.playerClass || 'Beginner',
+        level: playerData.level || 1,
         customization: playerData.customization || getDefaultCustomization(),
         equipped: playerData.equipped || getDefaultEquipment(),
         cosmeticEquipped: playerData.cosmeticEquipped || getDefaultEquipment(),

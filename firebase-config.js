@@ -219,7 +219,7 @@ async function createRecoveryCode() {
         });
         
         // Store recovery code locally
-        localStorage.setItem('mapleRPG_recoveryCode', recoveryCode);
+        localStorage.setItem('evergreenRPG_recoveryCode', recoveryCode);
         
         showNotification('Recovery code created! Write it down!', 'legendary');
         return { success: true, code: recoveryCode };
@@ -280,7 +280,7 @@ async function loadFromRecoveryCode(recoveryCode) {
         const data = doc.data();
         
         // Store recovery code locally for future saves
-        localStorage.setItem('mapleRPG_recoveryCode', recoveryCode);
+        localStorage.setItem('evergreenRPG_recoveryCode', recoveryCode);
         
         showNotification('Character data loaded!', 'legendary');
         return { success: true, characterData: data.characterData };
