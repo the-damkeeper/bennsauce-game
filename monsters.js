@@ -1855,7 +1855,10 @@ function updateMonsters() {
                 m.velocityY = 0;
                 m.isJumping = false;
                 onAnySurface = true;
-                console.log(`%c[COLLISION SNAP] ${m.type} | Before: ${oldY.toFixed(1)} → After: ${m.y.toFixed(1)} | ΔY: ${deltaY.toFixed(1)}px | Platform: ${p.y.toFixed(1)} | Anchor: ${anchorY.toFixed(1)}`, deltaY > 10 ? 'color: #f00; font-weight: bold;' : 'color: #888;');
+                // Only log large snaps (potential teleportation issues)
+                if (deltaY > 10) {
+                    console.log(`%c[COLLISION SNAP] ${m.type} | Before: ${oldY.toFixed(1)} → After: ${m.y.toFixed(1)} | ΔY: ${deltaY.toFixed(1)}px | Platform: ${p.y.toFixed(1)} | Anchor: ${anchorY.toFixed(1)}`, 'color: #f00; font-weight: bold;');
+                }
             }
         });
 
