@@ -134,7 +134,7 @@ let slopeHitboxes = [];
 let cameraX = 0;
 let cameraY = 0;
 let isChatting = false;
-let currentChatChannel = 'global'; // 'global', 'buddy', 'guild', 'party'
+let currentChatChannel = 'map'; // 'map', 'global', 'buddy', 'guild', 'party'
 
 let isGmMode = { infiniteStats: false };
 
@@ -5842,7 +5842,17 @@ document.addEventListener('keydown', (e) => {
             const message = chatInput.value.trim();
             if (message) {
                 // Check for chat channel switching commands first
-                if (message === '/s' || message === '/S') {
+                if (message === '/m' || message === '/M') {
+                    currentChatChannel = 'map';
+                    if (chatChannelIndicator) {
+                        chatChannelIndicator.textContent = '[Map]';
+                        chatChannelIndicator.dataset.channel = 'map';
+                    }
+                    chatInput.value = '';
+                    addChatMessage('Switched to Map chat.', 'system');
+                    e.preventDefault();
+                    return;
+                } else if (message === '/s' || message === '/S') {
                     currentChatChannel = 'global';
                     if (chatChannelIndicator) {
                         chatChannelIndicator.textContent = '[Global]';
@@ -5932,6 +5942,14 @@ document.addEventListener('keydown', (e) => {
                     
                     // Route message based on current channel
                     switch (currentChatChannel) {
+                        case 'map':
+                            if (typeof sendMapChat === 'function') {
+                                sendMapChat(message);
+                                addChatMessage(`${player.name}: ${message}`, 'map');
+                            } else {
+                                addChatMessage('Map chat is not available.', 'error');
+                            }
+                            break;
                         case 'buddy':
                             if (typeof sendBuddyChatMessage === 'function') {
                                 sendBuddyChatMessage(message);
@@ -5984,8 +6002,8 @@ document.addEventListener('keydown', (e) => {
                 if (chatLogContainer) chatLogContainer.classList.add('chat-active');
                 // Update channel indicator when opening chat
                 if (chatChannelIndicator) {
-                    const channelNames = { global: '[Global]', buddy: '[Buddy]', guild: '[Guild]', party: '[Party]' };
-                    chatChannelIndicator.textContent = channelNames[currentChatChannel] || '[Global]';
+                    const channelNames = { map: '[Map]', global: '[Global]', buddy: '[Buddy]', guild: '[Guild]', party: '[Party]' };
+                    chatChannelIndicator.textContent = channelNames[currentChatChannel] || '[Map]';
                     chatChannelIndicator.dataset.channel = currentChatChannel;
                 }
             }

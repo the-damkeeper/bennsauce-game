@@ -782,10 +782,17 @@ function updateRemotePlayerNameplate(remotePlayer) {
             medalsContainer.appendChild(medalEl);
         }
 
-        // Show display medals
+        // Show display medals (excluding equipped medal to avoid duplicates)
         displayMedals.forEach(medal => {
-            const medalEl = createRemoteMedalElement(medal, false);
-            medalsContainer.appendChild(medalEl);
+            // Skip if this medal is the same as the equipped medal
+            const isEquippedMedal = remotePlayer.equippedMedal && 
+                medal.type === remotePlayer.equippedMedal.type && 
+                medal.id === remotePlayer.equippedMedal.id;
+            
+            if (!isEquippedMedal) {
+                const medalEl = createRemoteMedalElement(medal, false);
+                medalsContainer.appendChild(medalEl);
+            }
         });
 
         remotePlayer.element.appendChild(medalsContainer);
