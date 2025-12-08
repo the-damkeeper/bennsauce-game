@@ -585,6 +585,9 @@ function addRemotePlayer(playerData) {
     }
     
     remotePlayers[playerData.odId] = remotePlayer;
+    
+    // Update nameplate to show guild and medals
+    updateRemotePlayerNameplate(remotePlayer);
 }
 
 /**
@@ -676,7 +679,8 @@ function updateRemotePlayerAppearance(data) {
         medal: remotePlayer.equippedMedal
     });
 
-    // TODO: Trigger visual re-render when equipment/cosmetic rendering is implemented
+    // Update nameplate to show guild and medals
+    updateRemotePlayerNameplate(remotePlayer);
 }
 
 /**
@@ -692,6 +696,106 @@ function sendAppearanceUpdate() {
         equippedMedal: player.equippedMedal,
         displayMedals: player.displayMedals
     });
+}
+
+/**
+ * Update remote player nameplate to show guild and medals
+ */
+function updateRemotePlayerNameplate(remotePlayer) {
+    if (!remotePlayer || !remotePlayer.element) return;
+
+    // Remove existing guild and medals
+    const existingGuild = remotePlayer.element.querySelector('.remote-guild-nameplate');
+    const existingMedals = remotePlayer.element.querySelector('.remote-medals-container');
+    if (existingGuild) existingGuild.remove();
+    if (existingMedals) existingMedals.remove();
+
+    // Add guild nameplate if player has a guild
+    if (remotePlayer.guild) {
+        const guildNameplate = document.createElement('div');
+        guildNameplate.className = 'remote-guild-nameplate';
+        guildNameplate.style.cssText = `
+            position: absolute;
+            bottom: calc(100% + 2px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: #FFD700;
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-size: 10px;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 1001;
+        `;
+        
+        const guildName = typeof remotePlayer.guild === 'string' ? remotePlayer.guild : remotePlayer.guild.name;
+        guildNameplate.textContent = `[${guildName}]`;
+        remotePlayer.element.appendChild(guildNameplate);
+    }
+
+    // Add medals if player has any
+    const displayMedals = remotePlayer.displayMedals || [];
+    if (remotePlayer.equippedMedal || displayMedals.length > 0) {
+        const medalsContainer = document.createElement('div');
+        medalsContainer.className = 'remote-medals-container';
+        medalsContainer.style.cssText = `
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            margin-top: 2px;
+            pointer-events: none;
+            z-index: 1000;
+        `;
+
+        // Show equipped medal first
+        if (remotePlayer.equippedMedal) {
+            const medalEl = createRemoteMedalElement(remotePlayer.equippedMedal, true);
+            medalsContainer.appendChild(medalEl);
+        }
+
+        // Show display medals
+        displayMedals.forEach(medal => {
+            const medalEl = createRemoteMedalElement(medal, false);
+            medalsContainer.appendChild(medalEl);
+        });
+
+        remotePlayer.element.appendChild(medalsContainer);
+    }
+}
+
+/**
+ * Create a medal display element for remote players
+ */
+function createRemoteMedalElement(medal, isStatMedal) {
+    const medalTier = medal.tier || 'bronze';
+    const medalName = medal.name || 'Medal';
+
+    const medalElement = document.createElement('div');
+    medalElement.className = `monster-killer-medal-display ${medalTier}`;
+    if (isStatMedal) {
+        medalElement.classList.add('stat-medal');
+    }
+    medalElement.style.cssText = `
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-size: 9px;
+        font-weight: bold;
+        text-align: center;
+        white-space: nowrap;
+        text-shadow: 0 0 2px rgba(0,0,0,0.8);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    `;
+
+    const medalText = document.createElement('span');
+    medalText.textContent = medalName;
+    medalElement.appendChild(medalText);
+
+    return medalElement;
 }
 
 /**
