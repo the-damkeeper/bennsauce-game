@@ -1113,6 +1113,9 @@ function createMonsterFromServer(serverMonster, showSpawnVFX = false) {
         if (localMonster.hpBar) {
             localMonster.hpBar.style.width = `${Math.max(0, localMonster.hp) / localMonster.maxHp * 100}%`;
         }
+        
+        // Debug logging
+        console.log(`[MONSTER SPAWN] Type: ${serverMonster.type}, ID: ${serverMonster.id}, Spawn Position: (${serverMonster.x.toFixed(1)}, ${serverMonster.y.toFixed(1)})`);
     } else {
         console.error('[Socket] createMonster returned null/undefined for', serverMonster.type);
     }
