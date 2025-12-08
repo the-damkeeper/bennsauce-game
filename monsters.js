@@ -1824,7 +1824,8 @@ function updateMonsters() {
         
         // Always apply gravity and vertical physics (both single and multiplayer)
         // Skip gravity for first 2 frames to prevent spawned monsters from falling through platforms
-        if (m.spawnFrameCount !== undefined && m.spawnFrameCount > 0) {
+        const isSpawnGracePeriod = m.spawnFrameCount !== undefined && m.spawnFrameCount > 0;
+        if (isSpawnGracePeriod) {
             m.spawnFrameCount--;
         } else {
             m.velocityY += GRAVITY;
@@ -1887,17 +1888,20 @@ function updateMonsters() {
             }
         });
 
-        const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
-        const monsterCenterX = m.x + m.width / 2;
-        const slopeSurfaceY = getSlopeSurfaceY(monsterCenterX, map, groundLevel, 48);
-        const monsterBottom = m.y + anchorY;
-        const distanceToSlope = monsterBottom - slopeSurfaceY;
-        // Snap to slope if close enough (above or below)
-        // Use larger tolerance for walking up slopes, and always snap when on ground
-        if (!onAnySurface && distanceToSlope >= -50 && distanceToSlope <= 100) {
-            m.y = slopeSurfaceY - anchorY;
-            m.velocityY = 0;
-            m.isJumping = false;
+        // Skip slope snapping during spawn grace period to prevent interference with spawn positioning
+        if (!isSpawnGracePeriod) {
+            const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+            const monsterCenterX = m.x + m.width / 2;
+            const slopeSurfaceY = getSlopeSurfaceY(monsterCenterX, map, groundLevel, 48);
+            const monsterBottom = m.y + anchorY;
+            const distanceToSlope = monsterBottom - slopeSurfaceY;
+            // Snap to slope if close enough (above or below)
+            // Use larger tolerance for walking up slopes, and always snap when on ground
+            if (!onAnySurface && distanceToSlope >= -50 && distanceToSlope <= 100) {
+                m.y = slopeSurfaceY - anchorY;
+                m.velocityY = 0;
+                m.isJumping = false;
+            }
         }
 
         // Update animations
