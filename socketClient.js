@@ -1151,8 +1151,8 @@ function handleMonsterDamageFromServer(data) {
         localMonster.velocityX = data.knockbackVelocityX;
         // Set knockback timer - prevents server interpolation for 500ms
         localMonster.knockbackEndTime = Date.now() + 500;
-        // Make monster face the direction of knockback
-        localMonster.direction = data.knockbackVelocityX > 0 ? 1 : -1;
+        // Make monster face the player (opposite of knockback direction)
+        localMonster.direction = data.knockbackVelocityX > 0 ? -1 : 1;
     }
     
     // If this damage wasn't from us, show the damage number
