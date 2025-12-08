@@ -1848,16 +1848,35 @@ function updateMonsters() {
 
         platforms.forEach(p => {
             if (p.isLadder || p.y === undefined) return;
-            if (isColliding(m, p) && m.velocityY >= 0 && (m.y - m.velocityY + anchorY) <= p.y) {
-                const oldY = m.y;
-                const deltaY = Math.abs(oldY - (p.y - anchorY));
-                m.y = p.y - anchorY;
-                m.velocityY = 0;
-                m.isJumping = false;
-                onAnySurface = true;
-                // Only log large snaps (potential teleportation issues)
-                if (deltaY > 10) {
-                    console.log(`%c[COLLISION SNAP] ${m.type} | Before: ${oldY.toFixed(1)} → After: ${m.y.toFixed(1)} | ΔY: ${deltaY.toFixed(1)}px | Platform: ${p.y.toFixed(1)} | Anchor: ${anchorY.toFixed(1)}`, 'color: #f00; font-weight: bold;');
+            
+            // Check if monster is colliding with platform
+            if (isColliding(m, p)) {
+                const monsterBottom = m.y + anchorY;
+                const monsterTop = m.y;
+                const platformTop = p.y;
+                const platformBottom = p.y + (p.height || 20);
+                
+                // If monster is falling down and was above platform, land on it
+                if (m.velocityY >= 0 && (m.y - m.velocityY + anchorY) <= p.y) {
+                    const oldY = m.y;
+                    const deltaY = Math.abs(oldY - (p.y - anchorY));
+                    m.y = p.y - anchorY;
+                    m.velocityY = 0;
+                    m.isJumping = false;
+                    onAnySurface = true;
+                    // Only log large snaps (potential teleportation issues)
+                    if (deltaY > 10) {
+                        console.log(`%c[COLLISION SNAP] ${m.type} | Before: ${oldY.toFixed(1)} → After: ${m.y.toFixed(1)} | ΔY: ${deltaY.toFixed(1)}px | Platform: ${p.y.toFixed(1)} | Anchor: ${anchorY.toFixed(1)}`, 'color: #f00; font-weight: bold;');
+                    }
+                }
+                // CRITICAL FIX: If monster somehow got stuck INSIDE or BELOW platform, eject it upward
+                else if (monsterBottom > platformTop && monsterTop < platformBottom) {
+                    const oldY = m.y;
+                    m.y = p.y - anchorY;
+                    m.velocityY = 0;
+                    m.isJumping = false;
+                    onAnySurface = true;
+                    console.log(`%c[EJECTION] ${m.type} was stuck inside platform! Ejected from ${oldY.toFixed(1)} to ${m.y.toFixed(1)}`, 'background: #ff0; color: #000; font-weight: bold;');
                 }
             }
         });
