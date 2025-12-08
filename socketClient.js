@@ -225,14 +225,18 @@ function setupSocketListeners() {
 
     // Player chat
     socket.on('playerChat', (data) => {
+        console.log('[Client] Received playerChat:', data);
         const remotePlayer = remotePlayers[data.odId];
         if (remotePlayer && remotePlayer.element) {
             showRemotePlayerChat(remotePlayer, data.message);
+        } else {
+            console.warn('[Client] Could not show chat - remote player not found:', data.odId);
         }
     });
 
     // Player appearance updated (equipment, cosmetics, guild, medals)
     socket.on('playerAppearanceUpdated', (data) => {
+        console.log('[Client] Received playerAppearanceUpdated:', data);
         updateRemotePlayerAppearance(data);
     });
 
@@ -689,13 +693,16 @@ function updateRemotePlayerAppearance(data) {
 function sendAppearanceUpdate() {
     if (!socket || !hasJoinedServer) return;
 
-    socket.emit('updateAppearance', {
+    const appearanceData = {
         equipped: player.equipped,
         cosmeticEquipped: player.cosmeticEquipped,
         guild: player.guild,
         equippedMedal: player.equippedMedal,
         displayMedals: player.displayMedals
-    });
+    };
+    
+    console.log('[Client] Sending appearance update:', appearanceData);
+    socket.emit('updateAppearance', appearanceData);
 }
 
 /**
