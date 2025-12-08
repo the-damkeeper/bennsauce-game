@@ -290,12 +290,10 @@ window.startMonsterPositionTracking = function() {
         if (!window.game || !window.game.monsters) return;
         
         const monsters = window.game.monsters;
-        if (monsters.length === 0) {
-            console.log('[TRACKER] No monsters spawned yet');
-            return;
-        }
+        if (monsters.length === 0) return;
         
-        console.group(`%c[TRACKER] ${new Date().toLocaleTimeString()} - ${monsters.length} monster(s)`, 'color: #0ff; font-weight: bold;');
+        let hasInterestingEvents = false;
+        const interestingLogs = [];
         
         monsters.forEach((m, idx) => {
             const mId = m.id;
@@ -311,7 +309,12 @@ window.startMonsterPositionTracking = function() {
                     teleportCount: 0,
                     maxYDelta: 0
                 });
-                console.log(`%c[SPAWN] Monster #${idx} (${m.type}) spawned at (${m.x.toFixed(1)}, ${m.y.toFixed(1)})`, 'background: #0f0; color: #000; font-weight: bold;');
+                hasInterestingEvents = true;
+                interestingLogs.push({
+                    type: 'spawn',
+                    message: `%c[SPAWN] Monster #${idx} (${m.type}) spawned at (${m.x.toFixed(1)}, ${m.y.toFixed(1)})`,
+                    style: 'background: #0f0; color: #000; font-weight: bold;'
+                });
             }
             
             const spawnInfo = monsterSpawnLog.get(mId);
@@ -321,7 +324,23 @@ window.startMonsterPositionTracking = function() {
             // Detect teleportation (sudden Y change > 50px)
             if (deltaY > 50) {
                 spawnInfo.teleportCount++;
-                console.warn(`%c[TELEPORT] Monster #${idx} jumped ${deltaY.toFixed(1)}px! From ${spawnInfo.lastY.toFixed(1)} to ${m.y.toFixed(1)}`, 'background: #f00; color: #fff; font-weight: bold;');
+                hasInterestingEvents = true;
+                interestingLogs.push({
+                    type: 'teleport',
+                    message: `%c[TELEPORT] Monster #${idx} (${m.type}) jumped ${deltaY.toFixed(1)}px! From ${spawnInfo.lastY.toFixed(1)} to ${m.y.toFixed(1)}`,
+                    style: 'background: #f00; color: #fff; font-weight: bold;'
+                });
+            }
+            
+            // Log significant movement (>20px total change)
+            if (deltaY > 10 && totalYChange > 20) {
+                hasInterestingEvents = true;
+                const age = ((Date.now() - spawnInfo.spawnTime) / 1000).toFixed(1);
+                interestingLogs.push({
+                    type: 'movement',
+                    message: `%c[MOVEMENT] Monster #${idx} (${m.type}) | Pos: (${m.x.toFixed(1)}, ${m.y.toFixed(1)}) | ΔY: ${deltaY.toFixed(1)}px | Total ΔY: ${totalYChange.toFixed(1)}px | Age: ${age}s | ${m.onPlatform ? 'ON PLATFORM' : 'AIRBORNE'}`,
+                    style: 'color: #ff0; font-weight: bold;'
+                });
             }
             
             // Track max delta
@@ -329,34 +348,18 @@ window.startMonsterPositionTracking = function() {
                 spawnInfo.maxYDelta = deltaY;
             }
             
-            // Build status line
-            const age = ((Date.now() - spawnInfo.spawnTime) / 1000).toFixed(1);
-            const status = [
-                `#${idx} ${m.type}`,
-                `Pos: (${m.x.toFixed(1)}, ${m.y.toFixed(1)})`,
-                `Vel: (${m.velocityX.toFixed(2)}, ${m.velocityY.toFixed(2)})`,
-                `ΔY: ${deltaY.toFixed(1)}px`,
-                `Total ΔY: ${totalYChange.toFixed(1)}px`,
-                `Age: ${age}s`,
-                m.onPlatform ? `[ON PLATFORM]` : `[AIRBORNE]`,
-                spawnInfo.teleportCount > 0 ? `⚠️ ${spawnInfo.teleportCount} teleports` : ''
-            ].filter(Boolean).join(' | ');
-            
-            // Color code by status
-            let color = '#fff';
-            if (spawnInfo.teleportCount > 0) {
-                color = '#f00'; // Red for teleporting monsters
-            } else if (totalYChange > 20) {
-                color = '#ff0'; // Yellow for significant movement
-            } else if (!m.onPlatform) {
-                color = '#fa0'; // Orange for airborne
-            }
-            
-            console.log(`%c${status}`, `color: ${color}`);
-            
             // Update last position
             spawnInfo.lastY = m.y;
         });
+        
+        // Only log if there are interesting events
+        if (hasInterestingEvents) {
+            console.group(`%c[TRACKER] ${new Date().toLocaleTimeString()} - ${monsters.length} monster(s)`, 'color: #0ff; font-weight: bold;');
+            interestingLogs.forEach(log => {
+                console.log(log.message, log.style);
+            });
+            console.groupEnd();
+        }
         
         console.groupEnd();
         
