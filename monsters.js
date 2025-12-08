@@ -1530,7 +1530,7 @@ function createMonster(type, x, y, initialState = null) {
         type, x, y, previousY: y,
         velocityX: 0, velocityY: 0,
         onPlatform: null,
-        spawnFrameCount: 2, // Skip gravity for 2 frames
+        spawnFrameCount: 5, // Skip gravity for 5 frames to ensure stable spawn positioning
         element: el,
         direction: Math.random() < 0.5 ? 1 : -1,
         aiState: 'idle',
