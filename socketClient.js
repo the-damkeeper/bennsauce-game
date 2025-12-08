@@ -770,13 +770,12 @@ function updateRemotePlayerNameplate(remotePlayer) {
         medalsContainer.className = 'remote-medals-container';
         medalsContainer.style.cssText = `
             position: absolute;
-            top: 100%;
+            top: 78px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             flex-direction: column;
             gap: 1px;
-            margin-top: 2px;
             pointer-events: none;
             z-index: 1000;
         `;
@@ -816,16 +815,7 @@ function createRemoteMedalElement(medal, isStatMedal) {
     if (isStatMedal) {
         medalElement.classList.add('stat-medal');
     }
-    medalElement.style.cssText = `
-        padding: 1px 6px;
-        border-radius: 3px;
-        font-size: 9px;
-        font-weight: bold;
-        text-align: center;
-        white-space: nowrap;
-        text-shadow: 0 0 2px rgba(0,0,0,0.8);
-        box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    `;
+    // Don't override CSS - let the existing styles handle it
 
     const medalText = document.createElement('span');
     medalText.textContent = medalName;
