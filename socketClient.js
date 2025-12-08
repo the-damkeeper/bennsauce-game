@@ -980,8 +980,8 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
                 // Use exact coordinates provided
                 spawnX = spawner.x;
                 spawnY = spawner.y;
-                // Find closest surface for patrol bounds
-                spawnSurface = validSpawnPoints[0]; // Fallback to first valid surface
+                // Use ground surface for patrol bounds (test dummy should be on ground)
+                spawnSurface = allSpawnSurfaces[0]; // First surface is always ground
             } else {
                 // Pick a random valid surface (matching game.js style)
                 spawnSurface = validSpawnPoints[Math.floor(Math.random() * validSpawnPoints.length)];
