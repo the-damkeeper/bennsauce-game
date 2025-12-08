@@ -260,6 +260,18 @@ if (typeof window.debugGame !== 'undefined') {
     window.debugGame.runTests = () => gameTests.runTests();
 }
 
+// Debug functions for monster troubleshooting
+window.DEBUG_MONSTERS = false;
+window.toggleMonsterDebug = function() {
+    window.DEBUG_MONSTERS = !window.DEBUG_MONSTERS;
+    console.log(`[DEBUG] Monster debug overlay: ${window.DEBUG_MONSTERS ? 'ENABLED' : 'DISABLED'}`);
+    if (!window.DEBUG_MONSTERS) {
+        // Clean up debug overlays
+        document.querySelectorAll('.monster-debug-overlay').forEach(el => el.remove());
+    }
+    return window.DEBUG_MONSTERS;
+};
+
 // Auto-run tests in development
 if (window.location.hostname === 'localhost' || window.location.search.includes('test=true')) {
     // Run tests after game initialization
@@ -272,3 +284,4 @@ if (window.location.hostname === 'localhost' || window.location.search.includes(
 }
 
 console.log('🧪 Test suite loaded. Run window.debugGame.runTests() to execute tests.');
+console.log('🐛 Monster debug: Run toggleMonsterDebug() to enable visual debugging.');

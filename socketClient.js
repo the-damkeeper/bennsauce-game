@@ -1144,6 +1144,7 @@ function handleMonsterDamageFromServer(data) {
         localMonster.velocityX = data.knockbackVelocityX;
         // Clear server target position so knockback isn't overridden
         localMonster.serverTargetX = localMonster.x;
+        console.log(`[KNOCKBACK] Monster ID: ${data.id}, VelocityX: ${data.knockbackVelocityX}, Current Pos: (${localMonster.x.toFixed(1)}, ${localMonster.y.toFixed(1)})`);
     }
     
     // If this damage wasn't from us, show the damage number

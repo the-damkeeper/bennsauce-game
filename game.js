@@ -2344,6 +2344,21 @@ function render() {
         }
         m.element.style.left = `${Math.round(m.x)}px`;
         m.element.style.top = `${Math.round(topPosition)}px`;
+        
+        // DEBUG: Visual debug overlay
+        if (window.DEBUG_MONSTERS) {
+            let debugDiv = m.element.querySelector('.monster-debug-overlay');
+            if (!debugDiv) {
+                debugDiv = document.createElement('div');
+                debugDiv.className = 'monster-debug-overlay';
+                debugDiv.style.cssText = 'position:absolute;top:-30px;left:0;background:rgba(0,0,0,0.8);color:#0f0;font-size:10px;padding:2px 4px;white-space:nowrap;pointer-events:none;z-index:9999;';
+                m.element.appendChild(debugDiv);
+            }
+            debugDiv.textContent = `Y:${Math.round(m.y)} VX:${m.velocityX?.toFixed(1)||0} VY:${m.velocityY?.toFixed(1)||0}`;
+        } else {
+            const existingDebug = m.element.querySelector('.monster-debug-overlay');
+            if (existingDebug) existingDebug.remove();
+        }
 
         if (m.nameplateElement) {
             const levelDiff = m.level - player.level;

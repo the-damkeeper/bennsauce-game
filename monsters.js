@@ -1846,10 +1846,14 @@ function updateMonsters() {
         platforms.forEach(p => {
             if (p.isLadder || p.y === undefined) return;
             if (isColliding(m, p) && m.velocityY >= 0 && (m.y - m.velocityY + anchorY) <= p.y) {
+                const oldY = m.y;
                 m.y = p.y - anchorY;
                 m.velocityY = 0;
                 m.isJumping = false;
                 onAnySurface = true;
+                if (Math.abs(oldY - m.y) > 10) {
+                    console.log(`[PLATFORM COLLISION] Monster: ${m.type}, OldY: ${oldY.toFixed(1)}, NewY: ${m.y.toFixed(1)}, PlatformY: ${p.y.toFixed(1)}, AnchorY: ${anchorY.toFixed(1)}`);
+                }
             }
         });
 
