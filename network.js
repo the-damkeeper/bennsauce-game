@@ -469,7 +469,7 @@ function getCharacterDataForCloud() {
         totalGoldEarned: player.totalGoldEarned || 0,
         highestDamage: player.highestDamage || 0,
         discoveredMaps: discoveredMaps,
-        currentMapId: player.currentMapId || (typeof currentMapId !== 'undefined' ? currentMapId : 'henesys'),
+        currentMapId: player.currentMapId || (typeof currentMapId !== 'undefined' ? currentMapId : 'ironhaven'),
         activePet: player.activePet || null,
         ownedPets: player.ownedPets || [],
         medals: player.medals || [],
@@ -4452,7 +4452,7 @@ async function updatePresence() {
     if (!rankingsInitialized || !player || !player.name) return;
 
     try {
-        const mapName = player.currentMapId || 'henesys';
+        const mapName = player.currentMapId || 'ironhaven';
         const mapInfo = typeof maps !== 'undefined' ? maps[mapName] : null;
         const mapDisplayName = mapInfo?.displayName || mapName;
         
@@ -5224,10 +5224,10 @@ async function checkCompletionistMedal() {
     }
 }
 
-// Check Ludibrium-specific medals
-async function checkLudibriumMedals(eventType, data = {}) {
-    if (eventType === 'enter_Ludibrium') {
-        await claimServerFirstMedal('LudibriumPioneer');
+// Check Sky Palace-specific medals
+async function checkskyPalaceMedals(eventType, data = {}) {
+    if (eventType === 'enter_skyPalace') {
+        await claimServerFirstMedal('skyPalacePioneer');
     } else if (eventType === 'kill_alishar') {
         await claimServerFirstMedal('firstAlisharSlayer');
     }

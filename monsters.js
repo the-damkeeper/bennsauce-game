@@ -968,7 +968,7 @@ function warpBackFromArena(delay = 0) {
         } else if (currentMapId === 'worldBossArena') {
             // Fallback if original map not set
             if (typeof changeMap === 'function') {
-                changeMap('henesys', 500);
+                changeMap('ironhaven', 500);
             }
         }
     };
@@ -986,7 +986,7 @@ function checkWorldBossArenaOnDeath() {
         addChatMessage(`💀 You died in the World Boss arena! Warping back...`, 'system');
         
         // Force warp back - don't rely on event state
-        const targetMap = playerOriginalMap || 'henesys';
+        const targetMap = playerOriginalMap || 'ironhaven';
         const targetX = playerOriginalX || 500;
         
         setTimeout(() => {

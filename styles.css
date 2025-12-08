@@ -2627,7 +2627,7 @@ body.gamepad-active #invite-prompt-container {
     border-color: #c8a04a;
 }
 
-.world-map-tab[data-region="ludibrium"].active {
+.world-map-tab[data-region="skypalace"].active {
     background: rgba(120, 60, 160, 0.3);
     border-color: #783ca0;
 }

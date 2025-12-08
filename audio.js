@@ -31,10 +31,10 @@ const audioAssets = {
 
 
     // BGM (Background Music)
-    henesys: new Audio('https://sounds.larry.science/sounds/C19F549E33DFBA0B470E21E26FA018B87E161A5EF2CAA37C78C1F0BDB17A5C3E.mp3'),
-    kerningCity: new Audio('https://sounds.larry.science/sounds/40A04FA380078485E539909B348C8E44EBCA73A9631ED7FDCF5B6BA3B92B9B21.mp3'),
+    ironhaven: new Audio('https://sounds.larry.science/sounds/C19F549E33DFBA0B470E21E26FA018B87E161A5EF2CAA37C78C1F0BDB17A5C3E.mp3'),
+    onyxCity: new Audio('https://sounds.larry.science/sounds/40A04FA380078485E539909B348C8E44EBCA73A9631ED7FDCF5B6BA3B92B9B21.mp3'),
     hauntedMansion: new Audio('https://sounds.larry.science/sounds/EB9A77ACE9AFC1D4EEC44A4EF4A40BB089DEFED5FE316AF1A3332FDFA9AEBC5D.mp3'),
-    perion: new Audio('https://sounds.larry.science/sounds/6B63051503801E464904D8B3EC5CD42231F212DFF76ABCAF807F0BCFE2D35591.mp3'),
+    stonepeak: new Audio('https://sounds.larry.science/sounds/6B63051503801E464904D8B3EC5CD42231F212DFF76ABCAF807F0BCFE2D35591.mp3'),
     nautilus: new Audio('https://sounds.larry.science/sounds/177419B9699093AD86C37583B6BB8F6064E78D5047BAAF00E4E79671B404F433.mp3'),
     florinaBeach: new Audio('https://sounds.larry.science/sounds/D00F1250B5F784770982A7BC21AF2B9A21A158BE86A3E5A14632F3B1BCF78005.mp3'),
     elnath: new Audio('https://sounds.larry.science/sounds/07C105FFDD0031B40E88FBD97E325C72E32631341B3D690D53A10DBDDD9BFB78.mp3'),
@@ -42,7 +42,7 @@ const audioAssets = {
     title: new Audio('https://sounds.larry.science/sounds/0328D1FFDFF102AC30F19ADE2150B94DA03A4992FD4C41E3EC1016D8AB82CE48.mp3'),
     huntingground: new Audio('https://sounds.larry.science/sounds/FFB07F5DB2DC5F4548B3167D7AF31952371B04E8C43C6D9F226CD2827755158A.mp3'),
     dewdropIsland: new Audio('https://sounds.larry.science/sounds/133EFD1A12206A0C20CD37C57E12FC23BD4AB93978F3C3A55D39C24CD8F67ADB.mp3'),
-    ludibrium: new Audio('https://sounds.larry.science/sounds/0C5294D90A8A3B309010F464B892ACE910C23CEE3ADA6134D5CE5BBBD1291958.mp3'),
+    skypalace: new Audio('https://sounds.larry.science/sounds/0C5294D90A8A3B309010F464B892ACE910C23CEE3ADA6134D5CE5BBBD1291958.mp3'),
     clockTower: new Audio('https://sounds.larry.science/sounds/36A61226E9B3F319E32C52302EFC8B8DB744DA2C3C68D106E25CD5EFC49A986F.mp3'),
     deepClocktower: new Audio('https://sounds.larry.science/sounds/9B7C0F5EDE2DF4D0904039FAEF37A91AA7395C052113871B8FF8D7254D349AA3.mp3'),
 };
@@ -50,7 +50,7 @@ const audioAssets = {
 // Pre-configure all audio elements for volume and looping
 for (const key in audioAssets) {
     audioAssets[key].volume = 0.5; // Set a default volume
-    if (['title', 'henesys', 'huntingground', 'kerningCity', 'hauntedMansion', 'perion', 'nautilus', 'florinaBeach', 'elnath', 'iceValley', 'dewdropIsland', 'ludibrium', 'clockTower', 'deepClocktower'].includes(key)) {
+    if (['title', 'ironhaven', 'huntingground', 'onyxCity', 'hauntedMansion', 'stonepeak', 'nautilus', 'florinaBeach', 'elnath', 'iceValley', 'dewdropIsland', 'skypalace', 'clockTower', 'deepClocktower'].includes(key)) {
         audioAssets[key].loop = true; // Make sure BGM tracks loop
         audioAssets[key].volume = 0.3; // BGM should be quieter
     }
@@ -181,7 +181,7 @@ function applyAudioSettings() {
     const finalSfxVolume = convertVolume(sfxVolume);
 
     for (const key in audioAssets) {
-        if (['title', 'henesys', 'huntingground', 'kerningCity', 'hauntedMansion', 'perion', 'nautilus', 'florinaBeach', 'elnath', 'iceValley', 'dewdropIsland', 'ludibrium', 'clockTower', 'deepClocktower'].includes(key)) {
+        if (['title', 'ironhaven', 'huntingground', 'onyxCity', 'hauntedMansion', 'stonepeak', 'nautilus', 'florinaBeach', 'elnath', 'iceValley', 'dewdropIsland', 'skypalace', 'clockTower', 'deepClocktower'].includes(key)) {
             audioAssets[key].volume = finalBgmVolume;
         } else {
             audioAssets[key].volume = finalSfxVolume;

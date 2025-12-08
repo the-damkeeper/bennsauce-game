@@ -117,7 +117,7 @@ let sceneryObjects = [];
 let clouds = [];
 
 let keys = {}; // Object to track currently pressed keys
-let currentMapId = 'henesys';
+let currentMapId = 'ironhaven';
 let gameLoopId;
 let isGameActive = false;
 
@@ -708,7 +708,7 @@ function startGame(isNewCharacter = false) {
         delete player.activePet.imageElement;
     }
 
-    changeMap(player.currentMapId || 'henesys', player.x, player.y);
+    changeMap(player.currentMapId || 'ironhaven', player.x, player.y);
 
     updateUI();
     updateSkillHotbarUI();
@@ -1741,7 +1741,7 @@ function handleGMCommand(command) {
                 fadeAndChangeMap(foundMap, spawn.x, spawn.y);
                 addChatMessage(`Teleported to ${foundMap}`, 'legendary');
             } else {
-                addChatMessage('Map not found! Try: henesys, perion, ellinia, etc.', 'error');
+                addChatMessage('Map not found! Try: ironhaven, stonepeak, woodbrook, etc.', 'error');
             }
             break;
             
@@ -1862,7 +1862,7 @@ function updateCamera() {
     // Vertical camera logic
     let targetCameraY;
     
-    if (currentMapId === 'kerningCityJumpQuest' || currentMapId === 'ludibriumJumpQuest') {
+    if (currentMapId === 'onyxCityJumpQuest' || currentMapId === 'skypalaceJumpQuest') {
         // Jump quest: Always center player perfectly on screen
         targetCameraY = player.y - (scalingContainer.clientHeight / 2);
         // Use normal easing for smooth movement
@@ -2496,10 +2496,11 @@ function spawnMonster(monsterType) {
     }
 
     // Use the robust logic from monsters.js to build a fresh list of all spawnable surfaces.
+    // scaledTileSize is already declared above as 16 * PIXEL_ART_SCALE (= 48)
     const allSpawnSurfaces = [
         { x: 0, y: baseGroundY, width: map.width, isGround: true }, // Ground
-        ...(map.platforms || []).map(p => ({ ...p, y: p.y + GROUND_LEVEL_OFFSET })), // Correctly mapped platforms
-        ...(map.structures || []).map(s => ({ ...s, y: s.y + GROUND_LEVEL_OFFSET })) // Correctly mapped structures
+        ...(map.platforms || []).map(p => ({ ...p, y: p.y + GROUND_LEVEL_OFFSET, height: p.height || 20 })), // Correctly mapped platforms
+        ...(map.structures || []).map(s => ({ ...s, y: s.y + GROUND_LEVEL_OFFSET, height: scaledTileSize })) // Correctly mapped structures with proper height (one tile = 48px)
     ];
 
     const MIN_SPAWN_WIDTH = 150; // A minimum width for a platform to be considered for spawning.
@@ -2572,9 +2573,9 @@ function changeMap(mapId, spawnX, spawnY) {
     }
     player.discoveredMaps.add(mapId);
     
-    // Check for Ludibrium Pioneer medal (first to enter Ludibrium)
-    if ((mapId.startsWith('ludibrium') || mapId.startsWith('toyFactory') || mapId.startsWith('clockTower') || mapId.startsWith('deepLudibrium') || mapId.startsWith('ominousTower')) && typeof checkLudibriumMedals === 'function') {
-        checkLudibriumMedals('enter_Ludibrium');
+    // Check for Sky Palace Pioneer medal (first to enter Sky Palace)
+    if ((mapId.startsWith('skypalace') || mapId.startsWith('toyFactory') || mapId.startsWith('clockTower') || mapId.startsWith('deepskyPalace') || mapId.startsWith('ominousTower')) && typeof checkskyPalaceMedals === 'function') {
+        checkskyPalaceMedals('enter_skyPalace');
     }
 
     [...worldContent.querySelectorAll('.monster, .item-drop, .portal, .parallax-bg, .npc, .projectile, .platform, .attack-box, .portal-label, .ladder, .debug-hitbox, .scenery, .cloud, .ghost-player, .remote-player')].forEach(el => {
@@ -2620,7 +2621,7 @@ function changeMap(mapId, spawnX, spawnY) {
 
     groundElement.style.display = 'block';
 
-    if (currentMapId === 'kerningCityJumpQuest') {
+    if (currentMapId === 'onyxCityJumpQuest') {
         player.speed = 3.0;
         player.jumpForce = -11;
     } else {
@@ -2784,7 +2785,7 @@ function changeMap(mapId, spawnX, spawnY) {
 
     cameraX = player.x - (scalingContainer.clientWidth / 2);
 
-    if (currentMapId === 'kerningCityJumpQuest') {
+    if (currentMapId === 'onyxCityJumpQuest') {
         cameraY = player.y - (scalingContainer.clientHeight / 2);
     } else {
         const mapHeight = map.height || scalingContainer.clientHeight;
@@ -3344,7 +3345,7 @@ function createNpc(type, x, y) {
         el.style.backgroundSize = `${sheetWidth}px ${sData.frameHeight * PIXEL_ART_SCALE}px`;
     } else {
         // SVG-based NPCs (fallback for special NPCs like prizeBox)
-        if (type === 'prizeBox' || type === 'LudibriumPrizeBox') {
+        if (type === 'prizeBox' || type === 'skyPalacePrizeBox') {
             npcWidth = 50;
             npcHeight = 50;
         }
@@ -4854,9 +4855,9 @@ function checkCollisions() {
                         checkAllBossesKilledMedal();
                     }
                     
-                    // Check for Alishar kill (special Ludibrium medal)
-                    if (m.type === 'alishar' && typeof checkLudibriumMedals === 'function') {
-                        checkLudibriumMedals('kill_alishar');
+                    // Check for Alishar kill (special Sky Palace medal)
+                    if (m.type === 'alishar' && typeof checkskyPalaceMedals === 'function') {
+                        checkskyPalaceMedals('kill_alishar');
                     }
                     
                     // Check total kill achievements
@@ -6047,8 +6048,8 @@ document.addEventListener('keydown', (e) => {
                         let defaultRegion = 'victoria';
                         if (player.currentMapId.startsWith('dewdrop')) {
                             defaultRegion = 'dewdrop';
-                        } else if (player.currentMapId.startsWith('ludibrium') || player.currentMapId.startsWith('toyFactory') || player.currentMapId.startsWith('clockTower') || player.currentMapId.startsWith('deepLudibrium') || player.currentMapId.startsWith('ominousTower')) {
-                            defaultRegion = 'ludibrium';
+                        } else if (player.currentMapId.startsWith('skypalace') || player.currentMapId.startsWith('toyFactory') || player.currentMapId.startsWith('clockTower') || player.currentMapId.startsWith('deepskyPalace') || player.currentMapId.startsWith('ominousTower')) {
+                            defaultRegion = 'skypalace';
                         }
                         toggleWindow(worldMapWindow, () => {
                             initWorldMapTabs();

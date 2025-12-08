@@ -1310,7 +1310,7 @@ const itemData = {
     'Enhancement Scroll': { category: 'Etc', description: "A mysterious scroll that can enhance equipment.", cost: 1000 },
     'Coconut': { category: 'Etc', description: "A hard coconut. It feels like a rock.", cost: 40 },
     'Gachapon Ticket': { category: 'Etc', description: "A ticket for a chance at a wonderful prize.", cost: 0 },
-    'Jump Quest Champion Badge': { category: 'Etc', description: "A badge proving you completed the Kerning City Jump Quest.", cost: 0, rarity: 'legendary' },
+    'Jump Quest Champion Badge': { category: 'Etc', description: "A badge proving you completed the Onyx City Jump Quest.", cost: 0, rarity: 'legendary' },
     'Stick': { category: 'Etc', description: "A simple wooden stick. Could be used for crafting.", cost: 20 },
     'Wooden Axe': { category: 'Etc', description: "A basic woodcutting axe.", cost: 60 },
     
@@ -1342,7 +1342,7 @@ const itemData = {
     'Thick Salami Stick': { type: 'weapon', category: 'Cosmetic', zLevel: 11, zLevelOverrides: { climb: 13 }, description: "A mighty weapon crafted from the finest salami. Smells delicious!" },
     'Salami Slice Badge': { type: 'pendant', category: 'Equip', zLevel: 6, stats: { hp: 75, mp: 50, str: 8, dex: 8, int: 8, luk: 8, critChance: 10 }, variance: 3, levelReq: 25, cost: 0, canEnhance: false, rarity: 'legendary', description: "A legendary badge made from a perfect slice of salami. A symbol of the Salami Celebration!" },
     
-    // Ludibrium ITEMS
+    // Sky Palace ITEMS
     // Weapons
     'Block Golem Blade': { type: 'weapon', category: 'Equip', zLevel: 11, zLevelOverrides: { climb: 13 }, classReq: ['warrior', 'fighter', 'spearman'], stats: { attack: 45, accuracy: 8, str: 15, dex: 10 }, variance: 8, levelReq: 40, cost: 100000, description: "A blade forged in the gears of the Clock Tower. Pulses with clockwork energy." },
     'Clockwork Staff': { type: 'weapon', category: 'Equip', zLevel: 11, zLevelOverrides: { climb: 13 }, classReq: ['magician', 'wizard', 'cleric'], stats: { attack: 45, accuracy: 10, mp: 150, int: 18 }, variance: 8, levelReq: 40, cost: 100000, description: "A staff infused with the essence of Ratz." },
@@ -1358,11 +1358,11 @@ const itemData = {
     'Alishar\'s Cannon': { type: 'weapon', category: 'Equip', zLevel: 11, zLevelOverrides: { climb: 13 }, classReq: ['pirate', 'brawler', 'gunslinger'], stats: { attack: 80, accuracy: 18, str: 20, dex: 25, critChance: 8 }, variance: 10, levelReq: 70, cost: 0, canEnhance: false, rarity: 'legendary', description: "Alishar's personal firearm. Shoots clockwork gears at incredible speed." },
     
     // Helmets
-    'Block Golem Helm': { type: 'helmet', category: 'Equip', zLevel: 9, stats: { defense: 20, hp: 200, str: 8, dex: 8, int: 8, luk: 8 }, variance: 4, levelReq: 35, cost: 50000, hidesHair: true, description: "A helm worn by the Block Golems of Ludibrium." },
+    'Block Golem Helm': { type: 'helmet', category: 'Equip', zLevel: 9, stats: { defense: 20, hp: 200, str: 8, dex: 8, int: 8, luk: 8 }, variance: 4, levelReq: 35, cost: 50000, hidesHair: true, description: "A helm worn by the Block Golems of Sky Palace." },
     'Clockwork Hood': { type: 'helmet', category: 'Equip', zLevel: 9, stats: { defense: 25, hp: 300, mp: 150, str: 10, dex: 10, int: 10, luk: 10, avoidability: 5 }, variance: 5, levelReq: 50, cost: 80000, hidesHair: true, description: "A hood that enhances clockwork mechanisms." },
-    'Alishar Crown': { type: 'helmet', category: 'Equip', zLevel: 9, stats: { attack: 15, defense: 40, hp: 500, mp: 300, str: 20, dex: 20, int: 20, luk: 20, critChance: 10 }, variance: 5, levelReq: 80, cost: 0, canEnhance: false, rarity: 'legendary', hidesHair: true, description: "The crown of Alishar himself. Grants dominion over Ludibrium's toys." },
+    'Alishar Crown': { type: 'helmet', category: 'Equip', zLevel: 9, stats: { attack: 15, defense: 40, hp: 500, mp: 300, str: 20, dex: 20, int: 20, luk: 20, critChance: 10 }, variance: 5, levelReq: 80, cost: 0, canEnhance: false, rarity: 'legendary', hidesHair: true, description: "The crown of Alishar himself. Grants dominion over Sky Palace's toys." },
     'Legendary Hero Crown': { type: 'helmet', category: 'Equip', zLevel: 9, stats: { attack: 20, defense: 50, hp: 600, mp: 400, str: 25, dex: 25, int: 25, luk: 25, critChance: 15, critDamage: 10 }, variance: 0, levelReq: 100, cost: 0, canEnhance: false, rarity: 'legendary', hidesHair: true, description: "A crown worn only by those who reach the pinnacle of power." },
-    'Ludibrium Champion Crown': { type: 'helmet', category: 'Equip', zLevel: 9, stats: { attack: 25, defense: 60, hp: 700, mp: 500, str: 30, dex: 30, int: 30, luk: 30, critChance: 15, critDamage: 15 }, variance: 0, levelReq: 85, cost: 0, canEnhance: false, rarity: 'legendary', hidesHair: true, description: "The ultimate crown for those who conquered all of Ludibrium." },
+    'Sky Palace Champion Crown': { type: 'helmet', category: 'Equip', zLevel: 9, stats: { attack: 25, defense: 60, hp: 700, mp: 500, str: 30, dex: 30, int: 30, luk: 30, critChance: 15, critDamage: 15 }, variance: 0, levelReq: 85, cost: 0, canEnhance: false, rarity: 'legendary', hidesHair: true, description: "The ultimate crown for those who conquered all of Sky Palace." },
     
     // Capes
     'Toy Cape': { type: 'cape', category: 'Equip', zLevel: 0, zLevelOverrides: { climb: 12 }, stats: { attack: 5, defense: 15, avoidability: 10, str: 8, dex: 8, int: 8, luk: 8 }, variance: 4, levelReq: 45, cost: 60000, description: "A cloak made from enchanted fabric. Enhances stealth and agility." },
@@ -1375,7 +1375,7 @@ const itemData = {
     'Teddy Earrings': { type: 'earring', category: 'Equip', zLevel: 7, stats: { accuracy: 10, defense: 20, hp: 100, mp: 100, str: 10, dex: 10, int: 10, luk: 10 }, variance: 3, levelReq: 60, cost: 0, canEnhance: false, rarity: 'rare', description: "Earrings that hum with clockwork magic." },
     
     // Badges & Medals
-    'Ludi Master Badge': { type: 'pendant', category: 'Equip', zLevel: 6, stats: { attack: 12, accuracy: 15, str: 18, dex: 18, int: 18, luk: 18, critChance: 8 }, variance: 0, levelReq: 60, cost: 0, canEnhance: false, rarity: 'legendary', description: "A badge awarded to those who complete all Ludibrium quests." },
+    'Ludi Master Badge': { type: 'pendant', category: 'Equip', zLevel: 6, stats: { attack: 12, accuracy: 15, str: 18, dex: 18, int: 18, luk: 18, critChance: 8 }, variance: 0, levelReq: 60, cost: 0, canEnhance: false, rarity: 'legendary', description: "A badge awarded to those who complete all Sky Palace quests." },
     'Toy Master Badge': { type: 'pendant', category: 'Equip', zLevel: 6, stats: { attack: 20, accuracy: 20, str: 25, dex: 25, int: 25, luk: 25, critChance: 12, critDamage: 10 }, variance: 0, levelReq: 85, cost: 0, canEnhance: false, rarity: 'legendary', description: "A badge worn only by those who have defeated Alishar five times." },
     
     // Consumables
@@ -1432,7 +1432,7 @@ const skillData = {
                 { mpCost: 20, duration: 10000, effect: { speed: 3 }, desc: 'Temporarily increases movement speed by +3.' },
             ]
         }
-        // Flash Jump is now unlocked exclusively by completing the Kerning City Jump Quest
+        // Flash Jump is now unlocked exclusively by completing the Onyx City Jump Quest
     ],
     warrior: [
         {
@@ -2806,9 +2806,9 @@ const questData = {
         npcId: "captainBoris",
         levelReq: 6,
         prerequisite: 'equipmentBasics',
-        startText: "You've proven yourself, adventurer! You've completed all the challenges Dewdrop Island has to offer. I can take you to <b>Henesys</b>, where greater adventures await. Once you arrive, find <b>Mayor Stan</b> in the town center - he'll welcome you properly. But remember, once you leave Dewdrop Island, you can never return. Are you ready to board my ship?",
-        inProgressText: "I've taken you to Henesys! Go find Mayor Stan in the town center and talk to him to complete your journey.",
-        completeText: "Welcome to Henesys, brave adventurer! I've heard of your heroic deeds on Dewdrop Island. You're ready for the wider world now. Good luck on your journey!",
+        startText: "You've proven yourself, adventurer! You've completed all the challenges Dewdrop Island has to offer. I can take you to <b>Iron Haven</b>, where greater adventures await. Once you arrive, find <b>Mayor Stan</b> in the town center - he'll welcome you properly. But remember, once you leave Dewdrop Island, you can never return. Are you ready to board my ship?",
+        inProgressText: "I've taken you to Iron Haven! Go find Mayor Stan in the town center and talk to him to complete your journey.",
+        completeText: "Welcome to Iron Haven, brave adventurer! I've heard of your heroic deeds on Dewdrop Island. You're ready for the wider world now. Good luck on your journey!",
         objective: { type: 'talk' },
         completionNpcId: 'mayorStan',
         reward: { exp: 500, gold: 500 }
@@ -2850,7 +2850,7 @@ const questData = {
         title: "Mushroom Cleanup",
         npcId: "poeBlacksmith",
         levelReq: 5,
-        startText: "Those <b>Orange Mushrooms</b> in Kerning are a real nuisance. Take out <b>8</b> of them and I'll make it worth your while.",
+        startText: "Those <b>Orange Mushrooms</b> in Onyx are a real nuisance. Take out <b>8</b> of them and I'll make it worth your while.",
         inProgressText: "Still some mushrooms to squash. Get to it!",
         completeText: "Nice one! That'll teach 'em. Here's something for your trouble.",
         objective: { type: 'kill', target: 'orangeMushroom', count: 8 },
@@ -2862,7 +2862,7 @@ const questData = {
         levelReq: 12,
         startText: "The <b>Stumps</b> are becoming a menace to our town. Please, thin their numbers. Defeat <b>15</b> of them.",
         inProgressText: "The stumps are still a threat. We need your help.",
-        completeText: "Thank you, warrior. You have the gratitude of Perion. Please take this pendant as a symbol of our friendship.",
+        completeText: "Thank you, warrior. You have the gratitude of Stone Peak. Please take this pendant as a symbol of our friendship.",
         objective: {
             type: 'killMultiple', targets: [
                 { monster: 'stump', count: 10 },
@@ -2958,7 +2958,7 @@ const questData = {
         npcId: "mayorStan",
         levelReq: 10,
         prerequisite: 'slimeInvestigation1',
-        startText: "Your reports on the Red Slimes are concerning. I've heard rumors of an even tougher variant in the subway tunnels near Kerning City. Please, go investigate and defeat <b>15 Blue Slimes</b>.",
+        startText: "Your reports on the Red Slimes are concerning. I've heard rumors of an even tougher variant in the subway tunnels near Onyx City. Please, go investigate and defeat <b>15 Blue Slimes</b>.",
         inProgressText: "The Blue Slimes in the subway are still causing trouble. Keep up the good work.",
         completeText: "Impressive! You've taken care of the Blue Slimes. You're becoming quite the expert on slime extermination.",
         objective: { type: 'kill', target: 'blueSlime', count: 15 },
@@ -3074,7 +3074,7 @@ const questData = {
         title: "Ascending the Mountain",
         npcId: "chiefStan",
         levelReq: 21,
-        startText: "You've proven yourself a capable warrior! I have a new challenge for you. The mountains of Perion are home to fierce <b>Hectors</b>. These stone-skinned beasts are tough. Defeat <b>20 Hectors</b> to prove your mettle!",
+        startText: "You've proven yourself a capable warrior! I have a new challenge for you. The mountains of Stone Peak are home to fierce <b>Hectors</b>. These stone-skinned beasts are tough. Defeat <b>20 Hectors</b> to prove your mettle!",
         inProgressText: "Hectors are not to be underestimated. Their hide is like armor!",
         completeText: "Incredible! You've bested the Hectors. Your strength is legendary!",
         objective: { type: 'kill', target: 'hector', count: 20 },
@@ -3085,9 +3085,9 @@ const questData = {
         npcId: "chiefStan",
         prerequisite: 'mountainClimber',
         levelReq: 23,
-        startText: "Beyond Perion lies El Nath, a frozen land of eternal winter. The <b>Jr. Yetis</b> there have been raiding our supply routes. Travel to El Nath and defeat <b>25 Jr. Yetis</b> to secure our trade!",
+        startText: "Beyond Stone Peak lies El Nath, a frozen land of eternal winter. The <b>Jr. Yetis</b> there have been raiding our supply routes. Travel to El Nath and defeat <b>25 Jr. Yetis</b> to secure our trade!",
         inProgressText: "The cold is bitter in El Nath. Stay warm and stay alert!",
-        completeText: "You've done it! Our traders can travel safely once more. Perion is in your debt!",
+        completeText: "You've done it! Our traders can travel safely once more. Stone Peak is in your debt!",
         objective: { type: 'kill', target: 'jrYeti', count: 25 },
         reward: { exp: 3500, gold: 2800, items: [{ name: 'Red Potion', quantity: 15 }, { name: 'Blue Potion', quantity: 15 }] }
     },
@@ -3175,13 +3175,13 @@ const questData = {
         reward: { exp: 5000, gold: 4000, items: [{ name: 'Enhancement Scroll', quantity: 5 }, { name: 'Red Potion', quantity: 20 }, { name: 'Blue Potion', quantity: 20 }] }
     },
     
-    // === Ludibrium QUEST CHAINS ===
+    // === Sky Palace QUEST CHAINS ===
     // Quest Chain 1: Ludi the Guide's Introduction (Starting area)
-    'LudibriumWelcome': {
-        title: "Welcome to Ludibrium",
-        npcId: "ludibriumGuide",
+    'skyPalaceWelcome': {
+        title: "Welcome to Sky Palace",
+        npcId: "skypalaceGuide",
         levelReq: 30,
-        startText: "Ah, a new arrival from Henesys! I am Ludi the Guide, guide to this colorful toy world. The Ludibrium was once a great clock tower, now overrun by malfunctioning toys. If you wish to prove your worth, defeat <b>15 Block Golems</b> in the Town Square.",
+        startText: "Ah, a new arrival from Iron Haven! I am Ludi the Guide, guide to this colorful toy world. The Sky Palace was once a great clock tower, now overrun by malfunctioning toys. If you wish to prove your worth, defeat <b>15 Block Golems</b> in the Town Square.",
         inProgressText: "The Block Golems roam the entrance. Steel yourself and strike them down!",
         completeText: "Impressive! You've proven you belong here. But stranger things await in the depths...",
         objective: { type: 'kill', target: 'blockGolem', count: 15 },
@@ -3189,9 +3189,9 @@ const questData = {
     },
     'toyTrouble': {
         title: "Toy Trouble",
-        npcId: "ludibriumGuide",
+        npcId: "skypalaceGuide",
         levelReq: 32,
-        prerequisite: 'LudibriumWelcome',
+        prerequisite: 'skyPalaceWelcome',
         startText: "The Ratz in the Halls are mischievous toy rats that have gone haywire. They were once harmless playthings! Put <b>20 Ratz</b> to rest.",
         inProgressText: "The Ratz are causing chaos everywhere. Continue your hunt in the Toy Halls!",
         completeText: "You've fixed those broken toys. The Clockmaker in the Clock Tower may have more wisdom to share.",
@@ -3200,7 +3200,7 @@ const questData = {
     },
     'toyArmyCommander': {
         title: "Toy Army Commander",
-        npcId: "ludibriumGuide",
+        npcId: "skypalaceGuide",
         levelReq: 35,
         prerequisite: 'toyTrouble',
         startText: "You've done well, adventurer. But now comes a true test. Deep in the Toy Citadel, the <b>King Block Golem</b> commands the rogue toy army. He must be destroyed to restore order!",
@@ -3209,9 +3209,9 @@ const questData = {
         objective: { type: 'kill', target: 'kingBlockGolem', count: 1 },
         reward: { exp: 25000, gold: 15000, items: [{ name: 'Enhancement Scroll', quantity: 3 }] }
     },
-    'LudibriumExplorer': {
-        title: "Ludibrium Explorer",
-        npcId: "ludibriumGuide",
+    'skyPalaceExplorer': {
+        title: "Sky Palace Explorer",
+        npcId: "skypalaceGuide",
         levelReq: 40,
         prerequisite: 'toyArmyCommander',
         startText: "You've proven yourself a worthy warrior. Now explore the depths of the Clock Tower. Defeat <b>10 Robos</b>, <b>15 Trixsters</b>, and <b>10 Platoon Chronos</b> to secure our foothold!",
@@ -3278,7 +3278,7 @@ const questData = {
         npcId: "mysteriousOracle",
         levelReq: 70,
         prerequisite: 'visionOfGears',
-        startText: "My final vision reveals the truth - Alishar draws power from the Death Teddies! These corrupted stuffed toys fuel his magic. Destroy <b>30 Death Teddies</b> to weaken his hold on Ludibrium!",
+        startText: "My final vision reveals the truth - Alishar draws power from the Death Teddies! These corrupted stuffed toys fuel his magic. Destroy <b>30 Death Teddies</b> to weaken his hold on Sky Palace!",
         inProgressText: "Each Death Teddy destroyed weakens Alishar's power!",
         completeText: "Alishar's grip weakens! Now, brave hero, you must face him yourself!",
         objective: { type: 'kill', target: 'deathTeddy', count: 30 },
@@ -3313,7 +3313,7 @@ const questData = {
         title: "Forge of Toys",
         npcId: "shadowSmith",
         levelReq: 45,
-        startText: "This forge was once used to craft the finest toys in all of Ludibrium. Now it's overrun with Bloctopuses! Clear out <b>25 Bloctopuses</b> so I can get back to work!",
+        startText: "This forge was once used to craft the finest toys in all of Sky Palace. Now it's overrun with Bloctopuses! Clear out <b>25 Bloctopuses</b> so I can get back to work!",
         inProgressText: "Those octopus toys are everywhere! Keep fighting!",
         completeText: "Finally, I can work in peace! As thanks, take these enhancement materials!",
         objective: { type: 'kill', target: 'bloctopus', count: 25 },
@@ -3408,7 +3408,7 @@ const questData = {
         npcId: "dyingSeer",
         levelReq: 75,
         startText: "I have seen the end... Alishar draws power from the Death Teddies - corrupted stuffed toys filled with dark magic. You must defeat <b>40 Death Teddies</b> to sever his connection to the chaos!",
-        inProgressText: "Each Death Teddy destroyed weakens Alishar's grip on Ludibrium!",
+        inProgressText: "Each Death Teddy destroyed weakens Alishar's grip on Sky Palace!",
         completeText: "Yes! I can feel his power waning! The final battle approaches!",
         objective: { type: 'kill', target: 'deathTeddy', count: 40 },
         reward: { exp: 90000, gold: 55000 }
@@ -3419,7 +3419,7 @@ const questData = {
         levelReq: 80,
         prerequisite: 'finalProphecy',
         startText: "The Thanatos must fall before you face Alishar! These massive clockwork reapers are his most powerful servants. Destroy <b>10 Thanatos</b> to clear your path to destiny!",
-        inProgressText: "The Thanatos of Ludibrium are relentless! Keep fighting!",
+        inProgressText: "The Thanatos of Sky Palace are relentless! Keep fighting!",
         completeText: "The clockwork reapers have fallen! Only Alishar remains!",
         objective: { type: 'kill', target: 'thanatos', count: 10 },
         reward: { exp: 100000, gold: 60000, items: [{ name: 'Enhancement Scroll', quantity: 10 }] }
@@ -3429,9 +3429,9 @@ const questData = {
         npcId: "dyingSeer",
         levelReq: 85,
         prerequisite: 'clockworkThreat',
-        startText: "The time has come... Face <b>Alishar</b> and end this nightmare! He is the mad toymaker who corrupted all of Ludibrium. Destroy him, and order may yet be restored to the Clock Tower!",
+        startText: "The time has come... Face <b>Alishar</b> and end this nightmare! He is the mad toymaker who corrupted all of Sky Palace. Destroy him, and order may yet be restored to the Clock Tower!",
         inProgressText: "Alishar awaits on his throne of gears! This is your destiny!",
-        completeText: "YOU HAVE DONE IT! ALISHAR HAS FALLEN! Peace returns to Ludibrium! The toys can be happy once more! You are a true legend!",
+        completeText: "YOU HAVE DONE IT! ALISHAR HAS FALLEN! Peace returns to Sky Palace! The toys can be happy once more! You are a true legend!",
         objective: { type: 'kill', target: 'alishar', count: 1 },
         reward: { exp: 200000, gold: 100000, items: [{ name: 'Alishar Crown', quantity: 1 }, { name: 'Gachapon Ticket', quantity: 10 }] }
     }
@@ -3475,28 +3475,28 @@ const npcData = {
         sprite: sprites.captainKyrin, // Reusing captain sprite
         attachmentPoints: { questIcon: { x: 1, y: -20 } },
         quests: ['departureQuest'],
-        transportToHenesys: true  // Special flag for one-way transport
+        transportToIronHaven: true  // Special flag for one-way transport
     },
     'captainBorisReturn': {
         name: "Captain Boris",
         sprite: sprites.captainKyrin, // Reusing captain sprite
         attachmentPoints: { questIcon: { x: 1, y: -20 } },
         transportToDewdrop: true,  // Special flag for return transport
-        transportToLudibrium: true  // Transport to Ludibrium (requires job advancement)
+        transportToskyPalace: true  // Transport to Sky Palace (requires job advancement)
     },
-    'captainBorisHenesysReturn': {
+    'captainBorisIron HavenReturn': {
         name: "Captain Boris",
         sprite: sprites.captainKyrin,
         attachmentPoints: { questIcon: { x: 1, y: -20 } },
-        transportFromLudibrium: true  // Return from Ludibrium to Henesys
+        transportFromskyPalace: true  // Return from Sky Palace to Iron Haven
     },
     
-    // === Ludibrium NPCs ===
-    'ludibriumGuide': {
+    // === Sky Palace NPCs ===
+    'skypalaceGuide': {
         name: "Ludi the Guide",
         sprite: sprites.chiefStan,
         attachmentPoints: { questIcon: { x: 1, y: -20 } },
-        quests: ['LudibriumWelcome', 'toyTrouble', 'toyArmyCommander', 'LudibriumExplorer']
+        quests: ['skyPalaceWelcome', 'toyTrouble', 'toyArmyCommander', 'skyPalaceExplorer']
     },
     'ludyMerchant': {
         name: "Shade Vendor",
@@ -3594,7 +3594,7 @@ const npcData = {
         name: "Mysterious Box",
         sprite: sprites.prizeBox
     },
-    'ludibriumPrizeBox': {
+    'skypalacePrizeBox': {
         name: "Toy Treasure Chest",
         sprite: sprites.prizeBox
     },
@@ -3745,7 +3745,7 @@ const npcAppearances = {
         }
     },
     'captainBorisReturn': {
-        // Same as Captain Boris - handles both Dewdrop and Ludibrium transport
+        // Same as Captain Boris - handles both Dewdrop and Sky Palace transport
         customization: { hairStyle: 7, hairColor: 0, eyeColor: 7, skinTone: 2 },
         equipped: {
             top: 'Red T-shirt',
@@ -3759,7 +3759,7 @@ const npcAppearances = {
             eye: 'Eye Patch'
         }
     },
-    'captainBorisHenesysReturn': {
+    'captainBorisIron HavenReturn': {
         customization: { hairStyle: 7, hairColor: 0, eyeColor: 7, skinTone: 2 },
         equipped: {
             top: 'Red T-shirt',
@@ -3774,8 +3774,8 @@ const npcAppearances = {
         }
     },
 
-    // === Ludibrium NPCs ===
-    'ludibriumGuide': {
+    // === Sky Palace NPCs ===
+    'skypalaceGuide': {
         // Ludi the Guide - dark armored guardian
         customization: { hairStyle: 2, hairColor: 0, eyeColor: 1, skinTone: 0 }, // Spiky black hair, red eyes
         equipped: {
@@ -4079,7 +4079,7 @@ const npcAppearances = {
     },
     // Special NPCs that keep their original sprites
     'prizeBox': null, // Keep as sprite
-    'ludibriumPrizeBox': null, // Keep as sprite
+    'skypalacePrizeBox': null, // Keep as sprite
     'gachaponMachine': null, // Keep as sprite
     'mrSalami': null // Keep as sprite
 };
@@ -4658,10 +4658,10 @@ const maps = {
     },
     
     // === MAIN GAME MAPS ===
-    perion: {
+    stonepeak: {
         width: 1366,
         background: '#d3a682',
-        bgm: 'perion',
+        bgm: 'stonepeak',
         groundType: 'dirt',
         parallax: [
             {
@@ -4682,7 +4682,7 @@ const maps = {
         monsters: [],
         portals: [
             { x: 50, targetMap: 'elnath', targetX: 1900 },
-            { x: 1100, targetMap: 'perionTrail', targetX: 100 }],
+            { x: 1100, targetMap: 'stonepeakTrail', targetX: 100 }],
         platforms: [
             { x: 250, y: 528, width: 200 },
             { x: 750, y: 528, width: 200 },
@@ -4696,10 +4696,10 @@ const maps = {
 
         ]
     },
-    perionTrail: {
+    stonepeakTrail: {
         width: 2000,
         background: '#a17a5c',
-        bgm: 'perion',
+        bgm: 'stonepeak',
         groundType: 'dirt',
         parallax: [
             {
@@ -4721,7 +4721,7 @@ const maps = {
             { type: 'axeStump', count: 14 },
             { type: 'stumpy', count: 1 }],
         portals: [
-            { x: 50, targetMap: 'perion', targetX: 1100 },
+            { x: 50, targetMap: 'stonepeak', targetX: 1100 },
             { x: 1950, targetMap: 'westRockyMountain', targetX: 50 }],
         platforms: [
             { x: 200, y: 548, width: 300 },
@@ -4736,7 +4736,7 @@ const maps = {
     westRockyMountain: {
         width: 2200,
         background: '#b0a092',
-        bgm: 'perion',
+        bgm: 'stonepeak',
         groundType: 'dirt',
         parallax: [
             {
@@ -4759,8 +4759,8 @@ const maps = {
             { type: 'darkStump', count: 10 }
         ],
         portals: [
-            { x: 50, y: 300, targetMap: 'perionTrail', targetX: 1950 },
-            { x: 2100,targetMap: 'henesys', targetX: 100 }
+            { x: 50, y: 300, targetMap: 'stonepeakTrail', targetX: 1950 },
+            { x: 2100,targetMap: 'ironhaven', targetX: 100 }
         ],
         platforms: [
             { x: 1210, y: 425, width: 80, noSpawn: true },
@@ -4776,10 +4776,10 @@ const maps = {
             { x: 1300, y: 383, width: 1000, z: -1}
         ]
     },
-    henesys: {
+    ironhaven: {
         width: 2000,
         backgroundColor: '#3498db',
-        bgm: 'henesys',
+        bgm: 'ironhaven',
         groundType: 'grass',
         parallax: [
             {
@@ -4883,8 +4883,8 @@ const maps = {
         ],
         portals: [
             { x: 1200, y: 330, targetMap: 'slimeHuntingGround', targetX: 100 },
-            { x: 50, targetMap: 'henesys', targetX: 1900 },
-            { x: 2300, targetMap: 'kerningCity', targetX: 20 },
+            { x: 50, targetMap: 'ironhaven', targetX: 1900 },
+            { x: 2300, targetMap: 'onyxCity', targetX: 20 },
             { x: 1860, y: 250, targetMap: 'hiddenSlimeGlade', targetX: 100, isHidden: true }
         ],
     },
@@ -4933,10 +4933,10 @@ const maps = {
             { x: 150, y: 350, width: 200 }
         ]
     },
-    kerningCity: {
+    onyxCity: {
         width: 1600,
         background: '#6e5630ff',
-        bgm: 'kerningCity',
+        bgm: 'onyxCity',
         groundType: 'stone',
         ladders: [
             { x: 500, y1: 443, y2: 600, type: 'pipe' },
@@ -4949,7 +4949,7 @@ const maps = {
             { x: 50, targetMap: 'evergreenRoad', targetX: 400 },
             { x: 1500, targetMap: 'entranceToSubway', targetX: 100 },
             { x: 1100, y: 350, targetMap: 'sporeHillClearing', targetX: 100 },
-            { x: 350, y: 250, targetMap: 'kerningCityJumpQuest', targetX: 875, targetY: 7000 },
+            { x: 350, y: 250, targetMap: 'onyxCityJumpQuest', targetX: 875, targetY: 7000 },
             { x: 800, y: 518, targetMap: 'nautilus', targetX: 100 }],
         platforms: [
             { x: 200, y: 548, width: 300 },
@@ -4967,18 +4967,18 @@ const maps = {
             { x: 900, y: 350, width: 350, z: -1 },
         ]
     },
-    kerningCityJumpQuest: {
+    onyxCityJumpQuest: {
         width: 1366,
         height: 7200,
-        bgm: 'kerningCity',
+        bgm: 'onyxCity',
         groundType: 'stone',
         background: '#1a1a2d',
         npcs: [
             { type: 'prizeBox', x: 922, y: 1400, }
         ],
         portals: [
-            { x: 875, y: 6980, targetMap: 'kerningCity', targetX: 400, targetY: 400 },
-            { x: 100, y: 1800, targetMap: 'kerningCity', targetX: 400, targetY: 400 }
+            { x: 875, y: 6980, targetMap: 'onyxCity', targetX: 400, targetY: 400 },
+            { x: 100, y: 1800, targetMap: 'onyxCity', targetX: 400, targetY: 400 }
         ],
         platforms: [
             { x: 100, y: 6980, width: 150 }, { x: 250, y: 6920, width: 120 },
@@ -5037,13 +5037,13 @@ const maps = {
     entranceToSubway: {
         width: 1600,
         background: '#31312bff',
-        bgm: 'kerningCity',
+        bgm: 'onyxCity',
         groundType: 'stone',
         monsters: [
             { type: 'blueSlime', count: 12 }
         ],
         portals: [
-            { x: 50, targetMap: 'kerningCity', targetX: 1500 },
+            { x: 50, targetMap: 'onyxCity', targetX: 1500 },
             { x: 1550, targetMap: 'subwayTunnels', targetX: 100 }
         ],
         platforms: [
@@ -5057,7 +5057,7 @@ const maps = {
     subwayTunnels: {
         width: 1800,
         background: '#122523ff',
-        bgm: 'kerningCity',
+        bgm: 'onyxCity',
         groundType: 'stone',
         ladders: [
             { x: 1100, y1: 433, y2: 600, type: 'pipe' },
@@ -5088,7 +5088,7 @@ const maps = {
             { type: 'muirhat', x: 850 }],
         monsters: [],
         portals: [
-            { x: 50, targetMap: 'kerningCity', targetX: 800 },
+            { x: 50, targetMap: 'onyxCity', targetX: 800 },
             { x: 1150, targetMap: 'coconutBeach', targetX: 100 }],
         platforms: [
             { x: 200, y: 528, width: 200 },
@@ -5101,7 +5101,7 @@ const maps = {
     abandonedPlatform: {
         width: 1800,
         background: '#1a2a3a',
-        bgm: 'kerningCity',
+        bgm: 'onyxCity',
         groundType: 'stone',
         ladders: [
             { x: 500, y1: 543, y2: 600, type: 'pipe' },
@@ -5165,7 +5165,7 @@ const maps = {
             { type: 'orangeMushroom', count: 5 },
             { type: 'mushmom', count: 1 }],
         portals: [
-            { x: 50, targetMap: 'kerningCity', targetX: 1300 }],
+            { x: 50, targetMap: 'onyxCity', targetX: 1300 }],
         platforms: [
             { x: 300, y: 548, width: 400 },
             { x: 150, y: 468, width: 150 },
@@ -5226,7 +5226,7 @@ const maps = {
         monsters: [{ type: 'jrYeti', count: 10 }, { type: 'hector', count: 5 }],
         portals: [
             { x: 50, targetMap: 'coconutBeach', targetX: 1900 },
-            { x: 1950, targetMap: 'perion', targetX: 100 },
+            { x: 1950, targetMap: 'stonepeak', targetX: 100 },
             { x: 1000, targetMap: 'deadMine', targetX: 100 }
         ],
         platforms: [
@@ -5483,23 +5483,23 @@ const maps = {
         ]
     },
     
-    // === Ludibrium MAPS ===
+    // === Sky Palace MAPS ===
     // New world accessible after 2nd job advancement
     // A dark fortress filled with demonic creatures and ancient evil
-    ludibriumStation: {
+    skypalaceStation: {
         width: 2200,
         height: 1000,
         background: '#afefffff',
-        bgm: 'ludibrium',
+        bgm: 'skypalace',
         groundType: 'brick',
         npcs: [
-            { type: 'captainBorisHenesysReturn', x: 200 },
-            { type: 'ludibriumGuide', x: 600 },
+            { type: 'captainBorisIron HavenReturn', x: 200 },
+            { type: 'skypalaceGuide', x: 600 },
             { type: 'ludyMerchant', x: 1100 }
         ],
         monsters: [],
         portals: [
-            { x: 2100, y: 720, targetMap: 'ludibriumSquare', targetX: 100 }
+            { x: 2100, y: 720, targetMap: 'skypalaceSquare', targetX: 100 }
         ],
         ladders: [
             { x: 450, y1: 580, y2: 800, type: 'yellow'},
@@ -5531,11 +5531,11 @@ const maps = {
             { x: 1900, tiles: 2, width: 288 }
         ]
     },
-    ludibriumSquare: {
+    skypalaceSquare: {
         width: 2400,
         height: 1100,
         background: '#afefffff',
-        bgm: 'ludibrium',
+        bgm: 'skypalace',
         groundType: 'brick',
         npcs: [
             { type: 'toyMaker', x: 300 }
@@ -5544,7 +5544,7 @@ const maps = {
             { type: 'blockGolem', count: 16 }
         ],
         portals: [
-            { x: 50, targetMap: 'ludibriumStation', targetX: 2000 },
+            { x: 50, targetMap: 'skypalaceStation', targetX: 2000 },
             { x: 2300, targetMap: 'toyFactory1', targetX: 100 },
             { x: 1200, y: 180, targetMap: 'clockTower1', targetX: 100, isHidden: true }
         ],
@@ -5593,7 +5593,7 @@ const maps = {
             { type: 'tickTock', count: 16 }
         ],
         portals: [
-            { x: 600, y: 1780, targetMap: 'ludibriumSquare', targetX: 1100, targetY: 280 },
+            { x: 600, y: 1780, targetMap: 'skypalaceSquare', targetX: 1100, targetY: 280 },
             { x: 600, y: 200, targetMap: 'clockTower2', targetX: 300 }
         ],
         ladders: [
@@ -5661,7 +5661,7 @@ const maps = {
             { type: 'ratz', count: 12 }
         ],
         portals: [
-            { x: 50, targetMap: 'ludibriumSquare', targetX: 2200 },
+            { x: 50, targetMap: 'skypalaceSquare', targetX: 2200 },
             { x: 2500, targetMap: 'toyFactory2', targetX: 100 }
         ],
         ladders: [
@@ -5711,7 +5711,7 @@ const maps = {
         ],
         portals: [
             { x: 50, targetMap: 'toyFactory1', targetX: 2400 },
-            { x: 2700, targetMap: 'deepLudibrium1', targetX: 100 },
+            { x: 2700, targetMap: 'deepskyPalace1', targetX: 100 },
             { x: 1400, y: 150, targetMap: 'toyFactoryHidden', targetX: 100, isHidden: true }
         ],
         ladders: [
@@ -5790,7 +5790,7 @@ const maps = {
             { x: 1000, y: 280, width: 300 }
         ]
     },
-    deepLudibrium1: {
+    deepskyPalace1: {
         width: 2400,
         height: 1100,
         background: '#0d0d1a',
@@ -5802,7 +5802,7 @@ const maps = {
         ],
         portals: [
             { x: 50, targetMap: 'toyFactory2', targetX: 2600 },
-            { x: 2300, targetMap: 'deepLudibrium2', targetX: 100 }
+            { x: 2300, targetMap: 'deepskyPalace2', targetX: 100 }
         ],
         ladders: [
             { x: 400, y1: 600, y2: 900, type: 'purple' },
@@ -5838,7 +5838,7 @@ const maps = {
             { x: 1100, tiles: 3, width: 384 }
         ]
     },
-    deepLudibrium2: {
+    deepskyPalace2: {
         width: 2600,
         height: 1100,
         background: '#1a0a0a',
@@ -5852,8 +5852,8 @@ const maps = {
             { type: 'bloctopus', count: 12 }
         ],
         portals: [
-            { x: 50, targetMap: 'deepLudibrium1', targetX: 2200 },
-            { x: 2500, targetMap: 'deepLudibrium3', targetX: 100 }
+            { x: 50, targetMap: 'deepskyPalace1', targetX: 2200 },
+            { x: 2500, targetMap: 'deepskyPalace3', targetX: 100 }
         ],
         ladders: [
             { x: 500, y1: 600, y2: 900, type: 'yellow' },
@@ -5892,7 +5892,7 @@ const maps = {
             { x: 2000, tiles: 3, width: 384 }
         ]
     },
-    deepLudibrium3: {
+    deepskyPalace3: {
         width: 2200,
         height: 1200,
         background: '#0f0505',
@@ -5902,8 +5902,8 @@ const maps = {
             { type: 'kingBlockGolem', count: 1 }
         ],
         portals: [
-            { x: 50, targetMap: 'deepLudibrium2', targetX: 2400 },
-            { x: 2100, targetMap: 'deepLudibrium4', targetX: 100 }
+            { x: 50, targetMap: 'deepskyPalace2', targetX: 2400 },
+            { x: 2100, targetMap: 'deepskyPalace4', targetX: 100 }
         ],
         ladders: [
             { x: 350, y1: 700, y2: 1000, type: 'purple' },
@@ -5938,7 +5938,7 @@ const maps = {
             { x: 800, tiles: 4, width: 576 }
         ]
     },
-    deepLudibrium4: {
+    deepskyPalace4: {
         width: 2800,
         height: 1100,
         background: '#12121f',
@@ -5952,7 +5952,7 @@ const maps = {
             { type: 'platoon', count: 12 }
         ],
         portals: [
-            { x: 50, targetMap: 'deepLudibrium3', targetX: 2000 },
+            { x: 50, targetMap: 'deepskyPalace3', targetX: 2000 },
             { x: 2700, targetMap: 'ominousTower1', targetX: 100 }
         ],
         ladders: [
@@ -6003,9 +6003,9 @@ const maps = {
             { type: 'masterChronos', count: 12 }
         ],
         portals: [
-            { x: 50, targetMap: 'deepLudibrium4', targetX: 2600 },
+            { x: 50, targetMap: 'deepskyPalace4', targetX: 2600 },
             { x: 2500, targetMap: 'ominousTower2', targetX: 100 },
-            { x: 1300, y: 180, targetMap: 'ludibriumJumpQuest', targetX: 750, targetY: 14180, isHidden: true }
+            { x: 1300, y: 180, targetMap: 'skypalaceJumpQuest', targetX: 750, targetY: 14180, isHidden: true }
         ],
         ladders: [
             { x: 400, y1: 600, y2: 900, type: 'purple' },
@@ -6347,17 +6347,17 @@ const maps = {
         ]
     },
     
-    // === Ludibrium JUMP QUEST ===
-    // Twice the size of Kerning City Jump Quest (14400 vs 7200)
+    // === Sky Palace JUMP QUEST ===
+    // Twice the size of Onyx City Jump Quest (14400 vs 7200)
     // Rewards Flash Jump skill upon completion
-    ludibriumJumpQuest: {
+    skypalaceJumpQuest: {
         width: 1500,
         height: 14400,
         bgm: 'deepClocktower',
         groundType: 'darkBrick',
         background: '#050510',
         npcs: [
-            { type: 'ludibriumPrizeBox', x: 750, y: 800 }
+            { type: 'skypalacePrizeBox', x: 750, y: 800 }
         ],
         portals: [
             { x: 750, y: 14180, targetMap: 'ominousTower1', targetX: 1200, targetY: 520 },
@@ -6497,11 +6497,11 @@ const dewdropWorldMapLayout = {
     'dewdropDocks': { x: 50, y: 85 }
 };
 
-// Defines the initial positions of map nodes for the Ludibrium world map UI.
-const ludibriumWorldMapLayout = {
+// Defines the initial positions of map nodes for the Sky Palace world map UI.
+const skypalaceWorldMapLayout = {
     // Entry area
-    'ludibriumStation': { x: 10, y: 50 },
-    'ludibriumSquare': { x: 20, y: 50 },
+    'skypalaceStation': { x: 10, y: 50 },
+    'skypalaceSquare': { x: 20, y: 50 },
     // Hidden watchtower branch (goes up)
     'clockTower1': { x: 20, y: 35 },
     'clockTower2': { x: 20, y: 20 },
@@ -6511,12 +6511,12 @@ const ludibriumWorldMapLayout = {
     // hidden toy vault branch
     'toyFactoryHidden': { x: 40, y: 65 },
     // Continue main path
-    'deepLudibrium1': { x: 50, y: 50 },
-    'deepLudibrium2': { x: 60, y: 50 },
+    'deepskyPalace1': { x: 50, y: 50 },
+    'deepskyPalace2': { x: 60, y: 50 },
     // First mini-boss
-    'deepLudibrium3': { x: 70, y: 50 },
+    'deepskyPalace3': { x: 70, y: 50 },
     // Upper halls branch
-    'deepLudibrium4': { x: 75, y: 40 },
+    'deepskyPalace4': { x: 75, y: 40 },
     'ominousTower1': { x: 80, y: 35 },
     // Approach to throne
     'ominousTower2': { x: 85, y: 45 },
@@ -6530,21 +6530,21 @@ const ludibriumWorldMapLayout = {
     // Final boss
     'ominousTowerTop': { x: 95, y: 85 },
     // Jump Quest
-    'ludibriumJumpQuest': { x: 80, y: 25 }
+    'skypalaceJumpQuest': { x: 80, y: 25 }
 };
 
 // Defines the initial positions of map nodes for the main world map UI.
 const worldMapLayout = {
-    'kerningCityJumpQuest': { x: 90, y: 30 },
+    'onyxCityJumpQuest': { x: 90, y: 30 },
     'sporeHillClearing': { x: 75, y: 30 },
-    'perion': { x: 15, y: 50 },
-    'perionTrail': { x: 30, y: 50 },
+    'stonepeak': { x: 15, y: 50 },
+    'stonepeakTrail': { x: 30, y: 50 },
     'westRockyMountain': { x: 45, y: 50 },
-    'henesys': { x: 60, y: 50 },
+    'ironhaven': { x: 60, y: 50 },
     'evergreenRoad': { x: 75, y: 50 },
     'slimeHuntingGround': { x: 65, y: 50 },
     'hiddenSlimeGlade': { x: 55, y: 50 },
-    'kerningCity': { x: 90, y: 50 },
+    'onyxCity': { x: 90, y: 50 },
     'hauntedMansionFoyer': { x: 60, y: 70 },
     'golemsTemple': { x: 45, y: 70 },
     'entranceToSubway': { x: 90, y: 65 }, // Added the new map
@@ -6588,18 +6588,18 @@ const achievementData = {
     },
     completeJQ1: {
         title: "Master of Patience",
-        description: "Conquer the Kerning City Jump Quest.",
+        description: "Conquer the Onyx City Jump Quest.",
         tier: "gold",
         type: 'action',
         requirement: 'complete_jq',
         reward: { item: 'Red Potion', quantity: 25 }
     },
-    completeLudibriumJQ: {
+    completeskyPalaceJQ: {
         title: "Shadow Walker",
-        description: "Conquer the legendary Ludibrium Jump Quest - twice as tall as Kerning City!",
+        description: "Conquer the legendary Sky Palace Jump Quest - twice as tall as Onyx City!",
         tier: "diamond",
         type: 'action',
-        requirement: 'complete_Ludibrium_jq',
+        requirement: 'complete_sky_palace_jq',
         reward: { gold: 100000, item: 'Enhancement Scroll', quantity: 10 }
     },
     completeDewdropJQ: {
@@ -6646,10 +6646,10 @@ const achievementData = {
     survivalExpert: { title: "Survival Expert", description: "Use 100 potions.", tier: "bronze", type: 'action_accumulate', requirement: {action: 'potionsUsed', amount: 100 }, reward: { gold: 800 } },
     completionist: { title: "The Completionist", description: "Complete every quest and earn every achievement.", tier: "diamond", type: 'action', requirement: 'all_content', reward: { gold: 100000, item: 'Completionist Badge' } },
     
-    // === Ludibrium ACHIEVEMENTS ===
+    // === Sky Palace ACHIEVEMENTS ===
     // Exploration Achievements
-    LudibriumExplorer: { title: "Shadow Explorer", description: "Enter the Ludibrium for the first time.", tier: "bronze", type: 'map_visit', requirement: { map: 'ludibriumStation' }, reward: { gold: 2000 } },
-    LudibriumCartographer: { title: "Citadel Cartographer", description: "Discover all 15 maps in Ludibrium.", tier: "gold", type: 'action_accumulate', requirement: { action: 'Ludibrium_maps_discovered', amount: 15 }, reward: { gold: 25000, item: 'Enhancement Scroll', quantity: 5 } },
+    skyPalaceExplorer: { title: "Shadow Explorer", description: "Enter the Sky Palace for the first time.", tier: "bronze", type: 'map_visit', requirement: { map: 'skypalaceStation' }, reward: { gold: 2000 } },
+    skyPalaceCartographer: { title: "Citadel Cartographer", description: "Discover all 15 maps in Sky Palace.", tier: "gold", type: 'action_accumulate', requirement: { action: 'Sky Palace_maps_discovered', amount: 15 }, reward: { gold: 25000, item: 'Enhancement Scroll', quantity: 5 } },
     watchtowerClimber: { title: "Watchtower Climber", description: "Find and climb the hidden Watchtower.", tier: "silver", type: 'map_visit', requirement: { map: 'clockTower2' }, reward: { gold: 8000 } },
     secretTombFinder: { title: "Tomb Raider", description: "Discover the Secret Tomb in the Toy Factory.", tier: "silver", type: 'map_visit', requirement: { map: 'toyFactoryHidden' }, reward: { gold: 10000 } },
     
@@ -6681,17 +6681,17 @@ const achievementData = {
     
     // Level Achievements
     level60: { title: "Clockwork Warrior", description: "Reach Level 60.", tier: "diamond", type: 'level', requirement: 60, reward: { gold: 15000, item: 'Enhancement Scroll', quantity: 5 } },
-    level70: { title: "Ludibrium Champion", description: "Reach Level 70.", tier: "diamond", type: 'level', requirement: 70, reward: { gold: 30000, item: 'Enhancement Scroll', quantity: 8 } },
+    level70: { title: "Sky Palace Champion", description: "Reach Level 70.", tier: "diamond", type: 'level', requirement: 70, reward: { gold: 30000, item: 'Enhancement Scroll', quantity: 8 } },
     level80: { title: "Toy Walker", description: "Reach Level 80.", tier: "diamond", type: 'level', requirement: 80, reward: { gold: 50000, item: 'Gachapon Ticket', quantity: 5 } },
     level90: { title: "Alishar's Equal", description: "Reach Level 90.", tier: "diamond", type: 'level', requirement: 90, reward: { gold: 80000, item: 'Gachapon Ticket', quantity: 10 } },
     level100: { title: "Legendary Hero", description: "Reach Level 100.", tier: "diamond", type: 'level', requirement: 100, reward: { gold: 150000, item: 'Legendary Hero Crown' } },
     
     // Quest Achievements
-    LudibriumQuestMaster: { title: "Ludibrium Quest Master", description: "Complete all Ludibrium quests.", tier: "diamond", type: 'action', requirement: 'Ludibrium_all_quests', reward: { gold: 100000, item: 'Ludi Master Badge' } },
+    skyPalaceQuestMaster: { title: "Sky Palace Quest Master", description: "Complete all Sky Palace quests.", tier: "diamond", type: 'action', requirement: 'Sky Palace_all_quests', reward: { gold: 100000, item: 'Ludi Master Badge' } },
     
     // Special Achievements
-    LudibriumSpeedrun: { title: "Clockwork Speedster", description: "Reach Alishar's throne within 1 hour of entering Ludibrium.", tier: "gold", type: 'action', requirement: 'Ludibrium_speedrun', reward: { gold: 50000 } },
-    LudibriumCompletionist: { title: "Ludibrium Completionist", description: "Complete all Ludibrium content (quests, bosses, exploration).", tier: "diamond", type: 'action', requirement: 'Ludibrium_complete', reward: { gold: 200000, item: 'Ludibrium Champion Crown' } },
+    skyPalaceSpeedrun: { title: "Clockwork Speedster", description: "Reach Alishar's throne within 1 hour of entering Sky Palace.", tier: "gold", type: 'action', requirement: 'skyPalace_speedrun', reward: { gold: 50000 } },
+    skyPalaceCompletionist: { title: "Sky Palace Completionist", description: "Complete all Sky Palace content (quests, bosses, exploration).", tier: "diamond", type: 'action', requirement: 'skyPalace_complete', reward: { gold: 200000, item: 'Sky Palace Champion Crown' } },
     
     // === TRADING ACHIEVEMENTS ===
     firstTrade: { title: "Deal Maker", description: "Complete your first trade with another player.", tier: "bronze", type: 'action', requirement: 'first_trade', reward: { gold: 500 } },
@@ -6887,15 +6887,15 @@ const specialMedals = {
         stats: { str: 1, dex: 1, int: 1, luk: 1, jump: 3, speed: 3, avoidability: 3 }
     },
     
-    // === Ludibrium MEDALS ===
-    LudibriumPioneer: {
-        id: 'LudibriumPioneer',
-        name: 'Ludibrium Pioneer',
-        description: 'First player to enter the Ludibrium!',
+    // === Sky Palace MEDALS ===
+    skyPalacePioneer: {
+        id: 'skyPalacePioneer',
+        name: 'Sky Palace Pioneer',
+        description: 'First player to enter the Sky Palace!',
         icon: '⚔',
         tier: 'legendary',
         category: 'server',
-        requirement: { type: 'first_Ludibrium_entry' },
+        requirement: { type: 'first_Sky Palace_entry' },
         stats: { str: 8, dex: 8, int: 8, luk: 8, critChance: 3 }
     },
     firstalisharKiller: {
@@ -7038,14 +7038,14 @@ const specialMedals = {
         requirement: { type: 'kill_count', monster: 'alishar', count: 10 },
         stats: { str: 20, dex: 20, int: 20, luk: 20, critChance: 10, critDamage: 10, defense: 10 }
     },
-    LudibriumChampion: {
-        id: 'LudibriumChampion',
-        name: 'Ludibrium Champion',
-        description: 'Completed all Ludibrium content!',
+    skyPalaceChampion: {
+        id: 'skyPalaceChampion',
+        name: 'Sky Palace Champion',
+        description: 'Completed all Sky Palace content!',
         icon: '🏆',
         tier: 'legendary',
         category: 'local',
-        requirement: { type: 'Ludibrium_complete' },
+        requirement: { type: 'skyPalace_complete' },
         stats: { str: 25, dex: 25, int: 25, luk: 25, critChance: 10, critDamage: 10, defense: 15, speed: 5 }
     }
 };

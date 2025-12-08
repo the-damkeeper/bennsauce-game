@@ -1119,8 +1119,8 @@ class GamepadManager {
                         let defaultRegion = 'victoria';
                         if (player.currentMapId.startsWith('dewdrop')) {
                             defaultRegion = 'dewdrop';
-                        } else if (player.currentMapId.startsWith('ludibrium') || player.currentMapId.startsWith('toyFactory') || player.currentMapId.startsWith('clockTower') || player.currentMapId.startsWith('deepLudibrium') || player.currentMapId.startsWith('ominousTower')) {
-                            defaultRegion = 'ludibrium';
+                        } else if (player.currentMapId.startsWith('skypalace') || player.currentMapId.startsWith('toyFactory') || player.currentMapId.startsWith('clockTower') || player.currentMapId.startsWith('deepskyPalace') || player.currentMapId.startsWith('ominousTower')) {
+                            defaultRegion = 'skypalace';
                         }
                         toggleWindow(windowElement, () => {
                             initWorldMapTabs();

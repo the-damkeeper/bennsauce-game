@@ -3831,7 +3831,7 @@ function updateWorldMapUI(layout) {
     svg.setAttribute('id', 'world-map-connections');
     grid.appendChild(svg);
 
-    if (!player.discoveredMaps) player.discoveredMaps = new Set(['henesys']);
+    if (!player.discoveredMaps) player.discoveredMaps = new Set(['ironhaven']);
 
     for (const mapId in maps) {
         if (player.discoveredMaps.has(mapId) && maps[mapId].portals) {
@@ -4064,7 +4064,7 @@ let currentWorldMapRegion = 'victoria';
 
 /**
  * Check if a region is unlocked (player has discovered any map in that region)
- * @param {string} region - 'dewdrop', 'victoria', or 'ludibrium'
+ * @param {string} region - 'dewdrop', 'victoria', or 'skypalace'
  * @returns {boolean} Whether the region is unlocked
  */
 function isRegionUnlocked(region) {
@@ -4073,8 +4073,8 @@ function isRegionUnlocked(region) {
     // Check if player has discovered any map starting with the region prefix
     for (const mapId of player.discoveredMaps) {
         if (region === 'dewdrop' && mapId.startsWith('dewdrop')) return true;
-        if (region === 'ludibrium' && (mapId.startsWith('ludibrium') || mapId.startsWith('toyFactory') || mapId.startsWith('clockTower') || mapId.startsWith('deepLudibrium') || mapId.startsWith('ominousTower'))) return true;
-        if (region === 'victoria' && !mapId.startsWith('dewdrop') && !mapId.startsWith('ludibrium') && !mapId.startsWith('toyFactory') && !mapId.startsWith('clockTower') && !mapId.startsWith('deepLudibrium') && !mapId.startsWith('ominousTower')) return true;
+        if (region === 'skypalace' && (mapId.startsWith('skypalace') || mapId.startsWith('toyFactory') || mapId.startsWith('clockTower') || mapId.startsWith('deepskyPalace') || mapId.startsWith('ominousTower'))) return true;
+        if (region === 'victoria' && !mapId.startsWith('dewdrop') && !mapId.startsWith('skypalace') && !mapId.startsWith('toyFactory') && !mapId.startsWith('clockTower') && !mapId.startsWith('deepskyPalace') && !mapId.startsWith('ominousTower')) return true;
     }
     return false;
 }
@@ -4115,7 +4115,7 @@ function initWorldMapTabs() {
 
 /**
  * Switch to a different world map region tab
- * @param {string} region - 'dewdrop', 'victoria', or 'ludibrium'
+ * @param {string} region - 'dewdrop', 'victoria', or 'skypalace'
  */
 function switchWorldMapRegion(region) {
     currentWorldMapRegion = region;
@@ -4137,8 +4137,8 @@ function switchWorldMapRegion(region) {
         case 'dewdrop':
             mapLayout = dewdropWorldMapLayout;
             break;
-        case 'ludibrium':
-            mapLayout = ludibriumWorldMapLayout;
+        case 'skypalace':
+            mapLayout = skypalaceWorldMapLayout;
             break;
         case 'victoria':
         default:
@@ -4158,8 +4158,8 @@ function switchWorldMapRegion(region) {
 function getPlayerWorldMapRegion() {
     if (player.currentMapId.startsWith('dewdrop')) {
         return 'dewdrop';
-    } else if (player.currentMapId.startsWith('ludibrium') || player.currentMapId.startsWith('toyFactory') || player.currentMapId.startsWith('clockTower') || player.currentMapId.startsWith('deepLudibrium') || player.currentMapId.startsWith('ominousTower')) {
-        return 'ludibrium';
+    } else if (player.currentMapId.startsWith('skypalace') || player.currentMapId.startsWith('toyFactory') || player.currentMapId.startsWith('clockTower') || player.currentMapId.startsWith('deepskyPalace') || player.currentMapId.startsWith('ominousTower')) {
+        return 'skypalace';
     }
     return 'victoria';
 }
@@ -5368,8 +5368,8 @@ function createMedalEntry(medal, type, isEquipped, isLocked) {
             progress.textContent = `Awarded to the first 100 players who created a character!`;
         } else if (medal.requirement.type === 'manual') {
             progress.textContent = `Awarded during the beta testing period!`;
-        } else if (medal.requirement.type === 'first_Ludibrium_entry') {
-            progress.textContent = `Be the first player to enter Ludibrium!`;
+        } else if (medal.requirement.type === 'first_sky_palace_entry') {
+            progress.textContent = `Be the first player to enter Sky Palace!`;
         } else if (medal.requirement.type === 'first_alishar_kill') {
             progress.textContent = `Be the first player to defeat Alishar!`;
         } else if (medal.requirement.type === 'beta_participant') {
@@ -5570,13 +5570,13 @@ function checkSpecialMedalEarned(medal) {
             const totalNPCs = Object.keys(npcData || {}).length;
             return (player.stats?.talkedNPCs?.size || 0) >= totalNPCs;
         case 'all_jqs':
-            return player.stats?.jqsCompleted?.includes('kerning') && player.stats?.jqsCompleted?.includes('dewdrop');
+            return player.stats?.jqsCompleted?.includes('onyx') && player.stats?.jqsCompleted?.includes('dewdrop');
         case 'manual':
         case 'first_level':
         case 'first_all_bosses':
         case 'first_completionist':
         case 'first_players':
-        case 'first_Ludibrium_entry':
+        case 'first_sky_palace_entry':
         case 'first_alishar_kill':
             // These require server verification - check if already granted
             return player.specialMedals && player.specialMedals[medal.id];
@@ -9074,7 +9074,7 @@ function openDialogue(npc) {
         
         // Check if already claimed using a dedicated flag
         if (player.hasClaimedJumpQuestPrize) {
-            content.innerHTML = `<p>You've already received the rewards from this mysterious box.</p><p>Your Jump Quest Badge marks you as a skilled jumper!</p><p>Seek out the <strong>Ludibrium Jump Quest</strong> for the ultimate challenge - and the legendary Flash Jump skill!</p><button id="close-dialogue">Close</button>`;
+            content.innerHTML = `<p>You've already received the rewards from this mysterious box.</p><p>Your Jump Quest Badge marks you as a skilled jumper!</p><p>Seek out the <strong>Sky Palace Jump Quest</strong> for the ultimate challenge - and the legendary Flash Jump skill!</p><button id="close-dialogue">Close</button>`;
             document.getElementById('close-dialogue').addEventListener('click', () => toggleWindow(dialogueWindowElement));
         } else {
             // Give rewards
@@ -9101,7 +9101,7 @@ function openDialogue(npc) {
             
             content.innerHTML = `
                 <p><strong>🎊 Congratulations! 🎊</strong></p>
-                <p>You've conquered the Kerning City Jump Quest!</p>
+                <p>You've conquered the Onyx City Jump Quest!</p>
                 <br>
                 <p><strong>Rewards:</strong></p>
                 <p>✨ ${expReward.toLocaleString()} EXP</p>
@@ -9109,9 +9109,9 @@ function openDialogue(npc) {
                 <p>🏅 Jump Quest Badge</p>
                 <br>
                 <p>This badge marks you as a skilled jumper! But the true challenge awaits...</p>
-                <p><strong>Seek out the Ludibrium Jump Quest for the legendary Flash Jump skill!</strong></p>
+                <p><strong>Seek out the Sky Palace Jump Quest for the legendary Flash Jump skill!</strong></p>
                 <br>
-                <p>Use the portal to return to Kerning City whenever you're ready!</p>
+                <p>Use the portal to return to Onyx City whenever you're ready!</p>
                 <button id="close-dialogue">Awesome!</button>
             `;
             document.getElementById('close-dialogue').addEventListener('click', () => toggleWindow(dialogueWindowElement));
@@ -9124,19 +9124,19 @@ function openDialogue(npc) {
     }
     // --- END KERNING CITY PRIZE BOX ---
 
-    // --- Ludibrium JUMP QUEST PRIZE BOX ---
-    if (npc.id === 'LudibriumPrizeBox') {
+    // --- Sky Palace JUMP QUEST PRIZE BOX ---
+    if (npc.id === 'skyPalacePrizeBox') {
         const dialogueTitle = document.getElementById('dialogue-title');
         const content = document.getElementById('dialogue-content');
         dialogueTitle.textContent = npc.name;
         
         // Check if already claimed
-        if (player.hasClaimedLudibriumJQPrize) {
-            content.innerHTML = `<p>You've already claimed the ultimate prize from this ancient chest.</p><p>The power of Flash Jump flows through you!</p><p>Use the portal to return to Ludibrium whenever you're ready!</p><button id="close-dialogue">Close</button>`;
+        if (player.hasClaimedskyPalaceJQPrize) {
+            content.innerHTML = `<p>You've already claimed the ultimate prize from this ancient chest.</p><p>The power of Flash Jump flows through you!</p><p>Use the portal to return to Sky Palace whenever you're ready!</p><button id="close-dialogue">Close</button>`;
             document.getElementById('close-dialogue').addEventListener('click', () => toggleWindow(dialogueWindowElement));
         } else {
             // Give rewards
-            player.hasClaimedLudibriumJQPrize = true;
+            player.hasClaimedskyPalaceJQPrize = true;
             
             const expReward = 25000;
             const goldReward = 50000;
@@ -9160,16 +9160,16 @@ function openDialogue(npc) {
             addChatMessage('You received Shadow Veil Jump Badge!', 'quest-complete');
             showNotification('Received Shadow Veil Jump Badge', 'legendary');
             
-            // Update achievement for completing Ludibrium JQ
-            updateAchievementProgress('action', 'complete_Ludibrium_jq');
+            // Update achievement for completing Sky Palace JQ
+            updateAchievementProgress('action', 'complete_sky_palace_jq');
             
             // Show rewards
-            addChatMessage(`Ludibrium Jump Quest Complete! +${expReward.toLocaleString()} EXP`, 'quest-complete');
+            addChatMessage(`Sky Palace Jump Quest Complete! +${expReward.toLocaleString()} EXP`, 'quest-complete');
             addChatMessage(`Received ${goldReward.toLocaleString()} Gold`, 'quest-complete');
             
             content.innerHTML = `
                 <p><strong>🎊 LEGENDARY ACHIEVEMENT! 🎊</strong></p>
-                <p>You've conquered the legendary Ludibrium Jump Quest!</p>
+                <p>You've conquered the legendary Sky Palace Jump Quest!</p>
                 <p>The most treacherous climb in all of BennSauce!</p>
                 <br>
                 <p><strong>Rewards:</strong></p>
@@ -9181,7 +9181,7 @@ function openDialogue(npc) {
                 <p>You can now double jump in mid-air! Just press jump again while airborne.</p>
                 <p>Few have ever reached this height. You are truly a master of movement!</p>
                 <br>
-                <p>Use the portal to return to the Ludibrium!</p>
+                <p>Use the portal to return to the Sky Palace!</p>
                 <button id="close-dialogue">Legendary!</button>
             `;
             document.getElementById('close-dialogue').addEventListener('click', () => toggleWindow(dialogueWindowElement));
@@ -9194,7 +9194,7 @@ function openDialogue(npc) {
         toggleWindow(dialogueWindowElement);
         return; // End function for this special case
     }
-    // --- END Ludibrium PRIZE BOX ---
+    // --- END Sky Palace PRIZE BOX ---
 
     const dialogueTitle = document.getElementById('dialogue-title');
     const content = document.getElementById('dialogue-content');
@@ -9380,18 +9380,18 @@ function openDialogue(npc) {
         optionsHtml += `<button id="trade-salami-badge">Trade 500 Sticks for Badge</button>`;
     }
 
-    // Transport to Henesys (One-way from Dewdrop Island)
-    if (npc.transportToHenesys) {
+    // Transport to Iron Haven (One-way from Dewdrop Island)
+    if (npc.transportToIronHaven) {
         if (!hasSetPrimaryDialogue) {
             // Check if player completed the departure quest
             const hasCompletedIsland = player.quests.completed.includes('defeatKingCrab');
             if (hasCompletedIsland) {
-                dialogueText = `<p>"Ready to leave Dewdrop Island? I'll take you to Henesys, where greater adventures await! <strong>Warning:</strong> You can never return here once you leave."</p>`;
+                dialogueText = `<p>"Ready to leave Dewdrop Island? I'll take you to Iron Haven, where greater adventures await! <strong>Warning:</strong> You can never return here once you leave."</p>`;
             } else {
-                dialogueText = `<p>"I can take you to Henesys, but I recommend completing all the challenges here first. You won't be able to return!"</p>`;
+                dialogueText = `<p>"I can take you to Iron Haven, but I recommend completing all the challenges here first. You won't be able to return!"</p>`;
             }
         }
-        optionsHtml += `<button id="transport-henesys">Travel to Henesys</button>`;
+        optionsHtml += `<button id="transport-ironhaven">Travel to Iron Haven</button>`;
     }
 
     // Job Advancement Trial Retry
@@ -9416,29 +9416,29 @@ function openDialogue(npc) {
         optionsHtml += `<button id="transport-dewdrop">Travel to Dewdrop Island</button>`;
     }
 
-    // Transport to Ludibrium (requires 2nd job advancement)
-    if (npc.transportToLudibrium) {
+    // Transport to Sky Palace (requires 2nd job advancement)
+    if (npc.transportToskyPalace) {
         const secondJobClasses = ['fighter', 'spearman', 'cleric', 'wizard', 'hunter', 'crossbowman', 'assassin', 'bandit', 'brawler', 'gunslinger'];
         const hasJobAdvanced = secondJobClasses.includes(player.class);
         
         if (hasJobAdvanced) {
             if (!hasSetPrimaryDialogue) {
-                dialogueText = `<p>"Ahoy, brave ${capitalize(player.class)}! I've heard whispers of a dark fortress across the sea - the Ludibrium. Only those who have proven their worth through Job Advancement may venture there. Are you ready for the challenge?"</p>`;
+                dialogueText = `<p>"Ahoy, brave ${capitalize(player.class)}! I've heard whispers of a dark fortress across the sea - the Sky Palace. Only those who have proven their worth through Job Advancement may venture there. Are you ready for the challenge?"</p>`;
             }
-            optionsHtml += `<button id="transport-Ludibrium">Travel to Ludibrium</button>`;
+            optionsHtml += `<button id="transport-sky-palace">Travel to Sky Palace</button>`;
         } else {
             if (!hasSetPrimaryDialogue) {
-                dialogueText = `<p>"There's a dangerous place across the sea called Ludibrium... but it's too dangerous for someone at your level. Come back after you've completed your Job Advancement!"</p>`;
+                dialogueText = `<p>"There's a dangerous place across the sea called Sky Palace... but it's too dangerous for someone at your level. Come back after you've completed your Job Advancement!"</p>`;
             }
         }
     }
 
-    // Transport back from Ludibrium to Henesys
-    if (npc.transportFromLudibrium) {
+    // Transport back from Sky Palace to Iron Haven
+    if (npc.transportFromskyPalace) {
         if (!hasSetPrimaryDialogue) {
-            dialogueText = `<p>"Ready to head back to Henesys? The journey is long but safe. I'll have you there in no time!"</p>`;
+            dialogueText = `<p>"Ready to head back to Iron Haven? The journey is long but safe. I'll have you there in no time!"</p>`;
         }
-        optionsHtml += `<button id="transport-from-Ludibrium">Return to Henesys</button>`;
+        optionsHtml += `<button id="transport-from-sky-palace">Return to Iron Haven</button>`;
     }
 
     // --- Part 3: Render and add event listeners ---
@@ -9568,11 +9568,11 @@ function openDialogue(npc) {
             }
         });
         
-        document.getElementById('transport-henesys')?.addEventListener('click', () => {
-            // Transport to Henesys with confirmation
+        document.getElementById('transport-ironhaven')?.addEventListener('click', () => {
+            // Transport to Iron Haven with confirmation
             content.innerHTML = `
                 <p><strong>⚠ WARNING:</strong> Once you leave Dewdrop Island, you can NEVER return!</p>
-                <p>Are you absolutely sure you want to travel to Henesys?</p>
+                <p>Are you absolutely sure you want to travel to Iron Haven?</p>
                 <button id="confirm-transport">Yes, I'm Ready!</button>
                 <button id="close-dialogue">Not Yet</button>
             `;
@@ -9580,10 +9580,10 @@ function openDialogue(npc) {
             document.getElementById('confirm-transport').addEventListener('click', () => {
                 toggleWindow(dialogueWindowElement);
                 addChatMessage("Farewell, Dewdrop Island!", 'quest-complete');
-                fadeAndChangeMap('henesys', 150, 300);
-                // Add Henesys to discovered maps
-                if (!player.discoveredMaps.has('henesys')) {
-                    player.discoveredMaps.add('henesys');
+                fadeAndChangeMap('ironhaven', 150, 300);
+                // Add Iron Haven to discovered maps
+                if (!player.discoveredMaps.has('ironhaven')) {
+                    player.discoveredMaps.add('ironhaven');
                 }
                 // Mark that player has left Dewdrop Island permanently
                 player.hasLeftDewdrop = true;
@@ -9609,40 +9609,40 @@ function openDialogue(npc) {
             });
         });
 
-        document.getElementById('transport-Ludibrium')?.addEventListener('click', () => {
-            // Transport to Ludibrium
+        document.getElementById('transport-sky-palace')?.addEventListener('click', () => {
+            // Transport to Sky Palace
             content.innerHTML = `
-                <p>"The Ludibrium is a dangerous place filled with dark creatures. Are you ready to face the shadows?"</p>
-                <button id="confirm-transport-Ludibrium">Set Sail for Ludibrium</button>
+                <p>"The Sky Palace is a dangerous place filled with dark creatures. Are you ready to face the shadows?"</p>
+                <button id="confirm-transport-sky-palace">Set Sail for Sky Palace</button>
                 <button id="close-dialogue">Not Yet</button>
             `;
             document.getElementById('close-dialogue').addEventListener('click', () => toggleWindow(dialogueWindowElement));
-            document.getElementById('confirm-transport-Ludibrium').addEventListener('click', () => {
+            document.getElementById('confirm-transport-sky-palace').addEventListener('click', () => {
                 toggleWindow(dialogueWindowElement);
-                addChatMessage("Setting sail for Ludibrium!", 'quest-complete');
-                fadeAndChangeMap('ludibriumStation', 150, 300);
-                // Add Ludibrium Station to discovered maps
-                if (!player.discoveredMaps.has('ludibriumStation')) {
-                    player.discoveredMaps.add('ludibriumStation');
+                addChatMessage("Setting sail for Sky Palace!", 'quest-complete');
+                fadeAndChangeMap('skypalaceStation', 150, 300);
+                // Add Sky Palace Station to discovered maps
+                if (!player.discoveredMaps.has('skypalaceStation')) {
+                    player.discoveredMaps.add('skypalaceStation');
                 }
             });
         });
 
-        document.getElementById('transport-from-Ludibrium')?.addEventListener('click', () => {
-            // Transport back to Henesys from Ludibrium
+        document.getElementById('transport-from-sky-palace')?.addEventListener('click', () => {
+            // Transport back to Iron Haven from Sky Palace
             content.innerHTML = `
-                <p>"Ready to leave this dark place? I'll take you safely back to Henesys."</p>
-                <button id="confirm-return-henesys">Return to Henesys</button>
+                <p>"Ready to leave this dark place? I'll take you safely back to Iron Haven."</p>
+                <button id="confirm-return-ironhaven">Return to Iron Haven</button>
                 <button id="close-dialogue">Not Yet</button>
             `;
             document.getElementById('close-dialogue').addEventListener('click', () => toggleWindow(dialogueWindowElement));
-            document.getElementById('confirm-return-henesys').addEventListener('click', () => {
+            document.getElementById('confirm-return-ironhaven').addEventListener('click', () => {
                 toggleWindow(dialogueWindowElement);
-                addChatMessage("Sailing back to Henesys!", 'quest-complete');
-                fadeAndChangeMap('henesys', 1850, 300);
-                // Make sure Henesys is discovered
-                if (!player.discoveredMaps.has('henesys')) {
-                    player.discoveredMaps.add('henesys');
+                addChatMessage("Sailing back to Iron Haven!", 'quest-complete');
+                fadeAndChangeMap('ironhaven', 1850, 300);
+                // Make sure Iron Haven is discovered
+                if (!player.discoveredMaps.has('ironhaven')) {
+                    player.discoveredMaps.add('ironhaven');
                 }
             });
         });
@@ -10457,7 +10457,7 @@ function openJobAdvancementWindow(level) {
                 player.pendingJobAdvancement = {
                     targetClass: newClass,
                     trialMap: trialMap,
-                    returnMap: player.currentMapId || 'henesys',
+                    returnMap: player.currentMapId || 'ironhaven',
                     returnX: player.x,
                     returnY: player.y
                 };
@@ -10611,7 +10611,7 @@ function completeJobTrial() {
     
     // Teleport back after a short delay
     setTimeout(() => {
-        fadeAndChangeMap('henesys', 500, 600);
+        fadeAndChangeMap('ironhaven', 500, 600);
         activeJobTrial = null;
         
         // Show success modal
@@ -10662,9 +10662,9 @@ function failJobTrial(reason) {
     player.canRetryJobTrial = true;
     player.pendingJobAdvancement = null;
     
-    // Teleport to Henesys after a short delay
+    // Teleport to Iron Haven after a short delay
     setTimeout(() => {
-        fadeAndChangeMap('henesys', 500, 600);
+        fadeAndChangeMap('ironhaven', 500, 600);
         activeJobTrial = null;
         
         // Show failure modal
@@ -10672,7 +10672,7 @@ function failJobTrial(reason) {
             showInfoModal(
                 'Trial Failed',
                 `<p style="color: var(--error-color);">${failMessage}</p>
-                <p>Don't give up! You can attempt the trial again by speaking with <span style="color: var(--legendary-color); font-weight: bold;">Mayor Stan</span> in Henesys.</p>
+                <p>Don't give up! You can attempt the trial again by speaking with <span style="color: var(--legendary-color); font-weight: bold;">Mayor Stan</span> in Iron Haven.</p>
                 <p>Make sure you're well prepared with potions and upgraded equipment before trying again!</p>`
             );
         }, 500);

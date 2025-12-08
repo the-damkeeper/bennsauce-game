@@ -1123,16 +1123,18 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
             if (!p.noSpawn && p.width >= 100) {
                 // Platforms are already adjusted by GROUND_LEVEL_OFFSET in the platforms array used for collision
                 // Monster spawn Y must match the collision Y, which is p.y + GROUND_LEVEL_OFFSET
-                allSpawnSurfaces.push({ ...p, y: p.y + GROUND_LEVEL_OFFSET, isGround: false });
+                // Add explicit height for collision detection (defaults to 20 if not specified)
+                allSpawnSurfaces.push({ ...p, y: p.y + GROUND_LEVEL_OFFSET, height: p.height || 20, isGround: false });
             }
         }
     }
     
-    // Add structures (same as platforms)
+    // Add structures (same as platforms, with proper height)
     if (mapData.structures) {
         for (const s of mapData.structures) {
             if (!s.noSpawn && s.width >= 100) {
-                allSpawnSurfaces.push({ ...s, y: s.y + GROUND_LEVEL_OFFSET, isGround: false });
+                // Structures are one tile (48px scaled) tall - add height for collision
+                allSpawnSurfaces.push({ ...s, y: s.y + GROUND_LEVEL_OFFSET, height: scaledTileSize, isGround: false });
             }
         }
     }

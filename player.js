@@ -36,7 +36,7 @@ const itemNameMigrationMap = {
     'Slime Earrings': 'Leaf Earrings',
     'Silver Ring': 'Iron Earrings',
     'Mushmom Spore Pendant': 'Mushmom Pendant',
-    'Perion Pendant': 'King Slime Pendant',
+    'Stone Peak Pendant': 'King Slime Pendant',
     "Golem's Heart": 'Golem Pendant',
     "Balrog's Amulet": 'Balrog Pendant',
     'All-Cure Potion': 'Red Potion',
@@ -1539,7 +1539,7 @@ function loadCharacter(characterName) {
     if (player.discoveredMaps && Array.isArray(player.discoveredMaps)) {
         player.discoveredMaps = new Set(player.discoveredMaps);
     } else {
-        player.discoveredMaps = new Set(['henesys']);
+        player.discoveredMaps = new Set(['ironhaven']);
     }
 
     // Convert talkedNPCs to Set if it's an array from save data
@@ -2863,7 +2863,7 @@ function respawnPlayer() {
     setTimeout(() => { player.isInvincible = false; }, 1500);
 
     // Respawn in appropriate location based on whether player has left Dewdrop Island
-    const respawnMap = player.hasLeftDewdrop ? 'henesys' : 'dewdropBeach';
+    const respawnMap = player.hasLeftDewdrop ? 'ironhaven' : 'dewdropBeach';
     fadeAndChangeMap(respawnMap, respawnMap === 'dewdropBeach' ? 400 : 150);
     updateUI();
     
