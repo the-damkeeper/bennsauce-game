@@ -1530,6 +1530,7 @@ function createMonster(type, x, y, initialState = null) {
         type, x, y, previousY: y,
         velocityX: 0, velocityY: 0,
         onPlatform: null,
+        justSpawned: true, // Skip gravity on first frame
         element: el,
         direction: Math.random() < 0.5 ? 1 : -1,
         aiState: 'idle',
@@ -1822,8 +1823,13 @@ function updateMonsters() {
         }
         
         // Always apply gravity and vertical physics (both single and multiplayer)
-        m.velocityY += GRAVITY;
-        m.y += m.velocityY;
+        // Skip gravity on first frame to prevent spawned monsters from falling through platforms
+        if (!m.justSpawned) {
+            m.velocityY += GRAVITY;
+            m.y += m.velocityY;
+        } else {
+            m.justSpawned = false;
+        }
 
         // Map boundary collision
         if (m.x < 0) { m.x = 0; if (m.aiState === 'patrolling') m.direction = 1; }
