@@ -156,9 +156,9 @@ function setupSocketListeners() {
         // Start sending position updates
         startPositionUpdates();
         
-        // Show notification
-        if (typeof showNotification === 'function') {
-            showNotification('Connected to multiplayer server!', 'success');
+        // Only show notification if game is already running (reconnection)
+        if (typeof showNotification === 'function' && typeof isGameActive !== 'undefined' && isGameActive) {
+            showNotification('Reconnected to multiplayer server', 'success');
         }
     });
 
@@ -173,8 +173,9 @@ function setupSocketListeners() {
         // Clear remote players
         clearRemotePlayers();
         
-        if (typeof showNotification === 'function') {
-            showNotification('Disconnected from multiplayer server', 'warning');
+        // Only show notification if game was active (not during initial load)
+        if (typeof showNotification === 'function' && typeof isGameActive !== 'undefined' && isGameActive) {
+            showNotification('Lost connection to server', 'warning');
         }
     });
 
@@ -971,27 +972,38 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
         }
         
         for (let i = 0; i < count; i++) {
-            // Pick a random valid surface (matching game.js style)
-            const spawnSurface = validSpawnPoints[Math.floor(Math.random() * validSpawnPoints.length)];
-            
-            const padding = monsterWidth;
             let spawnX, spawnY;
-            let attempts = 0;
-            const maxAttempts = 10;
+            let spawnSurface;
             
-            // Try to find a spawn position that's not inside a hill (only for ground level)
-            do {
-                // Ensure proper padding but use full randomization range
-                const minX = spawnSurface.x + padding;
-                const maxX = spawnSurface.x + spawnSurface.width - padding;
-                const randomRange = Math.max(0, maxX - minX);
-                spawnX = minX + (Math.random() * randomRange);
-                // Use anchorY for positioning (matches physics landing: m.y = p.y - anchorY)
-                // For ground level, subtract a small amount to account for visual ground tile height
-                const groundOffset = spawnSurface.isGround ? 3 : 0;
-                spawnY = spawnSurface.y - anchorY - groundOffset;
-                attempts++;
-            } while (spawnSurface.isGround && isPointInsideHill(spawnX) && attempts < maxAttempts);
+            // Check if this is a fixed position spawn (like test dummy)
+            if (spawner.fixedPosition && spawner.x !== undefined && spawner.y !== undefined) {
+                // Use exact coordinates provided
+                spawnX = spawner.x;
+                spawnY = spawner.y;
+                // Find closest surface for patrol bounds
+                spawnSurface = validSpawnPoints[0]; // Fallback to first valid surface
+            } else {
+                // Pick a random valid surface (matching game.js style)
+                spawnSurface = validSpawnPoints[Math.floor(Math.random() * validSpawnPoints.length)];
+                
+                const padding = monsterWidth;
+                let attempts = 0;
+                const maxAttempts = 10;
+                
+                // Try to find a spawn position that's not inside a hill (only for ground level)
+                do {
+                    // Ensure proper padding but use full randomization range
+                    const minX = spawnSurface.x + padding;
+                    const maxX = spawnSurface.x + spawnSurface.width - padding;
+                    const randomRange = Math.max(0, maxX - minX);
+                    spawnX = minX + (Math.random() * randomRange);
+                    // Use anchorY for positioning (matches physics landing: m.y = p.y - anchorY)
+                    // For ground level, subtract a small amount to account for visual ground tile height
+                    const groundOffset = spawnSurface.isGround ? 3 : 0;
+                    spawnY = spawnSurface.y - anchorY - groundOffset;
+                    attempts++;
+                } while (spawnSurface.isGround && isPointInsideHill(spawnX) && attempts < maxAttempts);
+            }
             
             // If on ground and inside a hill, adjust Y to the slope surface
             if (spawnSurface.isGround && isPointInsideHill(spawnX) && typeof getSlopeSurfaceY === 'function') {

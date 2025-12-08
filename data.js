@@ -4339,7 +4339,7 @@ const maps = {
             { type: 'welcomeGuide', x: 400 }
         ],
         monsters: [
-            { type: 'testDummy', count: 1, x: 600 }
+            { type: 'testDummy', count: 1, x: 600, y: 485, fixedPosition: true }
         ],
         portals: [
             { x: 900, targetMap: 'dewdropTraining', targetX: 100 }
