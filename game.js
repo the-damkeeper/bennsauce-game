@@ -242,8 +242,13 @@ let loadingManager = {
             loadingText.textContent = 'Waiting for server connection...';
         }
         
+        const startTime = Date.now();
+        const maxWaitTime = 90000; // 90 seconds max wait (server wake-up can take 60s)
+        
         // Check if socket is connected
         const checkConnection = () => {
+            const elapsed = Date.now() - startTime;
+            
             if (typeof isConnectedToServer !== 'undefined' && isConnectedToServer) {
                 // Connected! Show start screen
                 setTimeout(() => {
@@ -256,13 +261,13 @@ let loadingManager = {
                         if (settingsMenu) settingsMenu.style.display = 'none';
                     }
                 }, 500);
-            } else if (typeof socketInitialized !== 'undefined' && socketInitialized && !isConnectedToServer) {
-                // Connection failed
+            } else if (elapsed > maxWaitTime) {
+                // Timeout - server didn't respond in time
                 if (loadingText) {
-                    loadingText.textContent = 'Server connection failed';
+                    loadingText.textContent = 'Connection timeout';
                 }
                 if (serverStatusText) {
-                    serverStatusText.textContent = '\u274c Could not connect to game server. Please refresh the page.';
+                    serverStatusText.textContent = '❌ Server did not respond. It may be offline or overloaded. Please refresh to try again.';
                     serverStatusText.style.color = '#e74c3c';
                 }
             } else {

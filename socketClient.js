@@ -107,13 +107,19 @@ function initializeSocket() {
     try {
         socket = io(SOCKET_CONFIG.SERVER_URL, {
             reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
-            timeout: 10000
+            reconnectionAttempts: 10, // More attempts for server wake-up
+            reconnectionDelay: 3000, // Wait 3 seconds between attempts
+            timeout: 60000 // 60 second timeout for server wake-up
         });
 
         setupSocketListeners();
         console.log('[Socket] Attempting to connect to game server...');
+        
+        // Update message to indicate server might be waking up
+        if (serverStatusText) {
+            serverStatusText.textContent = 'Connecting to server (may take 30-60 seconds if waking up)...';
+        }
+        
         return true;
     } catch (error) {
         console.error('[Socket] Failed to initialize socket:', error);
@@ -161,6 +167,7 @@ function setupSocketListeners() {
         console.log('[Socket] Disconnected from game server');
         isConnectedToServer = false;
         hasJoinedServer = false;
+        socketInitialized = false; // Reset so reconnect is required
         stopPositionUpdates();
         
         // Clear remote players
@@ -175,13 +182,13 @@ function setupSocketListeners() {
     socket.on('connect_error', (error) => {
         console.error('[Socket] Connection error:', error.message);
         isConnectedToServer = false;
-        socketInitialized = true; // Mark as initialized so error is detected
+        // Don't mark as initialized yet - keep trying during wake-up period
         
         // Update loading text
         const serverStatusText = document.getElementById('server-status-text');
         if (serverStatusText) {
-            serverStatusText.textContent = '❌ Failed to connect to server (retrying...)';
-            serverStatusText.style.color = '#e74c3c';
+            serverStatusText.textContent = '⏳ Server is waking up, please wait... (this can take 30-60 seconds)';
+            serverStatusText.style.color = '#f39c12';
         }
     });
 
