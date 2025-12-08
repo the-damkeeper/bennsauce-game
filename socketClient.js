@@ -997,10 +997,12 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
                     const maxX = spawnSurface.x + spawnSurface.width - padding;
                     const randomRange = Math.max(0, maxX - minX);
                     spawnX = minX + (Math.random() * randomRange);
-                    // Use anchorY for positioning (matches physics landing: m.y = p.y - anchorY)
-                    // For ground level, subtract a small amount to account for visual ground tile height
+                    // Spawn monsters ABOVE the surface so they fall naturally via physics
+                    // Physics will land them at: m.y = surfaceY - anchorY
+                    // So spawn them a few pixels higher to trigger the fall
+                    const spawnAboveOffset = 5; // Spawn 5px above landing position
                     const groundOffset = spawnSurface.isGround ? 3 : 0;
-                    spawnY = spawnSurface.y - anchorY - groundOffset;
+                    spawnY = spawnSurface.y - anchorY - groundOffset - spawnAboveOffset;
                     attempts++;
                 } while (spawnSurface.isGround && isPointInsideHill(spawnX) && attempts < maxAttempts);
             }
