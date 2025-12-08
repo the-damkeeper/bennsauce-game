@@ -3739,6 +3739,11 @@ function acceptGuildInvite(guildName, guildIcon) {
         updateGuildNameplate();
     }
     
+    // Notify server of appearance change for multiplayer
+    if (typeof sendAppearanceUpdate === 'function') {
+        sendAppearanceUpdate();
+    }
+    
     if (typeof updateSocialHubUI === 'function') {
         updateSocialHubUI();
     }
@@ -3873,6 +3878,11 @@ function handleGuildMessage(data) {
                     updateGuildNameplate();
                 }
                 
+                // Notify server of appearance change for multiplayer
+                if (typeof sendAppearanceUpdate === 'function') {
+                    sendAppearanceUpdate();
+                }
+                
                 // Update presence
                 updatePresence();
                 
@@ -3905,6 +3915,11 @@ function handleGuildMessage(data) {
                 }
                 if (typeof updateGuildNameplate === 'function') {
                     updateGuildNameplate();
+                }
+                
+                // Notify server of appearance change for multiplayer
+                if (typeof sendAppearanceUpdate === 'function') {
+                    sendAppearanceUpdate();
                 }
                 
                 // Update presence

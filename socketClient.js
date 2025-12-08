@@ -231,6 +231,11 @@ function setupSocketListeners() {
         }
     });
 
+    // Player appearance updated (equipment, cosmetics, guild, medals)
+    socket.on('playerAppearanceUpdated', (data) => {
+        updateRemotePlayerAppearance(data);
+    });
+
     // =============================================
     // MONSTER EVENTS (Phase 2)
     // =============================================
@@ -349,6 +354,9 @@ function joinGameServer() {
         playerClass: player.class || 'Beginner',
         guild: player.guild || null,
         equipped: equippedNames,
+        cosmeticEquipped: player.cosmeticEquipped || {},
+        equippedMedal: player.equippedMedal || null,
+        displayMedals: player.displayMedals || [],
         partyId: partyId
     };
     
@@ -540,6 +548,10 @@ function addRemotePlayer(playerData) {
         class: playerData.playerClass || 'Beginner',
         customization: playerData.customization || getDefaultCustomization(),
         equipped: playerData.equipped || getDefaultEquipment(),
+        cosmeticEquipped: playerData.cosmeticEquipped || getDefaultEquipment(),
+        guild: playerData.guild || null,
+        equippedMedal: playerData.equippedMedal || null,
+        displayMedals: playerData.displayMedals || [],
         x: playerData.x || 400,
         y: playerData.y || 300,
         targetX: playerData.x || 400,
@@ -641,6 +653,45 @@ function showRemotePlayerChat(remotePlayer, message) {
             remotePlayer.chatBubble.style.display = 'none';
         }
     }, 5000);
+}
+
+/**
+ * Update remote player appearance data (equipment, cosmetics, guild, medals)
+ */
+function updateRemotePlayerAppearance(data) {
+    const remotePlayer = remotePlayers[data.odId];
+    if (!remotePlayer) return;
+
+    // Update appearance data
+    if (data.equipped !== undefined) remotePlayer.equipped = data.equipped;
+    if (data.cosmeticEquipped !== undefined) remotePlayer.cosmeticEquipped = data.cosmeticEquipped;
+    if (data.guild !== undefined) remotePlayer.guild = data.guild;
+    if (data.equippedMedal !== undefined) remotePlayer.equippedMedal = data.equippedMedal;
+    if (data.displayMedals !== undefined) remotePlayer.displayMedals = data.displayMedals;
+
+    console.log(`[Client] Updated appearance for ${remotePlayer.name}:`, {
+        equipped: remotePlayer.equipped,
+        cosmetics: remotePlayer.cosmeticEquipped,
+        guild: remotePlayer.guild,
+        medal: remotePlayer.equippedMedal
+    });
+
+    // TODO: Trigger visual re-render when equipment/cosmetic rendering is implemented
+}
+
+/**
+ * Send local player appearance update to server
+ */
+function sendAppearanceUpdate() {
+    if (!socket || !isConnected) return;
+
+    socket.emit('updateAppearance', {
+        equipped: player.equipped,
+        cosmeticEquipped: player.cosmeticEquipped,
+        guild: player.guild,
+        equippedMedal: player.equippedMedal,
+        displayMedals: player.displayMedals
+    });
 }
 
 /**

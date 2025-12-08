@@ -1948,6 +1948,11 @@ function equipItem(itemToEquip, inventoryIndex) {
             updateStatWindowUI();
         }
         reapplyBuffs();
+        
+        // Notify server of appearance change for multiplayer
+        if (typeof sendAppearanceUpdate === 'function') {
+            sendAppearanceUpdate();
+        }
     }
 }
 
@@ -1984,6 +1989,11 @@ function dequipItem(slotType, isCosmetic) {
             }
             // --- END OF FIX ---
             reapplyBuffs();
+            
+            // Notify server of appearance change for multiplayer
+            if (typeof sendAppearanceUpdate === 'function') {
+                sendAppearanceUpdate();
+            }
         }
     }
 }

@@ -3358,6 +3358,11 @@ function updateEquipmentUI() {
                         updateStatWindowUI();
                     }
                     reapplyBuffs();
+                    
+                    // Notify server of appearance change for multiplayer
+                    if (typeof sendAppearanceUpdate === 'function') {
+                        sendAppearanceUpdate();
+                    }
                 }
             }
         });
@@ -3517,6 +3522,11 @@ function updateEquipmentUI() {
                     updateUI();
                     
                     showNotification(`${itemToEquip.name} equipped as cosmetic (no stats)`, 'system');
+                    
+                    // Notify server of appearance change for multiplayer
+                    if (typeof sendAppearanceUpdate === 'function') {
+                        sendAppearanceUpdate();
+                    }
                 }
             }
         });
@@ -5453,6 +5463,11 @@ function equipMedal(type, id, name, tier) {
     updateUI();
     updateStatWindowUI();
     saveCharacter();
+    
+    // Notify server of appearance change for multiplayer
+    if (typeof sendAppearanceUpdate === 'function') {
+        sendAppearanceUpdate();
+    }
 }
 
 function unequipMedal() {
@@ -5467,6 +5482,11 @@ function unequipMedal() {
         updateUI();
         updateStatWindowUI();
         saveCharacter();
+        
+        // Notify server of appearance change for multiplayer
+        if (typeof sendAppearanceUpdate === 'function') {
+            sendAppearanceUpdate();
+        }
     }
 }
 
@@ -5493,6 +5513,11 @@ function toggleMedalDisplay(type, id, name, tier) {
     updatePlayerNameplate();
     updateMedalsTab();
     saveCharacter();
+    
+    // Notify server of appearance change for multiplayer
+    if (typeof sendAppearanceUpdate === 'function') {
+        sendAppearanceUpdate();
+    }
 }
 
 // Get medal stats for the currently equipped medal
