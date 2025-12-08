@@ -2757,10 +2757,10 @@ function changeMap(mapId, spawnX, spawnY) {
         });
     }
 
-    const allSurfaces = [...(map.platforms || []), ...(map.structures || [])];
     const scaledTileSize = spriteData.ground.tileSize * PIXEL_ART_SCALE;
 
-    allSurfaces.forEach(pData => {
+    // Add platforms to collision array
+    (map.platforms || []).forEach(pData => {
         const pEl = document.createElement('div');
         pEl.className = 'platform';
         const snappedX = Math.round(pData.x);
@@ -2790,6 +2790,42 @@ function changeMap(mapId, spawnX, spawnY) {
             element: pEl,
             height: 20,
             hitboxElement: platformHitbox
+        });
+    });
+
+    // Add structures to collision array - use TOP surface for collision
+    (map.structures || []).forEach(sData => {
+        const sEl = document.createElement('div');
+        sEl.className = 'platform';
+        const snappedX = Math.round(sData.x);
+        // CRITICAL: Structure top Y = bottom Y - height (structures extend upward from their Y coordinate)
+        const structureTopY = Math.round(sData.y + GROUND_LEVEL_OFFSET - scaledTileSize);
+        const numTiles = Math.round(sData.width / scaledTileSize);
+        const finalWidth = Math.max(1, numTiles) * scaledTileSize;
+
+        sEl.style.left = `${snappedX}px`;
+        sEl.style.top = `${structureTopY}px`;
+        sEl.style.width = `${finalWidth}px`;
+        worldContent.appendChild(sEl);
+
+        const structureHitbox = document.createElement('div');
+        structureHitbox.className = 'debug-hitbox';
+        structureHitbox.style.left = `${snappedX + PLATFORM_EDGE_PADDING}px`;
+        structureHitbox.style.top = `${structureTopY}px`;
+        structureHitbox.style.width = `${finalWidth - (PLATFORM_EDGE_PADDING * 2)}px`;
+        structureHitbox.style.height = `20px`;
+        worldContent.appendChild(structureHitbox);
+        if (showHitboxes) structureHitbox.style.display = 'block';
+
+        platforms.push({
+            ...sData,
+            x: snappedX,
+            y: structureTopY, // TOP surface, not bottom
+            width: finalWidth,
+            element: sEl,
+            height: scaledTileSize, // Structures have full height for side collision
+            hitboxElement: structureHitbox,
+            isStructure: true
         });
     });
 
