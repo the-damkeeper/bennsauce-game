@@ -999,12 +999,11 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
                     const maxX = spawnSurface.x + spawnSurface.width - padding;
                     const randomRange = Math.max(0, maxX - minX);
                     spawnX = minX + (Math.random() * randomRange);
-                    // Spawn monsters ABOVE the surface so they fall naturally via physics
-                    // Physics will land them at: m.y = surfaceY - anchorY
-                    // Spawn them higher to ensure they're above the platform and fall down
-                    const spawnAboveOffset = 20; // Spawn 20px above landing position to ensure clearance
+                    // Spawn monsters at exact landing position
+                    // Physics landing formula: m.y = surfaceY - anchorY
+                    // No offset needed - spawn exactly where they should land
                     const groundOffset = spawnSurface.isGround ? 3 : 0;
-                    spawnY = spawnSurface.y - anchorY - groundOffset - spawnAboveOffset;
+                    spawnY = spawnSurface.y - anchorY - groundOffset;
                     
                     // DEBUG: Log spawn calculation for first few monsters
                     if (positions.length < 3) {
@@ -1154,6 +1153,8 @@ function handleMonsterDamageFromServer(data) {
         localMonster.velocityX = data.knockbackVelocityX;
         // Clear server target position so knockback isn't overridden
         localMonster.serverTargetX = localMonster.x;
+        // Make monster face the direction of knockback (opposite of attack direction)
+        localMonster.direction = data.knockbackVelocityX > 0 ? 1 : -1;
         console.log(`[KNOCKBACK] Monster ID: ${data.id}, VelocityX: ${data.knockbackVelocityX}, Current Pos: (${localMonster.x.toFixed(1)}, ${localMonster.y.toFixed(1)})`);
     }
     
