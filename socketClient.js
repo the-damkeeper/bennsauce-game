@@ -999,11 +999,12 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
                     const maxX = spawnSurface.x + spawnSurface.width - padding;
                     const randomRange = Math.max(0, maxX - minX);
                     spawnX = minX + (Math.random() * randomRange);
-                    // Spawn monsters at exact landing position
-                    // Physics landing formula: m.y = surfaceY - anchorY
-                    // No offset needed - spawn exactly where they should land
+                    // Spawn monsters SLIGHTLY above landing position (3px)
+                    // This allows gravity to naturally settle them onto the surface
+                    // Without this, spawning at exact position causes collision snap glitching
                     const groundOffset = spawnSurface.isGround ? 3 : 0;
-                    spawnY = spawnSurface.y - anchorY - groundOffset;
+                    const settleOffset = 3; // Small offset to trigger natural physics settling
+                    spawnY = spawnSurface.y - anchorY - groundOffset - settleOffset;
                     
                     // DEBUG: Log spawn calculation for first few monsters
                     if (positions.length < 3) {
