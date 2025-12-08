@@ -2520,10 +2520,20 @@ function spawnMonster(monsterType) {
     let attempts = 0;
     const maxAttempts = 10;
 
+    // Calculate anchorY the same way monsters.js does for collision
+    let anchorY;
+    if (monsterData.usesPlayerSprite) {
+        anchorY = 60; // Player sprite anchor
+    } else if (monsterData.isPixelArt && spriteData[monsterType]?.anchorPoint) {
+        anchorY = spriteData[monsterType].anchorPoint.y * PIXEL_ART_SCALE;
+    } else {
+        anchorY = monsterData.height || 55;
+    }
+
     // Try to find a spawn position that's not inside a hill (only for ground level)
     do {
         spawnX = spawnPoint.x + padding + Math.random() * (spawnPoint.width - padding * 2);
-        spawnY = spawnPoint.y - monsterData.height;
+        spawnY = spawnPoint.y - anchorY; // Use anchorY instead of height for accurate positioning
         attempts++;
     } while (spawnPoint.isGround && isPointInsideHill(spawnX, map, baseGroundY) && attempts < maxAttempts);
 
@@ -2531,7 +2541,7 @@ function spawnMonster(monsterType) {
     if (spawnPoint.isGround && isPointInsideHill(spawnX, map, baseGroundY)) {
         const slopeSurfaceY = getSlopeSurfaceY(spawnX, map, baseGroundY, scaledTileSize);
         if (slopeSurfaceY !== null && slopeSurfaceY < baseGroundY) {
-            spawnY = slopeSurfaceY - monsterData.height;
+            spawnY = slopeSurfaceY - anchorY; // Use anchorY instead of height
         }
     }
 
