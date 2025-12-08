@@ -1146,8 +1146,12 @@ function handleMonsterDamageFromServer(data) {
     if (localMonster.hpBarContainer) localMonster.hpBarContainer.style.display = 'block';
     if (localMonster.nameplateElement) localMonster.nameplateElement.style.display = 'block';
     
-    // Make monster face the direction of attack (opposite of knockback direction)
+    // Apply knockback when PLAYER hits monster (not when monster hits player)
     if (data.knockbackVelocityX !== undefined && data.knockbackVelocityX !== 0) {
+        localMonster.velocityX = data.knockbackVelocityX;
+        // Set knockback timer - prevents server interpolation for 500ms
+        localMonster.knockbackEndTime = Date.now() + 500;
+        // Make monster face the direction of knockback
         localMonster.direction = data.knockbackVelocityX > 0 ? 1 : -1;
     }
     
@@ -1587,6 +1591,9 @@ function interpolateMonsterPositions() {
         
         // Skip if update is too old (>1 second)
         if (now - (m.lastServerUpdate || 0) > 1000) continue;
+        
+        // Skip interpolation if monster is being knocked back
+        if (m.knockbackEndTime && now < m.knockbackEndTime) continue;
         
         // Interpolate X position
         const dx = m.serverTargetX - m.x;

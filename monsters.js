@@ -1815,8 +1815,8 @@ function updateMonsters() {
                 m.x += m.velocityX;
                 m.velocityX *= 0.85; // Friction
                 
-                // Clear server target during knockback so we don't fight against interpolation
-                if (m.serverTargetX !== undefined) {
+                // Update server target to new position after knockback
+                if (m.serverTargetX !== undefined && m.knockbackEndTime && Date.now() < m.knockbackEndTime) {
                     m.serverTargetX = m.x;
                 }
             }
