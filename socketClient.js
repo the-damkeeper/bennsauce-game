@@ -1112,36 +1112,51 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
         return false;
     }
     
-    // Build spawn surfaces (ground, platforms, structures) - matching game.js logic
-    const allSpawnSurfaces = [
-        { x: 0, y: baseGroundY, width: mapWidth, isGround: true }
-    ];
+    // Build spawn surfaces list - MUST match game.js exactly
+    const allSpawnSurfaces = [];
     
-    // Add platforms (NO offset needed - monster Y coordinates already match platform collision Y)
+    // Add ground
+    allSpawnSurfaces.push({ 
+        x: 0, 
+        y: baseGroundY, 
+        width: mapWidth, 
+        isGround: true,
+        surfaceType: 'ground'
+    });
+    
+    // Add platforms - top surface for collision
     if (mapData.platforms) {
         for (const p of mapData.platforms) {
-            if (!p.noSpawn && p.width >= 100) {
-                // Platforms are already adjusted by GROUND_LEVEL_OFFSET in the platforms array used for collision
-                // Monster spawn Y must match the collision Y, which is p.y + GROUND_LEVEL_OFFSET
-                // Add explicit height for collision detection (defaults to 20 if not specified)
-                allSpawnSurfaces.push({ ...p, y: p.y + GROUND_LEVEL_OFFSET, height: p.height || 20, isGround: false });
+            if (!p.noSpawn && p.width >= 150) {
+                allSpawnSurfaces.push({
+                    x: p.x,
+                    y: p.y + GROUND_LEVEL_OFFSET, // Top surface Y
+                    width: p.width,
+                    isGround: false,
+                    surfaceType: 'platform'
+                });
             }
         }
     }
     
-    // Add structures (same as platforms, with proper height)
+    // Add structures - monsters spawn ON TOP
     if (mapData.structures) {
         for (const s of mapData.structures) {
-            if (!s.noSpawn && s.width >= 100) {
-                // Structures are one tile (48px scaled) tall - add height for collision
-                allSpawnSurfaces.push({ ...s, y: s.y + GROUND_LEVEL_OFFSET, height: scaledTileSize, isGround: false });
+            if (!s.noSpawn && s.width >= 150) {
+                // Structure top = structure Y + offset - height
+                const structureTopY = s.y + GROUND_LEVEL_OFFSET - scaledTileSize;
+                allSpawnSurfaces.push({
+                    x: s.x,
+                    y: structureTopY,
+                    width: s.width,
+                    isGround: false,
+                    surfaceType: 'structure'
+                });
             }
         }
     }
     
-    // Filter valid spawn points (min width 150 like game.js)
-    const MIN_SPAWN_WIDTH = 150;
-    const validSpawnPoints = allSpawnSurfaces.filter(p => p.width >= MIN_SPAWN_WIDTH);
+    const validSpawnPoints = allSpawnSurfaces;
     
     if (validSpawnPoints.length === 0) {
         console.warn('[Socket] No valid spawn points found');

@@ -2495,53 +2495,87 @@ function spawnMonster(monsterType) {
         return false;
     }
 
-    // Use the robust logic from monsters.js to build a fresh list of all spawnable surfaces.
-    // scaledTileSize is already declared above as 16 * PIXEL_ART_SCALE (= 48)
-    const allSpawnSurfaces = [
-        { x: 0, y: baseGroundY, width: map.width, isGround: true }, // Ground
-        ...(map.platforms || []).map(p => ({ ...p, y: p.y + GROUND_LEVEL_OFFSET, height: p.height || 20 })), // Correctly mapped platforms
-        ...(map.structures || []).map(s => ({ ...s, y: s.y + GROUND_LEVEL_OFFSET, height: scaledTileSize })) // Correctly mapped structures with proper height (one tile = 48px)
-    ];
+    // Build spawn surfaces list - platforms and structures where monsters can spawn
+    // CRITICAL: All Y values must match exactly what collision detection uses
+    const allSpawnSurfaces = [];
+    
+    // Add ground
+    allSpawnSurfaces.push({ 
+        x: 0, 
+        y: baseGroundY, 
+        width: map.width, 
+        isGround: true,
+        surfaceType: 'ground'
+    });
+    
+    // Add platforms - these use top surface for collision
+    if (map.platforms) {
+        for (const p of map.platforms) {
+            if (!p.noSpawn && p.width >= 150) {
+                allSpawnSurfaces.push({
+                    x: p.x,
+                    y: p.y + GROUND_LEVEL_OFFSET, // Top surface Y (collision Y)
+                    width: p.width,
+                    isGround: false,
+                    surfaceType: 'platform'
+                });
+            }
+        }
+    }
+    
+    // Add structures - monsters spawn ON TOP of structures
+    if (map.structures) {
+        for (const s of map.structures) {
+            if (!s.noSpawn && s.width >= 150) {
+                // Structure top surface = structure Y + GROUND_LEVEL_OFFSET - structure height
+                const structureTopY = s.y + GROUND_LEVEL_OFFSET - scaledTileSize;
+                allSpawnSurfaces.push({
+                    x: s.x,
+                    y: structureTopY, // Monsters spawn on TOP of structures
+                    width: s.width,
+                    isGround: false,
+                    surfaceType: 'structure'
+                });
+            }
+        }
+    }
 
-    const MIN_SPAWN_WIDTH = 150; // A minimum width for a platform to be considered for spawning.
-    const validSpawnPoints = allSpawnSurfaces.filter(p => !p.noSpawn && p.width >= MIN_SPAWN_WIDTH);
-
-    if (validSpawnPoints.length === 0) {
-        console.warn(`No valid spawn points found for ${monsterType} in map: ${currentMapId}`);
+    if (allSpawnSurfaces.length === 0) {
+        console.warn(`[Spawn] No valid spawn surfaces for ${monsterType} in ${currentMapId}`);
         return;
     }
 
-    // Pick a random valid surface.
-    const spawnPoint = validSpawnPoints[Math.floor(Math.random() * validSpawnPoints.length)];
+    // Pick a random surface
+    const spawnPoint = allSpawnSurfaces[Math.floor(Math.random() * allSpawnSurfaces.length)];
 
-    // Calculate a safe X and Y position on that surface.
-    const padding = monsterData.width || 48;
-    let spawnX, spawnY;
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    // Calculate anchorY the same way monsters.js does for collision
+    // Calculate anchorY (where monster's "feet" are within sprite)
     let anchorY;
     if (monsterData.usesPlayerSprite) {
-        anchorY = 60; // Player sprite anchor
+        anchorY = 60;
     } else if (monsterData.isPixelArt && spriteData[monsterType]?.anchorPoint) {
         anchorY = spriteData[monsterType].anchorPoint.y * PIXEL_ART_SCALE;
     } else {
         anchorY = monsterData.height || 55;
     }
 
+    // Calculate spawn position
+    const padding = monsterData.width || 48;
+    let spawnX, spawnY;
+    let attempts = 0;
+    const maxAttempts = 10;
+
     // Try to find a spawn position that's not inside a hill (only for ground level)
     do {
         spawnX = spawnPoint.x + padding + Math.random() * (spawnPoint.width - padding * 2);
-        spawnY = spawnPoint.y - anchorY; // Use anchorY instead of height for accurate positioning
+        spawnY = spawnPoint.y - anchorY; // Spawn Y = Surface Y - anchor offset
         attempts++;
     } while (spawnPoint.isGround && isPointInsideHill(spawnX, map, baseGroundY) && attempts < maxAttempts);
 
-    // If we're on the ground and still inside a hill, adjust Y to the slope surface
+    // If still inside hill, use slope surface
     if (spawnPoint.isGround && isPointInsideHill(spawnX, map, baseGroundY)) {
         const slopeSurfaceY = getSlopeSurfaceY(spawnX, map, baseGroundY, scaledTileSize);
         if (slopeSurfaceY !== null && slopeSurfaceY < baseGroundY) {
-            spawnY = slopeSurfaceY - anchorY; // Use anchorY instead of height
+            spawnY = slopeSurfaceY - anchorY;
         }
     }
 
