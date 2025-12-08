@@ -230,16 +230,48 @@ let loadingManager = {
 
         generateAllFoliage();
 
-        setTimeout(() => {
-            const loadingScreen = document.getElementById('loading-screen');
-            const startScreen = document.getElementById('start-screen');
-            const settingsMenu = document.getElementById('settings-menu');
-            if (loadingScreen && startScreen) {
-                loadingScreen.style.display = 'none';
-                startScreen.style.display = 'flex';
-                if (settingsMenu) settingsMenu.style.display = 'none';
+        // Wait for server connection before showing start screen
+        this.waitForServer();
+    },
+    
+    waitForServer() {
+        const loadingText = document.getElementById('loading-text');
+        const serverStatusText = document.getElementById('server-status-text');
+        
+        if (loadingText) {
+            loadingText.textContent = 'Waiting for server connection...';
+        }
+        
+        // Check if socket is connected
+        const checkConnection = () => {
+            if (typeof isConnectedToServer !== 'undefined' && isConnectedToServer) {
+                // Connected! Show start screen
+                setTimeout(() => {
+                    const loadingScreen = document.getElementById('loading-screen');
+                    const startScreen = document.getElementById('start-screen');
+                    const settingsMenu = document.getElementById('settings-menu');
+                    if (loadingScreen && startScreen) {
+                        loadingScreen.style.display = 'none';
+                        startScreen.style.display = 'flex';
+                        if (settingsMenu) settingsMenu.style.display = 'none';
+                    }
+                }, 500);
+            } else if (typeof socketInitialized !== 'undefined' && socketInitialized && !isConnectedToServer) {
+                // Connection failed
+                if (loadingText) {
+                    loadingText.textContent = 'Server connection failed';
+                }
+                if (serverStatusText) {
+                    serverStatusText.textContent = '\u274c Could not connect to game server. Please refresh the page.';
+                    serverStatusText.style.color = '#e74c3c';
+                }
+            } else {
+                // Still waiting, check again
+                setTimeout(checkConnection, 100);
             }
-        }, 500); // Small delay to show 100% completion
+        };
+        
+        checkConnection();
     }
 };
 

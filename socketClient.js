@@ -87,9 +87,20 @@ function isPlayerInMyParty(odId) {
  * Initialize the socket connection to the game server
  */
 function initializeSocket() {
+    // Update loading text
+    const serverStatusText = document.getElementById('server-status-text');
+    if (serverStatusText) {
+        serverStatusText.textContent = 'Connecting to game server...';
+        serverStatusText.style.color = '#f39c12';
+    }
+    
     // Check if Socket.io is loaded
     if (typeof io === 'undefined') {
         console.warn('[Socket] Socket.io not loaded. Real-time multiplayer disabled.');
+        if (serverStatusText) {
+            serverStatusText.textContent = '❌ Failed to load multiplayer (Socket.io missing)';
+            serverStatusText.style.color = '#e74c3c';
+        }
         return false;
     }
 
@@ -106,6 +117,10 @@ function initializeSocket() {
         return true;
     } catch (error) {
         console.error('[Socket] Failed to initialize socket:', error);
+        if (serverStatusText) {
+            serverStatusText.textContent = '❌ Failed to connect to server';
+            serverStatusText.style.color = '#e74c3c';
+        }
         return false;
     }
 }
@@ -119,6 +134,13 @@ function setupSocketListeners() {
         console.log('[Socket] Connected to game server!');
         isConnectedToServer = true;
         socketInitialized = true;
+        
+        // Update loading text
+        const serverStatusText = document.getElementById('server-status-text');
+        if (serverStatusText) {
+            serverStatusText.textContent = '✓ Connected to game server';
+            serverStatusText.style.color = '#2ecc71';
+        }
         
         // Join the game with player data if game is active
         if (typeof player !== 'undefined' && player && typeof currentMapId !== 'undefined' && typeof isGameActive !== 'undefined' && isGameActive) {
@@ -151,9 +173,16 @@ function setupSocketListeners() {
 
     // Connection error
     socket.on('connect_error', (error) => {
-        console.warn('[Socket] Connection error:', error.message);
+        console.error('[Socket] Connection error:', error.message);
         isConnectedToServer = false;
-        socketInitialized = true; // Mark as initialized even on error so game can proceed offline
+        socketInitialized = true; // Mark as initialized so error is detected
+        
+        // Update loading text
+        const serverStatusText = document.getElementById('server-status-text');
+        if (serverStatusText) {
+            serverStatusText.textContent = '❌ Failed to connect to server (retrying...)';
+            serverStatusText.style.color = '#e74c3c';
+        }
     });
 
     // Receive current players when joining a map
