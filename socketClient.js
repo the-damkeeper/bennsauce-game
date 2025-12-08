@@ -1322,7 +1322,7 @@ function sendMonsterAttack(monsterId, damage, isCritical, attackType) {
         damage: damage,
         isCritical: isCritical || false,
         attackType: attackType || 'normal',
-        playerDirection: typeof player !== 'undefined' ? player.direction : 1
+        playerDirection: typeof player !== 'undefined' && player.facing ? (player.facing === 'right' ? 1 : -1) : 1
     });
     
     return true;
