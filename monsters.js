@@ -1070,27 +1070,23 @@ function distributeWorldBossRewards() {
     const contributionPercent = totalDamage > 0 ? (myDamage / totalDamage) * 100 : 0;
     
     // ============================================
-    // SCALE REWARDS BASED ON PLAYER LEVEL
+    // FLAT EXP AND GOLD REWARDS FROM MONSTER DATA
     // ============================================
-    // EXP reward = percentage of player's maxExp (EXP needed to level)
-    // Base: 2% of maxExp for participation
-    // Bonus: Up to 3% more based on contribution (max 5% of maxExp for top contributor)
-    // This means you need ~20 monster kills to level up as a solo player
+    // Get base EXP from monster type definition (flat value)
+    const monsterData = typeof monsterTypes !== 'undefined' ? monsterTypes[monster.type] : null;
+    const baseMonsterExp = monsterData?.exp || 10; // Fallback to 10 if not defined
     
-    const playerMaxExp = player.maxExp || 1000; // Fallback if not set
-    const playerLevel = player.level || 1;
+    // EXP scales with contribution (solo = full exp, split in multiplayer)
+    // Base: 20% of monster EXP for participation
+    // Bonus: Up to 80% more based on contribution (full exp for top/solo contributor)
+    const baseExpPercent = 0.20;
+    const bonusExpPercent = totalDamage > 0 ? 0.80 * (myDamage / totalDamage) : 0;
+    const expReward = Math.floor(baseMonsterExp * (baseExpPercent + bonusExpPercent));
     
-    // EXP: 2% base + up to 3% bonus = max 5% of a level for top contributor
-    const baseExpPercent = 0.02;
-    const bonusExpPercent = totalDamage > 0 ? 0.03 * (myDamage / totalDamage) : 0;
-    const expReward = Math.floor(playerMaxExp * (baseExpPercent + bonusExpPercent));
-    
-    // Gold: Scale based on level (higher level = more gold needed)
-    // Base gold = level * 500, scales with contribution
-    const baseGoldAmount = playerLevel * 500;
-    const baseGoldPercent = 0.20;
-    const bonusGoldPercent = totalDamage > 0 ? 0.80 * (myDamage / totalDamage) : 0;
-    const goldReward = Math.floor(baseGoldAmount * (baseGoldPercent + bonusGoldPercent));
+    // Gold: Use monster loot gold values (already defined in monster data)
+    // This is handled by loot drops, so calculate a small bonus gold for participation
+    const baseGoldAmount = (monster.level || 1) * 5; // Small gold bonus based on monster level
+    const goldReward = Math.floor(baseGoldAmount * (baseExpPercent + bonusExpPercent));
     
     // Apply guild buffs if applicable
     let finalGold = goldReward;
