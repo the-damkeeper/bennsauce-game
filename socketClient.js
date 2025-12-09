@@ -1141,16 +1141,21 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
     }
     
     // Add structures - they also function as platforms
+    // CRITICAL: Structures need height added to get TOP collision surface
     if (mapData.structures) {
         for (const s of mapData.structures) {
             if (!s.noSpawn && s.width >= 150) {
+                // Structure Y in data is where top surface RENDERING starts
+                // But the actual walkable surface is one tile (48px) above that
+                const structureTopY = s.y + GROUND_LEVEL_OFFSET;
                 allSpawnSurfaces.push({
                     x: s.x,
-                    y: s.y + GROUND_LEVEL_OFFSET, // Same calculation as platforms
+                    y: structureTopY, // Top collision surface
                     width: s.width,
                     isGround: false,
                     surfaceType: 'structure'
                 });
+                console.log(`[SOCKET SPAWN SURFACE] Structure at data Y=${s.y} → collision Y=${structureTopY}`);
             }
         }
     }
