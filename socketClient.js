@@ -1332,8 +1332,17 @@ function createMonsterFromServer(serverMonster) {
         return null;
     }
     
-    // Create the monster using existing game function (fade-in handles spawn effect)
-    const localMonster = createMonster(serverMonster.type, serverMonster.x, serverMonster.y);
+    // Create the monster using existing game function, passing server data as initialState
+    // CRITICAL: Pass serverMonster as initialState so createMonster() sees serverId
+    const initialState = {
+        serverId: serverMonster.id,
+        hp: serverMonster.hp,
+        maxHp: serverMonster.maxHp,
+        isMiniBoss: serverMonster.isMiniBoss,
+        isEliteMonster: serverMonster.isEliteMonster,
+        isTrialBoss: serverMonster.isTrialBoss
+    };
+    const localMonster = createMonster(serverMonster.type, serverMonster.x, serverMonster.y, initialState);
     
     if (localMonster) {
         // Store server ID mapping
