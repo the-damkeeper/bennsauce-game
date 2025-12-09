@@ -2331,6 +2331,9 @@ function createItemDrop(name, x, y, initialState = null, bypassLevelCheck = fals
     let newItem;
     const el = document.createElement('div');
     el.className = 'item-drop';
+    
+    // Debug: Log what ID we're receiving
+    console.log(`[createItemDrop] Creating ${name}, initialState.id: ${initialState?.id}`);
 
     if (name === 'Gold') {
         newItem = { 
