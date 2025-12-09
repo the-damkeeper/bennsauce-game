@@ -1856,10 +1856,15 @@ function handleItemPickedUp(data) {
  * Call this from createItemDrop after adding item to droppedItems
  */
 function checkPendingPickup(itemId) {
+    console.log(`[Socket] checkPendingPickup called for: ${itemId}, pending queue size: ${pendingPickups.size}`);
+    if (pendingPickups.size > 0) {
+        console.log(`[Socket] Pending items: ${Array.from(pendingPickups.keys()).join(', ')}`);
+    }
+    
     if (pendingPickups.has(itemId)) {
         const pickup = pendingPickups.get(itemId);
         pendingPickups.delete(itemId);
-        console.log(`[Socket] Processing pending pickup for ${itemId} (picked up by ${pickup.pickedUpByName})`);
+        console.log(`[Socket] ✓ Processing pending pickup for ${itemId} (picked up by ${pickup.pickedUpByName})`);
         
         // Find and remove the item that was just created
         for (let i = droppedItems.length - 1; i >= 0; i--) {
@@ -1868,7 +1873,7 @@ function checkPendingPickup(itemId) {
                     droppedItems[i].element.remove();
                 }
                 droppedItems.splice(i, 1);
-                console.log(`[Socket] Removed pending pickup item from droppedItems`);
+                console.log(`[Socket] ✓ Removed pending pickup item from droppedItems`);
                 break;
             }
         }
