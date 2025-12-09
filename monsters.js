@@ -1530,9 +1530,10 @@ function createMonster(type, x, y, initialState = null) {
         type, x, y, previousY: y,
         velocityX: 0, velocityY: 0,
         onPlatform: null,
-        spawnFrameCount: 5, // Skip gravity for 5 frames to ensure stable spawn positioning
+        spawnFrameCount: 15, // Skip gravity for 15 frames to ensure stable spawn positioning
         spawnFadeFrames: -1, // -1 means fade hasn't started yet (starts after physics grace period)
-        deathFadeFrames: 0, // For death fade-out animation
+        isSpawning: true, // Flag to prevent damage during spawn
+        deathFadeFrames: 30, // For death fade-out animation (initialized to 30)
         element: el,
         direction: Math.random() < 0.5 ? 1 : -1,
         aiState: 'idle',
@@ -1757,8 +1758,7 @@ function updateMonsters() {
         // --- NEW LOGIC FOR DEAD MONSTERS ---
         // This block now handles physics AND collision for dying monsters.
         if (m.isDead) {
-            // Death fade-out effect
-            if (m.deathFadeFrames === undefined) m.deathFadeFrames = 30;
+            // Death fade-out effect (30 frames = ~300ms)
             if (m.deathFadeFrames > 0) {
                 m.deathFadeFrames--;
                 const fadeProgress = m.deathFadeFrames / 30; // Fade from 1 to 0
@@ -1833,7 +1833,7 @@ function updateMonsters() {
         }
         
         // Always apply gravity and vertical physics (both single and multiplayer)
-        // Skip gravity for first 5 frames to prevent spawned monsters from falling through platforms
+        // Skip gravity for 15 frames to prevent spawned monsters from falling through platforms
         const isSpawnGracePeriod = m.spawnFrameCount !== undefined && m.spawnFrameCount > 0;
         if (isSpawnGracePeriod) {
             m.spawnFrameCount--;
@@ -1854,8 +1854,12 @@ function updateMonsters() {
             m.spawnFadeFrames--;
             const fadeProgress = 1 - (m.spawnFadeFrames / 30); // 30 frames total
             m.element.style.setProperty('opacity', String(fadeProgress), 'important');
-        } else if (m.spawnFadeFrames === 0 && m.element && m.element.style.opacity !== '1') {
-            m.element.style.setProperty('opacity', '1', 'important');
+        } else if (m.spawnFadeFrames === 0) {
+            // Fully visible - clear spawning flag and ensure opacity is 1
+            m.isSpawning = false;
+            if (m.element && m.element.style.opacity !== '1') {
+                m.element.style.setProperty('opacity', '1', 'important');
+            }
         }
 
         // Map boundary collision

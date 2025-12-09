@@ -4588,6 +4588,9 @@ function checkCollisions() {
         
         // Find the first monster that can hit the player
         for (const m of nearbyMonsters) {
+            // Skip monsters that are spawning (not yet fully visible)
+            if (m.isSpawning) continue;
+            
             if (isColliding(player, m) && !m.isDead && m.type !== 'testDummy') {
                 if (now - m.lastAttackTime > m.attackCooldown) {
                     // Check AGAIN if player became invincible (in case another monster already hit)
@@ -4662,7 +4665,8 @@ function checkCollisions() {
             : monsters;
 
         for (const m of nearbyMonsters) {
-            if (m.isDead || attack.hitMonsters.includes(m.id)) continue;
+            // Skip monsters that are spawning (not yet fully visible) or already dead
+            if (m.isDead || m.isSpawning || attack.hitMonsters.includes(m.id)) continue;
 
             if (isColliding(attack, m)) {
 
