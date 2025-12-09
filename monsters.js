@@ -31,14 +31,13 @@ function attemptEliteMonsterSpawn() {
     if (Math.random() > 0.3) return;
     
     // Get eligible monsters (exclude bosses, test dummies, and elite monsters)
-    // In multiplayer, ONLY transform server monsters (with serverId) to ensure synchronization
-    const isMultiplayer = typeof isServerAuthoritativeMonsters === 'function' && isServerAuthoritativeMonsters();
+    // SERVER-ONLY MODE: Only transform monsters with serverId (from server)
     const eligibleMonsters = monsters.filter(m => 
         !m.isMiniBoss && 
         !m.isEliteMonster && 
         m.type !== 'testDummy' &&
         !m.isDead &&
-        (!isMultiplayer || m.serverId) // In multiplayer, only transform server monsters
+        m.serverId // SERVER-ONLY: Must have serverId
     );
     
     if (eligibleMonsters.length === 0) return;
@@ -1543,10 +1542,10 @@ function updateTrialBossAnimation(monster) {
 // in monsters.js
 
 function createMonster(type, x, y, initialState = null) {
-    // In multiplayer, only create monsters from server sync (initialState will have serverId)
-    const isServerAuth = typeof window.isServerAuthoritativeMonsters === 'function' && window.isServerAuthoritativeMonsters();
-    if (isServerAuth && (!initialState || !initialState.serverId)) {
-        console.error('[SPAWN ERROR] Attempting to create local monster in multiplayer! Type:', type, 'hasInitialState:', !!initialState);
+    // SERVER-ONLY MODE: All monsters MUST come from server with serverId
+    if (!initialState || !initialState.serverId) {
+        console.error('[SPAWN ERROR] Attempting to create monster without serverId! Type:', type, 'hasInitialState:', !!initialState);
+        console.error('[SPAWN ERROR] ALL monsters must be created by server. This is a bug.');
         return null;
     }
     
@@ -2132,17 +2131,9 @@ function updateMonsterAI(m) {
  * Manages monster respawn timers and initiates spawning.
  */
 function updateSpawners() {
-    const now = Date.now();
-    const map = maps[currentMapId];
-
-    // Skip local spawning if server handles monsters OR if we're connected (waiting for server data)
-    if (typeof window.isServerAuthoritativeMonsters === 'function' && window.isServerAuthoritativeMonsters()) {
-        return;
-    }
-    // Also skip if connected to server - server will send monsters
-    if (typeof window.isConnectedToServer === 'function' && window.isConnectedToServer()) {
-        return;
-    }
+    // SERVER-ONLY MODE: Server handles ALL spawning and respawning
+    // This function should never execute
+    return;
 
     monsterSpawners.forEach(spawner => {
         const monsterData = monsterTypes[spawner.type];

@@ -2495,13 +2495,12 @@ function toggleDebugHitboxes(show) {
 
 // --- THIS IS THE NEW, CORRECTED FUNCTION ---
 function spawnMonster(monsterType) {
-    // In multiplayer, server handles ALL spawning
-    const isServerAuth = typeof isServerAuthoritativeMonsters === 'function' && isServerAuthoritativeMonsters();
-    if (isServerAuth) {
-        console.error('[SPAWN ERROR] spawnMonster() called in multiplayer mode! Type:', monsterType, '- This should not happen!');
-        return;
-    }
+    // SERVER-ONLY MODE: All spawning handled by server
+    console.error('[SPAWN ERROR] spawnMonster() should NEVER be called! Type:', monsterType);
+    console.error('[SPAWN ERROR] Server handles ALL monster spawning. This is a bug.');
+    return;
     
+    // DEAD CODE BELOW - keeping for reference but should never execute
     const monsterData = monsterTypes[monsterType];
     if (!monsterData) {
         console.error(`Attempted to spawn unknown monster type: ${monsterType}`);
@@ -2960,19 +2959,15 @@ function changeMap(mapId, spawnX, spawnY) {
         });
     }
 
-    // Check if server will handle monsters (for multiplayer)
-    // Use window.isConnectedToServer - if connected, server handles monsters even before we've joined
-    const serverWillSpawnMonsters = typeof window.isConnectedToServer === 'function' && window.isConnectedToServer();
-    if (worldState[mapId] && !serverWillSpawnMonsters) {
-        // Only restore saved monsters in single-player/offline mode
-        worldState[mapId].monsters.forEach(mState => createMonster(mState.type, mState.x, mState.y, mState));
+    // SERVER-ONLY MODE: Server handles ALL monsters
+    // Never restore monsters from worldState - server will send current monsters
+    // Only restore dropped items (they're client-side for now)
+    if (worldState[mapId]) {
         worldState[mapId].droppedItems.forEach(itemState => createItemDrop(itemState.name, itemState.x, itemState.y, itemState));
-    } else if (worldState[mapId] && serverWillSpawnMonsters) {
-        // In multiplayer, only restore dropped items (server handles monsters)
-        worldState[mapId].droppedItems.forEach(itemState => createItemDrop(itemState.name, itemState.x, itemState.y, itemState));
-    } else if (!worldState[mapId]) {
-        // Skip local monster spawning if server will handle it
-        if (map.monsters && !serverWillSpawnMonsters) {
+    }
+    
+    // NEVER spawn monsters locally - server handles everything
+    if (false && map.monsters) {
             map.monsters.forEach(m => {
                 const monsterData = monsterTypes[m.type];
                 if (!monsterData) {
@@ -3015,28 +3010,8 @@ function changeMap(mapId, spawnX, spawnY) {
     // Validate monsters - remove any that don't belong on this map
     validateMonstersForMap(mapId);
 
-    // Only create spawners for local mode (server handles respawning in multiplayer)
-    if (map.monsters && !serverWillSpawnMonsters) {
-        map.monsters.forEach(m => {
-            const monsterData = monsterTypes[m.type];
-            
-            // Don't create spawners for trial bosses - they spawn once and don't respawn
-            if (monsterData && monsterData.isTrialBoss) {
-                return;
-            }
-            
-            // Create spawners for regular monsters without fixed positions
-            // AND for mini-bosses (they have respawn timers)
-            if (m.x === undefined) {
-                const spawner = { type: m.type, maxCount: m.count, lastSpawnTime: 0 };
-                monsterSpawners.push(spawner);
-            } else if (monsterData && monsterData.isMiniBoss) {
-                // Mini-bosses with fixed positions also need spawners for respawning
-                const spawner = { type: m.type, maxCount: 1, spawnX: m.x, lastDefeatTime: 0 };
-                monsterSpawners.push(spawner);
-            }
-        });
-    }
+    // SERVER-ONLY MODE: No local spawners - server handles all respawning
+    // monsterSpawners array stays empty
 
     minimap.innerHTML = '';
     minimapContent = document.createElement('div');
@@ -4914,16 +4889,19 @@ function checkCollisions() {
                         continue; // Skip normal death handling - damageWorldBoss triggers endWorldBossEvent
                     }
                     
-                    // Server-authoritative monsters: skip ALL local death processing (server handles everything)
-                    const isServerAuth = typeof isServerAuthoritativeMonsters === 'function' && isServerAuthoritativeMonsters();
-                    if (isServerAuth) {
-                        if (!m.serverId) {
-                            console.error('[DROP ERROR] Monster died in multiplayer WITHOUT serverId! Type:', m.type, 'isElite:', m.isEliteMonster);
-                        }
-                        continue; // ALL monsters in multiplayer are handled server-side
+                    // SERVER-ONLY MODE: ALL death/drops handled server-side
+                    if (!m.serverId) {
+                        console.error('[DROP ERROR] Monster died WITHOUT serverId! Type:', m.type, 'isElite:', m.isEliteMonster);
+                        console.error('[DROP ERROR] This monster should not exist. Removing without drops.');
+                        // Remove the invalid monster
+                        if (m.element) m.element.remove();
+                        if (m.hitboxElement) m.hitboxElement.remove();
+                        const index = monsters.indexOf(m);
+                        if (index > -1) monsters.splice(index, 1);
+                        continue;
                     }
-                    
-                    console.log('[LOCAL DROP] Processing local monster death:', m.type, 'isElite:', m.isEliteMonster, 'serverAuth:', isServerAuth);
+                    // If monster has serverId, server will send death event - skip local processing
+                    continue;
                     m.isDead = true;
                     if (m.hitboxElement) m.hitboxElement.remove();
                     m.element.classList.add('monster-death');
