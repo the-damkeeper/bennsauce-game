@@ -255,145 +255,154 @@ gameTests.addTest('Collision Detection', () => {
     );
 });
 
-// Add test runner to debug console
-if (typeof window.debugGame !== 'undefined') {
-    window.debugGame.runTests = () => gameTests.runTests();
-}
+// Check if we're in development mode
+const isDevMode = window.location.hostname === 'localhost' || 
+                  window.location.hostname === '127.0.0.1' ||
+                  window.location.search.includes('debug=true') ||
+                  localStorage.getItem('debug') === 'true';
 
-// Debug functions for monster troubleshooting
-window.DEBUG_MONSTERS = false;
-window.MONSTER_POSITION_TRACKER = null;
-
-window.toggleMonsterDebug = function() {
-    window.DEBUG_MONSTERS = !window.DEBUG_MONSTERS;
-    console.log(`[DEBUG] Monster debug overlay: ${window.DEBUG_MONSTERS ? 'ENABLED' : 'DISABLED'}`);
-    if (!window.DEBUG_MONSTERS) {
-        // Clean up debug overlays
-        document.querySelectorAll('.monster-debug-overlay').forEach(el => el.remove());
+// Only expose debug functions in development mode
+if (isDevMode) {
+    // Add test runner to debug console
+    if (typeof window.debugGame !== 'undefined') {
+        window.debugGame.runTests = () => gameTests.runTests();
     }
-    return window.DEBUG_MONSTERS;
-};
 
-// Monster position tracking system
-window.startMonsterPositionTracking = function() {
-    if (window.MONSTER_POSITION_TRACKER) {
-        console.log('[TRACKER] Already running');
-        return;
-    }
-    
-    console.log('%c[TRACKER] STARTED - Logging all monster positions every 1 second', 'background: #ff0; color: #000; font-weight: bold; padding: 4px;');
-    console.log('[TRACKER] Use stopMonsterPositionTracking() to stop');
-    
-    const monsterSpawnLog = new Map(); // Track spawn info per monster
-    
-    window.MONSTER_POSITION_TRACKER = setInterval(() => {
-        if (!window.game || !window.game.monsters) return;
+    // Debug functions for monster troubleshooting
+    window.DEBUG_MONSTERS = false;
+    window.MONSTER_POSITION_TRACKER = null;
+
+    window.toggleMonsterDebug = function() {
+        window.DEBUG_MONSTERS = !window.DEBUG_MONSTERS;
+        console.log(`[DEBUG] Monster debug overlay: ${window.DEBUG_MONSTERS ? 'ENABLED' : 'DISABLED'}`);
+        if (!window.DEBUG_MONSTERS) {
+            // Clean up debug overlays
+            document.querySelectorAll('.monster-debug-overlay').forEach(el => el.remove());
+        }
+        return window.DEBUG_MONSTERS;
+    };
+
+    // Monster position tracking system
+    window.startMonsterPositionTracking = function() {
+        if (window.MONSTER_POSITION_TRACKER) {
+            console.log('[TRACKER] Already running');
+            return;
+        }
         
-        const monsters = window.game.monsters;
-        if (monsters.length === 0) return;
+        console.log('%c[TRACKER] STARTED - Logging all monster positions every 1 second', 'background: #ff0; color: #000; font-weight: bold; padding: 4px;');
+        console.log('[TRACKER] Use stopMonsterPositionTracking() to stop');
         
-        let hasInterestingEvents = false;
-        const interestingLogs = [];
+        const monsterSpawnLog = new Map(); // Track spawn info per monster
         
-        monsters.forEach((m, idx) => {
-            const mId = m.id;
+        window.MONSTER_POSITION_TRACKER = setInterval(() => {
+            if (!window.game || !window.game.monsters) return;
             
-            // Check if this is a newly spawned monster
-            if (!monsterSpawnLog.has(mId)) {
-                monsterSpawnLog.set(mId, {
-                    spawnX: m.x,
-                    spawnY: m.y,
-                    spawnTime: Date.now(),
-                    type: m.type,
-                    lastY: m.y,
-                    teleportCount: 0,
-                    maxYDelta: 0
-                });
-                hasInterestingEvents = true;
-                interestingLogs.push({
-                    type: 'spawn',
-                    message: `%c[SPAWN] Monster #${idx} (${m.type}) spawned at (${m.x.toFixed(1)}, ${m.y.toFixed(1)})`,
-                    style: 'background: #0f0; color: #000; font-weight: bold;'
-                });
-            }
+            const monsters = window.game.monsters;
+            if (monsters.length === 0) return;
             
-            const spawnInfo = monsterSpawnLog.get(mId);
-            const deltaY = Math.abs(m.y - spawnInfo.lastY);
-            const totalYChange = Math.abs(m.y - spawnInfo.spawnY);
+            let hasInterestingEvents = false;
+            const interestingLogs = [];
             
-            // Detect teleportation (sudden Y change > 50px)
-            if (deltaY > 50) {
-                spawnInfo.teleportCount++;
-                hasInterestingEvents = true;
-                interestingLogs.push({
-                    type: 'teleport',
-                    message: `%c[TELEPORT] Monster #${idx} (${m.type}) jumped ${deltaY.toFixed(1)}px! From ${spawnInfo.lastY.toFixed(1)} to ${m.y.toFixed(1)}`,
-                    style: 'background: #f00; color: #fff; font-weight: bold;'
-                });
-            }
-            
-            // Log significant movement (>20px total change)
-            if (deltaY > 10 && totalYChange > 20) {
-                hasInterestingEvents = true;
-                const age = ((Date.now() - spawnInfo.spawnTime) / 1000).toFixed(1);
-                interestingLogs.push({
-                    type: 'movement',
-                    message: `%c[MOVEMENT] Monster #${idx} (${m.type}) | Pos: (${m.x.toFixed(1)}, ${m.y.toFixed(1)}) | ΔY: ${deltaY.toFixed(1)}px | Total ΔY: ${totalYChange.toFixed(1)}px | Age: ${age}s | ${m.onPlatform ? 'ON PLATFORM' : 'AIRBORNE'}`,
-                    style: 'color: #ff0; font-weight: bold;'
-                });
-            }
-            
-            // Track max delta
-            if (deltaY > spawnInfo.maxYDelta) {
-                spawnInfo.maxYDelta = deltaY;
-            }
-            
-            // Update last position
-            spawnInfo.lastY = m.y;
-        });
-        
-        // Only log if there are interesting events
-        if (hasInterestingEvents) {
-            console.group(`%c[TRACKER] ${new Date().toLocaleTimeString()} - ${monsters.length} monster(s)`, 'color: #0ff; font-weight: bold;');
-            interestingLogs.forEach(log => {
-                console.log(log.message, log.style);
+            monsters.forEach((m, idx) => {
+                const mId = m.id;
+                
+                // Check if this is a newly spawned monster
+                if (!monsterSpawnLog.has(mId)) {
+                    monsterSpawnLog.set(mId, {
+                        spawnX: m.x,
+                        spawnY: m.y,
+                        spawnTime: Date.now(),
+                        type: m.type,
+                        lastY: m.y,
+                        teleportCount: 0,
+                        maxYDelta: 0
+                    });
+                    hasInterestingEvents = true;
+                    interestingLogs.push({
+                        type: 'spawn',
+                        message: `%c[SPAWN] Monster #${idx} (${m.type}) spawned at (${m.x.toFixed(1)}, ${m.y.toFixed(1)})`,
+                        style: 'background: #0f0; color: #000; font-weight: bold;'
+                    });
+                }
+                
+                const spawnInfo = monsterSpawnLog.get(mId);
+                const deltaY = Math.abs(m.y - spawnInfo.lastY);
+                const totalYChange = Math.abs(m.y - spawnInfo.spawnY);
+                
+                // Detect teleportation (sudden Y change > 50px)
+                if (deltaY > 50) {
+                    spawnInfo.teleportCount++;
+                    hasInterestingEvents = true;
+                    interestingLogs.push({
+                        type: 'teleport',
+                        message: `%c[TELEPORT] Monster #${idx} (${m.type}) jumped ${deltaY.toFixed(1)}px! From ${spawnInfo.lastY.toFixed(1)} to ${m.y.toFixed(1)}`,
+                        style: 'background: #f00; color: #fff; font-weight: bold;'
+                    });
+                }
+                
+                // Log significant movement (>20px total change)
+                if (deltaY > 10 && totalYChange > 20) {
+                    hasInterestingEvents = true;
+                    const age = ((Date.now() - spawnInfo.spawnTime) / 1000).toFixed(1);
+                    interestingLogs.push({
+                        type: 'movement',
+                        message: `%c[MOVEMENT] Monster #${idx} (${m.type}) | Pos: (${m.x.toFixed(1)}, ${m.y.toFixed(1)}) | ΔY: ${deltaY.toFixed(1)}px | Total ΔY: ${totalYChange.toFixed(1)}px | Age: ${age}s | ${m.onPlatform ? 'ON PLATFORM' : 'AIRBORNE'}`,
+                        style: 'color: #ff0; font-weight: bold;'
+                    });
+                }
+                
+                // Track max delta
+                if (deltaY > spawnInfo.maxYDelta) {
+                    spawnInfo.maxYDelta = deltaY;
+                }
+                
+                // Update last position
+                spawnInfo.lastY = m.y;
             });
-            console.groupEnd();
-        }
-        
-        console.groupEnd();
-        
-        // Cleanup dead monsters from tracking
-        const activeIds = new Set(monsters.map(m => m.id));
-        for (const [id, info] of monsterSpawnLog.entries()) {
-            if (!activeIds.has(id)) {
-                monsterSpawnLog.delete(id);
+            
+            // Only log if there are interesting events
+            if (hasInterestingEvents) {
+                console.group(`%c[TRACKER] ${new Date().toLocaleTimeString()} - ${monsters.length} monster(s)`, 'color: #0ff; font-weight: bold;');
+                interestingLogs.forEach(log => {
+                    console.log(log.message, log.style);
+                });
+                console.groupEnd();
             }
+            
+            console.groupEnd();
+            
+            // Cleanup dead monsters from tracking
+            const activeIds = new Set(monsters.map(m => m.id));
+            for (const [id, info] of monsterSpawnLog.entries()) {
+                if (!activeIds.has(id)) {
+                    monsterSpawnLog.delete(id);
+                }
+            }
+            
+        }, 1000);
+    };
+
+    window.stopMonsterPositionTracking = function() {
+        if (window.MONSTER_POSITION_TRACKER) {
+            clearInterval(window.MONSTER_POSITION_TRACKER);
+            window.MONSTER_POSITION_TRACKER = null;
+            console.log('%c[TRACKER] STOPPED', 'background: #f00; color: #fff; font-weight: bold; padding: 4px;');
+        } else {
+            console.log('[TRACKER] Not running');
         }
-        
-    }, 1000);
-};
+    };
 
-window.stopMonsterPositionTracking = function() {
-    if (window.MONSTER_POSITION_TRACKER) {
-        clearInterval(window.MONSTER_POSITION_TRACKER);
-        window.MONSTER_POSITION_TRACKER = null;
-        console.log('%c[TRACKER] STOPPED', 'background: #f00; color: #fff; font-weight: bold; padding: 4px;');
-    } else {
-        console.log('[TRACKER] Not running');
+    // Auto-run tests in development
+    if (window.location.hostname === 'localhost' || window.location.search.includes('test=true')) {
+        // Run tests after game initialization
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                console.log('🔧 Development mode detected - running tests...');
+                gameTests.runTests();
+            }, 2000);
+        });
     }
-};
 
-// Auto-run tests in development
-if (window.location.hostname === 'localhost' || window.location.search.includes('test=true')) {
-    // Run tests after game initialization
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            console.log('🔧 Development mode detected - running tests...');
-            gameTests.runTests();
-        }, 2000);
-    });
+    console.log('🧪 Test suite loaded. Run window.debugGame.runTests() to execute tests.');
+    console.log('🐛 Monster debug: Run toggleMonsterDebug() to enable visual debugging.');
 }
-
-console.log('🧪 Test suite loaded. Run window.debugGame.runTests() to execute tests.');
-console.log('🐛 Monster debug: Run toggleMonsterDebug() to enable visual debugging.');

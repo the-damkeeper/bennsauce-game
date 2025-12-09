@@ -294,18 +294,25 @@ class PerformanceMonitor {
 // Global performance monitor
 const performanceMonitor = new PerformanceMonitor();
 
-// Expose debug functions to console
-window.debugGame = {
-    togglePerformanceMonitor: () => performanceMonitor.toggle(),
-    exportPerformanceData: () => performanceMonitor.exportData(),
-    getPoolStats: () => typeof getPoolStats === 'function' ? getPoolStats() : 'Pools not available',
-    getMemoryInfo: () => typeof memoryManager !== 'undefined' ? memoryManager.getMemoryInfo() : 'Memory manager not available',
-    clearPools: () => typeof cleanupObjectPools === 'function' ? cleanupObjectPools() : 'Pools not available',
-    forceGC: () => window.gc ? window.gc() : 'GC not available'
-};
+// Check if we're in development mode
+const isDevelopment = window.location.hostname === 'localhost' || 
+                      window.location.hostname === '127.0.0.1' ||
+                      window.location.search.includes('debug=true') ||
+                      localStorage.getItem('debug') === 'true';
 
-// Console welcome message for developers
-console.log(`
+// Only expose debug functions in development mode
+if (isDevelopment) {
+    window.debugGame = {
+        togglePerformanceMonitor: () => performanceMonitor.toggle(),
+        exportPerformanceData: () => performanceMonitor.exportData(),
+        getPoolStats: () => typeof getPoolStats === 'function' ? getPoolStats() : 'Pools not available',
+        getMemoryInfo: () => typeof memoryManager !== 'undefined' ? memoryManager.getMemoryInfo() : 'Memory manager not available',
+        clearPools: () => typeof cleanupObjectPools === 'function' ? cleanupObjectPools() : 'Pools not available',
+        forceGC: () => window.gc ? window.gc() : 'GC not available'
+    };
+
+    // Console welcome message for developers
+    console.log(`
 🎮 BennSauce Debug Console
 
 Available commands:
@@ -318,3 +325,49 @@ Available commands:
 
 Add ?debug=true to URL or set localStorage.debug = 'true' for persistent debug mode.
 `);
+} else {
+    // Production mode - disable console methods to prevent cheating
+    // Keep error logging for debugging production issues
+    const noop = () => {};
+    
+    // Store original console for error reporting
+    const originalConsole = {
+        error: console.error.bind(console),
+        warn: console.warn.bind(console)
+    };
+    
+    // Override console methods
+    console.log = noop;
+    console.info = noop;
+    console.debug = noop;
+    console.table = noop;
+    console.dir = noop;
+    console.dirxml = noop;
+    console.trace = noop;
+    console.group = noop;
+    console.groupCollapsed = noop;
+    console.groupEnd = noop;
+    console.time = noop;
+    console.timeEnd = noop;
+    console.profile = noop;
+    console.profileEnd = noop;
+    console.count = noop;
+    console.clear = noop;
+    
+    // Keep error and warn for production debugging
+    console.error = originalConsole.error;
+    console.warn = originalConsole.warn;
+    
+    // Disable debugGame entirely
+    window.debugGame = {
+        togglePerformanceMonitor: noop,
+        exportPerformanceData: noop,
+        getPoolStats: noop,
+        getMemoryInfo: noop,
+        clearPools: noop,
+        forceGC: noop
+    };
+    
+    // Freeze the object to prevent modifications
+    Object.freeze(window.debugGame);
+}

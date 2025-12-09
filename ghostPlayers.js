@@ -48,8 +48,15 @@ const ghostDebug = {
     }
 };
 
-// Expose to console for easy access
-window.ghostDebug = ghostDebug;
+// Only expose to console in development mode
+const isGhostDebugMode = window.location.hostname === 'localhost' || 
+                          window.location.hostname === '127.0.0.1' ||
+                          window.location.search.includes('debug=true') ||
+                          localStorage.getItem('debug') === 'true';
+
+if (isGhostDebugMode) {
+    window.ghostDebug = ghostDebug;
+}
 
 // Random phrases that ghosts can say
 const ghostPhrases = [
@@ -839,10 +846,19 @@ function updateGhostPlayersForMap(mapId) {
     }
 }
 
-// Console helper functions
-window.copyGhostLogs = () => ghostDebug.copyLogsToClipboard();
-window.clearGhostLogs = () => ghostDebug.clear();
-window.getGhostLogs = (count = 50) => console.log(ghostDebug.getRecentLogs(count));
+// Check if we're in development mode
+const isGhostDevMode = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.search.includes('debug=true') ||
+                       localStorage.getItem('debug') === 'true';
+
+if (isGhostDevMode) {
+    // Console helper functions (dev mode only)
+    window.copyGhostLogs = () => ghostDebug.copyLogsToClipboard();
+    window.clearGhostLogs = () => ghostDebug.clear();
+    window.getGhostLogs = (count = 50) => console.log(ghostDebug.getRecentLogs(count));
+}
+
 window.showGhostInfo = () => {
     console.log(`%c=== GHOST PLAYER INFO ===`, 'color: #00ffff; font-weight: bold; font-size: var(--font-standard);');
     console.log(`%cTotal ghosts: ${ghostPlayers.length}`, 'color: #ffaa00');
