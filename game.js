@@ -1111,23 +1111,10 @@ function updateGameLogic() {
             updateCamera(); // Update camera after player physics
             updatePlayerBlink();
             updatePortalCharging();
-            updateMonsters();
-            
-            // For multiplayer non-host clients: interpolate monster positions from server
-            if (typeof interpolateMonsterPositions === 'function') {
-                interpolateMonsterPositions();
-            }
-            
-            // Update spatial grid after monster positions change (OPTIMIZED)
-            if (typeof updateSpatialGridForMonsters === 'function') {
-                updateSpatialGridForMonsters();
-            }
-            
             updateAttacks();
             updateProjectiles();
             updateDroppedItems();
             checkCollisions();
-            updateMiniMap();
             updatePortalAnimations();
             updateChatBubble();
             updatePlayerAnimation();
@@ -1138,6 +1125,22 @@ function updateGameLogic() {
                 updateQuestHelperUI();
             }
         }
+        
+        // Always update monsters, even when player is dead (server-authoritative)
+        updateMonsters();
+        
+        // For multiplayer non-host clients: interpolate monster positions from server
+        if (typeof interpolateMonsterPositions === 'function') {
+            interpolateMonsterPositions();
+        }
+        
+        // Update spatial grid after monster positions change (OPTIMIZED)
+        if (typeof updateSpatialGridForMonsters === 'function') {
+            updateSpatialGridForMonsters();
+        }
+        
+        // Always update mini-map to show monsters and other players
+        updateMiniMap();
 
         updateSpawners();
         updatePrompts();
