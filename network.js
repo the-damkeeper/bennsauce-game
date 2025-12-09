@@ -4414,14 +4414,19 @@ async function initializePresence() {
                     for (const playerId in previousPlayers) {
                         if (!onlinePlayers[playerId] && playerId !== player.name) {
                             const offlinePlayer = previousPlayers[playerId];
-                            if (typeof addChatMessage === 'function') {
-                                addChatMessage(`${offlinePlayer.playerName} has gone offline.`, 'player-leave');
-                            }
-                            // Show popup notification (no sound for offline)
-                            const isBuddy = player.buddies && player.buddies.some(b => b.name === offlinePlayer.playerName);
-                            const isGuildMember = player.guild && player.guild.name && offlinePlayer.guildName === player.guild.name;
-                            if (typeof window.showPlayerOnlineNotification === 'function') {
-                                window.showPlayerOnlineNotification(offlinePlayer.playerName, offlinePlayer.level, offlinePlayer.class || 'Beginner', false, isBuddy, isGuildMember);
+                            // Only show offline message if player wasn't already AFK
+                            // AFK players timing out shouldn't trigger "gone offline" message
+                            const wasAfk = offlinePlayer.status === 'afk';
+                            if (!wasAfk) {
+                                if (typeof addChatMessage === 'function') {
+                                    addChatMessage(`${offlinePlayer.playerName} has gone offline.`, 'player-leave');
+                                }
+                                // Show popup notification (no sound for offline)
+                                const isBuddy = player.buddies && player.buddies.some(b => b.name === offlinePlayer.playerName);
+                                const isGuildMember = player.guild && player.guild.name && offlinePlayer.guildName === player.guild.name;
+                                if (typeof window.showPlayerOnlineNotification === 'function') {
+                                    window.showPlayerOnlineNotification(offlinePlayer.playerName, offlinePlayer.level, offlinePlayer.class || 'Beginner', false, isBuddy, isGuildMember);
+                                }
                             }
                         }
                     }
