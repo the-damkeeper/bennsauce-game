@@ -4153,7 +4153,8 @@ function handlePlayerAttack(ability) {
                 attackX = player.x + player.width / 2 - attackBoxWidth / 2;
                 attackY = player.y + player.height / 2 - attackBoxHeight / 2;
             } else {
-                attackBoxWidth = (isMultiTarget ? 120 : 80) * SCALE;
+                // Multi-target abilities have wider hitbox (200px vs 80px for single-target)
+                attackBoxWidth = (isMultiTarget ? 200 : 80) * SCALE;
                 attackBoxHeight = 60 * SCALE;
                 attackX = player.facing === 'right' ? player.x + player.width - 20 * SCALE : player.x - attackBoxWidth + 20 * SCALE;
                 attackY = player.y;

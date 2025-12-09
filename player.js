@@ -4814,7 +4814,14 @@ function completeQuest(questId) {
     }
 
     // 4. If all item rewards were granted successfully, give EXP/Gold and complete the quest.
-    gainExp(quest.reward.exp);
+    // Scale quest EXP to be a percentage of player's maxExp (meaningful at any level)
+    // Base quest reward is divided by 1000 to get percent of maxExp
+    // e.g., reward.exp: 25 means 2.5% of maxExp, reward.exp: 200 means 20% of maxExp
+    // This keeps quests meaningful at all levels while not being overpowered
+    const questExpPercent = (quest.reward.exp || 0) / 1000;
+    const scaledQuestExp = Math.floor((player.maxExp || 100) * questExpPercent);
+    gainExp(scaledQuestExp);
+    
     player.gold += quest.reward.gold;
     player.stats.totalGoldEarned = (player.stats.totalGoldEarned || 0) + quest.reward.gold;
     updateAchievementProgress('action_accumulate', 'gold_earned');

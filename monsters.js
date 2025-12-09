@@ -1073,16 +1073,16 @@ function distributeWorldBossRewards() {
     // SCALE REWARDS BASED ON PLAYER LEVEL
     // ============================================
     // EXP reward = percentage of player's maxExp (EXP needed to level)
-    // Base: 15% of maxExp for participation
-    // Bonus: Up to 35% more based on contribution (max 50% of maxExp for top contributor)
-    // Gold scales similarly based on level
+    // Base: 2% of maxExp for participation
+    // Bonus: Up to 3% more based on contribution (max 5% of maxExp for top contributor)
+    // This means you need ~20 monster kills to level up as a solo player
     
     const playerMaxExp = player.maxExp || 1000; // Fallback if not set
     const playerLevel = player.level || 1;
     
-    // EXP: 15% base + up to 35% bonus = max 50% of a level for top contributor
-    const baseExpPercent = 0.15;
-    const bonusExpPercent = totalDamage > 0 ? 0.35 * (myDamage / totalDamage) : 0;
+    // EXP: 2% base + up to 3% bonus = max 5% of a level for top contributor
+    const baseExpPercent = 0.02;
+    const bonusExpPercent = totalDamage > 0 ? 0.03 * (myDamage / totalDamage) : 0;
     const expReward = Math.floor(playerMaxExp * (baseExpPercent + bonusExpPercent));
     
     // Gold: Scale based on level (higher level = more gold needed)
