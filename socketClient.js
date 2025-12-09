@@ -279,6 +279,7 @@ function setupSocketListeners() {
 
     // Monster transformed to elite (broadcast from server)
     socket.on('monsterTransformedElite', (data) => {
+        console.log('[ELITE DEBUG] Received monsterTransformedElite event from server:', data);
         handleEliteTransformFromServer(data);
     });
 
@@ -1623,7 +1624,30 @@ function isServerAuthoritativeMonsters() {
  * Send elite monster transformation to server
  */
 function sendEliteTransformToServer(serverId, maxHp, damage, originalMaxHp, originalDamage) {
-    if (!socket || !isConnectedToServer) return;
+    console.log(`[ELITE DEBUG] sendEliteTransformToServer called:`, {
+        hasSocket: !!socket,
+        isConnected: isConnectedToServer,
+        socketConnected: socket?.connected,
+        socketId: socket?.id
+    });
+    
+    if (!socket || !isConnectedToServer) {
+        console.error(`[ELITE DEBUG] Cannot send to server - not connected!`);
+        return;
+    }
+    
+    if (!socket.connected) {
+        console.error(`[ELITE DEBUG] Socket exists but not connected!`);
+        return;
+    }
+    
+    console.log(`[ELITE DEBUG] Emitting transformElite to server:`, {
+        monsterId: serverId,
+        maxHp,
+        damage,
+        originalMaxHp,
+        originalDamage
+    });
     
     socket.emit('transformElite', {
         monsterId: serverId,
@@ -1632,20 +1656,39 @@ function sendEliteTransformToServer(serverId, maxHp, damage, originalMaxHp, orig
         originalMaxHp: originalMaxHp,
         originalDamage: originalDamage
     });
+    
+    console.log(`[ELITE DEBUG] Emit complete, waiting for server response...`);
 }
 
 /**
  * Handle elite transformation received from server
  */
 function handleEliteTransformFromServer(data) {
+    console.log(`[ELITE DEBUG] Received transform from server:`, {
+        monsterId: data.monsterId,
+        maxHp: data.maxHp,
+        hp: data.hp,
+        damage: data.damage,
+        hasMapping: !!serverMonsterMapping[data.monsterId],
+        allMappedMonsters: Object.keys(serverMonsterMapping)
+    });
+    
     const localMonster = serverMonsterMapping[data.monsterId];
     if (!localMonster) {
-        console.log('[Socket] Monster not found for elite transform:', data.monsterId);
+        console.log('[ELITE DEBUG] Monster not found for elite transform:', data.monsterId);
+        console.log('[ELITE DEBUG] Available monsters:', Object.keys(serverMonsterMapping));
         return;
     }
     
+    console.log(`[ELITE DEBUG] Found local monster:`, {
+        type: localMonster.type,
+        isAlreadyElite: localMonster.isEliteMonster,
+        hasElement: !!localMonster.element
+    });
+    
     // Apply elite transformation (visual only if already transformed locally)
     if (!localMonster.isEliteMonster) {
+        console.log(`[ELITE DEBUG] Applying transformation...`);
         localMonster.isEliteMonster = true;
         localMonster.originalMaxHp = data.originalMaxHp;
         localMonster.originalDamage = data.originalDamage;
@@ -1656,27 +1699,41 @@ function handleEliteTransformFromServer(data) {
         // Add visual effects
         if (localMonster.element) {
             localMonster.element.classList.add('elite-monster');
+            console.log(`[ELITE DEBUG] Added elite-monster class`);
+        } else {
+            console.log(`[ELITE DEBUG] No element to add class to!`);
         }
         
         // Create elite HP bar if not already created
         if (typeof createEliteMonsterHPBar === 'function' && !localMonster.eliteHPBar) {
+            console.log(`[ELITE DEBUG] Creating elite HP bar...`);
             createEliteMonsterHPBar(localMonster);
+        } else {
+            console.log(`[ELITE DEBUG] HP bar not created:`, {
+                hasFunction: typeof createEliteMonsterHPBar === 'function',
+                alreadyHasBar: !!localMonster.eliteHPBar
+            });
         }
         
         // Update current elite reference
         if (typeof currentEliteMonster !== 'undefined') {
             currentEliteMonster = localMonster;
+            console.log(`[ELITE DEBUG] Set currentEliteMonster`);
         }
         
         // Show announcement to all players
         if (typeof addChatMessage === 'function') {
             addChatMessage(`⚠️ A ELITE ${localMonster.name.toUpperCase()} has appeared! ⚠️`, 'boss');
+            console.log(`[ELITE DEBUG] Showed announcement`);
         }
         if (typeof playSound === 'function') {
             playSound('quest'); // Dramatic effect
+            console.log(`[ELITE DEBUG] Played sound`);
         }
         
-        console.log(`[Socket] Monster ${data.monsterId} transformed to ELITE (received from server)`);
+        console.log(`[ELITE DEBUG] Transformation complete!`);
+    } else {
+        console.log(`[ELITE DEBUG] Monster already elite, skipping transformation`);
     }
 }
 

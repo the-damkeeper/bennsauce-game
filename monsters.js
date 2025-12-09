@@ -46,6 +46,13 @@ function attemptEliteMonsterSpawn() {
 }
 
 function transformToEliteMonster(monster) {
+    console.log(`[ELITE DEBUG] Starting transformation for monster:`, {
+        type: monster.type,
+        serverId: monster.serverId,
+        hasElement: !!monster.element,
+        isConnected: typeof isConnectedToServer !== 'undefined' ? isConnectedToServer : 'unknown'
+    });
+    
     // Mark as elite monster
     monster.isEliteMonster = true;
     monster.originalMaxHp = monster.maxHp;
@@ -56,11 +63,20 @@ function transformToEliteMonster(monster) {
     monster.hp = monster.maxHp;
     monster.damage = monster.damage * 3;
     
+    console.log(`[ELITE DEBUG] Stats boosted:`, {
+        maxHp: monster.maxHp,
+        damage: monster.damage,
+        originalMaxHp: monster.originalMaxHp,
+        originalDamage: monster.originalDamage
+    });
+    
     // Add glowing effect (no size scaling to preserve anchor points)
     monster.element.classList.add('elite-monster');
+    console.log(`[ELITE DEBUG] Added elite-monster class to element`);
     
     // Create elite monster HP bar at top of screen
     createEliteMonsterHPBar(monster);
+    console.log(`[ELITE DEBUG] Created elite HP bar`);
     
     // Announce the elite monster
     addChatMessage(`⚠️ A ELITE ${monster.name.toUpperCase()} has appeared! ⚠️`, 'boss');
@@ -70,7 +86,13 @@ function transformToEliteMonster(monster) {
     
     // If multiplayer, broadcast the transformation to server
     if (typeof sendEliteTransformToServer === 'function' && monster.serverId) {
+        console.log(`[ELITE DEBUG] Sending transformation to server for monster ${monster.serverId}`);
         sendEliteTransformToServer(monster.serverId, monster.maxHp, monster.damage, monster.originalMaxHp, monster.originalDamage);
+    } else {
+        console.log(`[ELITE DEBUG] NOT sending to server:`, {
+            hasFunction: typeof sendEliteTransformToServer === 'function',
+            hasServerId: !!monster.serverId
+        });
     }
 }
 
