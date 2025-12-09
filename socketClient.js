@@ -254,11 +254,11 @@ function setupSocketListeners() {
         syncMonstersFromServer(serverMonsters);
     });
 
-    // Monster spawned (respawned) - show VFX for individual spawns
+    // Monster spawned (respawned) with fade-in effect
     socket.on('monsterSpawned', (monsterData) => {
         // Only create if server is authoritative AND we don't already have this monster
         if (serverAuthoritativeMonsters && !serverMonsterMapping[monsterData.id]) {
-            createMonsterFromServer(monsterData, true); // true = show spawn VFX
+            createMonsterFromServer(monsterData);
         }
     });
 
@@ -1286,25 +1286,14 @@ function syncMonstersFromServer(serverMonsters) {
 /**
  * Create a local monster from server data
  * @param {Object} serverMonster - Monster data from server
- * @param {boolean} showSpawnVFX - Whether to show spawn visual effect (default: false for bulk spawns)
  */
-function createMonsterFromServer(serverMonster, showSpawnVFX = false) {
+function createMonsterFromServer(serverMonster) {
     if (typeof createMonster !== 'function') {
         console.warn('[Socket] createMonster function not available');
         return null;
     }
     
-    // Get monster dimensions for spawn effect
-    const monsterTypeData = typeof monsterTypes !== 'undefined' ? monsterTypes[serverMonster.type] : null;
-    const width = monsterTypeData?.width || 40;
-    const height = monsterTypeData?.height || 40;
-    
-    // Show spawn VFX if requested (for individual spawns/respawns)
-    if (showSpawnVFX && typeof createPixelArtEffect === 'function') {
-        createPixelArtEffect('spawnEffect', serverMonster.x, serverMonster.y, width, height);
-    }
-    
-    // Create the monster using existing game function
+    // Create the monster using existing game function (fade-in handles spawn effect)
     const localMonster = createMonster(serverMonster.type, serverMonster.x, serverMonster.y);
     
     if (localMonster) {
