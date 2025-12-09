@@ -1,6 +1,6 @@
 {
   "name": "bennsauce-game",
-  "version": "0.852",
+  "version": "0.853",
   "description": "BennSauce - A 2D MMORPG-style adventure game",
   "main": "electron-main.js",
   "scripts": {

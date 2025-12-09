@@ -523,7 +523,7 @@ class SaveManager {
         }
         
         return {
-            version: '0.852',
+            version: '0.853',
             timestamp: Date.now(),
             checksum: this.calculateChecksum(serializedCharacters),
             data: serializedCharacters
@@ -646,7 +646,7 @@ class SaveManager {
             const metadata = {
                 lastSave: Date.now(),
                 totalSaves: (this.getMetadata().totalSaves || 0) + 1,
-                gameVersion: '0.852'
+                gameVersion: '0.853'
             };
             localStorage.setItem(this.metaKey, JSON.stringify(metadata));
             
@@ -679,7 +679,7 @@ class SaveManager {
             audioSettings,
             metadata,
             exportDate: new Date().toISOString(),
-            gameVersion: '0.852'
+            gameVersion: '0.853'
         };
     }
     
@@ -4641,10 +4641,16 @@ function playQuestVFX() {
     const sheetWidth = effectData.frameWidth * animation.length * PIXEL_ART_SCALE;
     const sheetHeight = effectData.frameHeight * PIXEL_ART_SCALE;
     el.style.backgroundSize = `${sheetWidth}px ${sheetHeight}px`;
+    
+    // Set initial frame immediately to avoid showing full sheet
+    if (animation.length > 0) {
+        const firstFrame = animation[0];
+        el.style.backgroundPosition = `-${firstFrame.x * PIXEL_ART_SCALE}px -${firstFrame.y * PIXEL_ART_SCALE}px`;
+    }
 
     worldContent.appendChild(el);
 
-    let currentFrame = 0;
+    let currentFrame = 1; // Start at frame 1 since we already showed frame 0
     const frameDuration = 80;
 
     const animationInterval = setInterval(() => {

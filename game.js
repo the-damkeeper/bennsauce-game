@@ -753,7 +753,7 @@ function startGame(isNewCharacter = false) {
     updateSkillHotbarUI();
     updateEquipmentUI();
 
-    addChatMessage("Welcome to BennSauce v0.852!", 'system');
+    addChatMessage("Welcome to BennSauce v0.853!", 'system');
     
     // Initialize online presence tracking immediately (needed for party EXP on all maps including Dewdrop)
     if (typeof initializePresence === 'function') {

@@ -2054,7 +2054,10 @@ function createRemoteQuestVFXFallback(x, y) {
     
     if (typeof artAssets !== 'undefined' && artAssets.questVFX) {
         el.style.backgroundImage = `url(${artAssets.questVFX})`;
-        el.style.backgroundSize = `${effectData.sheetWidth * PIXEL_ART_SCALE}px ${effectData.sheetHeight * PIXEL_ART_SCALE}px`;
+        // Calculate background size based on animation frames, not entire sheet
+        const sheetWidth = effectData.frameWidth * animation.length * PIXEL_ART_SCALE;
+        const sheetHeight = effectData.frameHeight * PIXEL_ART_SCALE;
+        el.style.backgroundSize = `${sheetWidth}px ${sheetHeight}px`;
         el.style.imageRendering = 'pixelated';
     }
     
@@ -2064,6 +2067,8 @@ function createRemoteQuestVFXFallback(x, y) {
     }
     
     let frameIndex = 0;
+    const frameDuration = 80; // Match local player frame duration
+    
     const animateVFX = () => {
         if (frameIndex >= animation.length) {
             el.remove();
@@ -2072,9 +2077,17 @@ function createRemoteQuestVFXFallback(x, y) {
         const frame = animation[frameIndex];
         el.style.backgroundPosition = `-${frame.x * PIXEL_ART_SCALE}px -${frame.y * PIXEL_ART_SCALE}px`;
         frameIndex++;
-        setTimeout(animateVFX, 100);
+        setTimeout(animateVFX, frameDuration);
     };
-    animateVFX();
+    
+    // Start with first frame immediately to avoid showing full sheet
+    if (animation.length > 0) {
+        const firstFrame = animation[0];
+        el.style.backgroundPosition = `-${firstFrame.x * PIXEL_ART_SCALE}px -${firstFrame.y * PIXEL_ART_SCALE}px`;
+    }
+    
+    // Start animation after a frame
+    setTimeout(animateVFX, frameDuration);
 }
 
 /**

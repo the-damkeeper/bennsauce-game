@@ -1,7 +1,7 @@
 // Game Constants - Centralized configuration
 const GAME_CONFIG = {
     // Version
-    VERSION: '0.852',
+    VERSION: '0.853',
     
     // Performance
     TARGET_FPS: 100, // Target 100 FPS cap

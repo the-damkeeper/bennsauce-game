@@ -1135,7 +1135,7 @@ async function saveCharacterToCloud(characterData, forceImmediate = false) {
         // Add metadata
         charToSave._cloudMeta = {
             lastSaved: firebase.firestore.FieldValue.serverTimestamp(),
-            version: '0.852',
+            version: '0.853',
             checksum: generateChecksum(charToSave)
         };
 
