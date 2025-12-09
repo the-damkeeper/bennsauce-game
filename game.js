@@ -124,7 +124,7 @@ let isGameActive = false;
 // Attack holding system
 let isHoldingAttack = false;
 let lastHeldAttackTime = 0;
-const HELD_ATTACK_DELAY = 300; // 300ms between held attacks
+const HELD_ATTACK_DELAY = 500; // 500ms between held attacks (matches player.attackCooldown)
 let worldState = {}; // To save state of maps when player leaves them
 let lastSaveTime = 0;
 const AUTO_SAVE_INTERVAL = 60000; // 60 seconds
@@ -1568,18 +1568,18 @@ function lootItems() {
 
         // Check pet auto-loot range
         let petDistance = Infinity;
-        if (player.pet && player.pet.type) {
-            const petInfo = petData[player.pet.type];
+        if (player.activePet && player.activePet.isSpawned && player.activePet.type) {
+            const petInfo = petData[player.activePet.type];
             if (petInfo) {
                 petDistance = Math.hypot(
-                    (player.pet.x + petInfo.width / 2) - (item.x + item.width / 2),
-                    (player.pet.y + petInfo.height / 2) - (item.y + item.height / 2)
+                    (player.activePet.x + petInfo.width / 2) - (item.x + item.width / 2),
+                    (player.activePet.y + petInfo.height / 2) - (item.y + item.height / 2)
                 );
             }
         }
 
         // Item can be looted either by player manually or by pet automatically
-        const canLoot = playerDistance < LOOT_RANGE || (player.pet && petDistance < (petData[player.pet.type]?.lootRange || 0));
+        const canLoot = playerDistance < LOOT_RANGE || (player.activePet && player.activePet.isSpawned && petDistance < (petData[player.activePet.type]?.lootRange || 0));
 
         if (canLoot) {
             let itemWasPickedUp = false;
