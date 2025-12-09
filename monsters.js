@@ -1640,6 +1640,9 @@ function createMonster(type, x, y, initialState = null) {
     // --- END OF FIX ---
 
     worldContent.appendChild(el);
+    
+    // Start invisible for spawn fade-in effect
+    el.style.opacity = '0';
 
     if (initialState) {
         newMonster.id = initialState.id;
@@ -2212,10 +2215,8 @@ function spawnMonster(type) {
         }
     }
 
-    createPixelArtEffect('spawnEffect', spawnX, spawnY, monsterData.width, monsterData.height);
-    setTimeout(() => {
-        createMonster(type, spawnX, spawnY);
-    }, 350);
+    // Spawn immediately with fade-in effect (no VFX needed)
+    createMonster(type, spawnX, spawnY);
 }
 
 // in monsters.js
