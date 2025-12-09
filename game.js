@@ -2523,8 +2523,20 @@ function spawnMonster(monsterType) {
         }
     }
     
-    // NOTE: Structures are NOT spawn surfaces - they're solid ground decoration
-    // Monsters spawn on the ground BEHIND structures, not on top of them
+    // Add structures - they also function as platforms
+    if (map.structures) {
+        for (const s of map.structures) {
+            if (!s.noSpawn && s.width >= 150) {
+                allSpawnSurfaces.push({
+                    x: s.x,
+                    y: s.y + GROUND_LEVEL_OFFSET, // Same calculation as platforms
+                    width: s.width,
+                    isGround: false,
+                    surfaceType: 'structure'
+                });
+            }
+        }
+    }
 
     if (allSpawnSurfaces.length === 0) {
         console.warn(`[Spawn] No valid spawn surfaces for ${monsterType} in ${currentMapId}`);
@@ -2743,9 +2755,10 @@ function changeMap(mapId, spawnX, spawnY) {
         });
     }
 
-    const allSurfaces = [...(map.platforms || []), ...(map.structures || [])];
+    // Add both platforms and structures to collision array
     const scaledTileSize = spriteData.ground.tileSize * PIXEL_ART_SCALE;
 
+    const allSurfaces = [...(map.platforms || []), ...(map.structures || [])];
     allSurfaces.forEach(pData => {
         const pEl = document.createElement('div');
         pEl.className = 'platform';

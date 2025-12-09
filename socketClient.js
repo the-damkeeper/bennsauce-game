@@ -1140,8 +1140,20 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
         }
     }
     
-    // NOTE: Structures are NOT spawn surfaces - they're solid decoration
-    // Monsters spawn on ground behind structures, not on top
+    // Add structures - they also function as platforms
+    if (mapData.structures) {
+        for (const s of mapData.structures) {
+            if (!s.noSpawn && s.width >= 150) {
+                allSpawnSurfaces.push({
+                    x: s.x,
+                    y: s.y + GROUND_LEVEL_OFFSET, // Same calculation as platforms
+                    width: s.width,
+                    isGround: false,
+                    surfaceType: 'structure'
+                });
+            }
+        }
+    }
     
     const validSpawnPoints = allSpawnSurfaces;
     
