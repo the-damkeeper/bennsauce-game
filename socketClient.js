@@ -1792,7 +1792,11 @@ function sendItemPickup(item) {
 
 /**
  * Handle item picked up notification from server
+ * Uses a pending queue to handle race conditions where pickup events
+ * arrive before items are created on remote clients
  */
+const pendingPickups = new Map(); // itemId -> { x, y, pickedUpBy, pickedUpByName, timestamp }
+
 function handleItemPickedUp(data) {
     if (typeof droppedItems === 'undefined') return;
     
@@ -1805,12 +1809,12 @@ function handleItemPickedUp(data) {
     
     console.log(`[Socket] ${pickedUpByName} picked up item at (${x}, ${y}), itemId: ${itemId}`);
     
-    // Find and remove the item by matching id or position (within tolerance)
+    // Try to find and remove the item
     let found = false;
     for (let i = droppedItems.length - 1; i >= 0; i--) {
         const item = droppedItems[i];
         
-        // Match by ID if available, or by approximate position
+        // Match by ID (primary) or by approximate position (fallback)
         const matchesId = item.id === itemId;
         const matchesPosition = Math.abs(item.x - x) < 50 && Math.abs(item.y - y) < 50;
         
@@ -1833,11 +1837,46 @@ function handleItemPickedUp(data) {
     }
     
     if (!found) {
-        console.warn(`[Socket] Failed to find item to remove! itemId: ${itemId}, position: (${x}, ${y})`);
-        const itemsInfo = droppedItems.map(item => `${item.name}[id=${item.id}]@(${Math.round(item.x)},${Math.round(item.y)})`);
-        console.warn(`[Socket] Current droppedItems (${droppedItems.length}): ${itemsInfo.join(', ')}`);
+        // Item not found - add to pending queue (will be removed when created)
+        pendingPickups.set(itemId, { x, y, pickedUpBy, pickedUpByName, timestamp: Date.now() });
+        console.log(`[Socket] Item not found yet, added to pending pickups queue. Queue size: ${pendingPickups.size}`);
+        
+        // Clean up old pending pickups after 10 seconds
+        setTimeout(() => {
+            if (pendingPickups.has(itemId)) {
+                pendingPickups.delete(itemId);
+                console.log(`[Socket] Cleaned up stale pending pickup: ${itemId}`);
+            }
+        }, 10000);
     }
 }
+
+/**
+ * Check if a newly created item should be immediately removed (was already picked up)
+ * Call this from createItemDrop after adding item to droppedItems
+ */
+function checkPendingPickup(itemId) {
+    if (pendingPickups.has(itemId)) {
+        const pickup = pendingPickups.get(itemId);
+        pendingPickups.delete(itemId);
+        console.log(`[Socket] Processing pending pickup for ${itemId} (picked up by ${pickup.pickedUpByName})`);
+        
+        // Find and remove the item that was just created
+        for (let i = droppedItems.length - 1; i >= 0; i--) {
+            if (droppedItems[i].id === itemId) {
+                if (droppedItems[i].element) {
+                    droppedItems[i].element.remove();
+                }
+                droppedItems.splice(i, 1);
+                console.log(`[Socket] Removed pending pickup item from droppedItems`);
+                break;
+            }
+        }
+    }
+}
+
+// Export for use by createItemDrop
+window.checkPendingPickup = checkPendingPickup;
 
 /**
  * Handle party member stats update from server

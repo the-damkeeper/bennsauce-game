@@ -2464,4 +2464,9 @@ function createItemDrop(name, x, y, initialState = null, bypassLevelCheck = fals
         droppedItemObject.animationTimer = 0;
     }
     droppedItems.push(droppedItemObject);
+    
+    // Check if this item was already picked up (race condition handling)
+    if (typeof checkPendingPickup === 'function') {
+        checkPendingPickup(droppedItemObject.id);
+    }
 }
