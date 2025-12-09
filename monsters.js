@@ -2466,7 +2466,8 @@ function createItemDrop(name, x, y, initialState = null, bypassLevelCheck = fals
     droppedItems.push(droppedItemObject);
     
     // Check if this item was already picked up (race condition handling)
-    if (typeof checkPendingPickup === 'function') {
-        checkPendingPickup(droppedItemObject.id);
+    // The function is on window because it's defined in socketClient.js
+    if (typeof window.checkPendingPickup === 'function') {
+        window.checkPendingPickup(droppedItemObject.id);
     }
 }
