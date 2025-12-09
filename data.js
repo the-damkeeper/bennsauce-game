@@ -4824,7 +4824,7 @@ const maps = {
             { type: 'beautician', x: 780, y: 278 },
             { type: 'guildMaster', x: 750 },
             { type: 'gachaponMachine', x: 1150, y: 400 },
-            { type: 'mailbox', x: 1050, y: 400 },
+            //{ type: 'mailbox', x: 1050, y: 400 },
             { type: 'storageKeeper', x: 150 },
             { type: 'mrSalami', x: 150, y: 358 },
             { type: 'captainBorisReturn', x: 1800 }

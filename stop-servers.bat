@@ -1,5 +1,8 @@
 @echo off
 echo Stopping BennSauce Servers...
-taskkill /F /IM node.exe >nul 2>&1
+echo Killing processes on port 3001 (game server)...
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":3001" ^| findstr "LISTENING"') do taskkill /F /PID %%a >nul 2>&1
+echo Killing processes on port 8080 (web server)...
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8080" ^| findstr "LISTENING"') do taskkill /F /PID %%a >nul 2>&1
 echo Servers stopped!
 timeout /t 2

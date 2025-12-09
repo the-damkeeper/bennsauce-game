@@ -2,9 +2,10 @@
 echo Starting BennSauce Servers...
 echo.
 
-:: Kill any existing node processes on our ports
-echo Stopping any existing servers...
-taskkill /F /IM node.exe >nul 2>&1
+:: Kill any existing processes on our ports (safer than killing all node.exe)
+echo Stopping any existing servers on ports 3001 and 8080...
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":3001" ^| findstr "LISTENING"') do taskkill /F /PID %%a >nul 2>&1
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8080" ^| findstr "LISTENING"') do taskkill /F /PID %%a >nul 2>&1
 
 :: Wait a moment
 timeout /t 2 /nobreak >nul

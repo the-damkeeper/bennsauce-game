@@ -11921,6 +11921,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 openEnhancementConfirmation({ source: 'inventory', tab: activeInventoryTab, index: selectedInventoryIndex });
                 return;
             }
+            if (e.target.closest('#inventory-drop-btn')) {
+                const item = player.inventory[activeInventoryTab]?.[selectedInventoryIndex];
+                if (!item) return;
+                const confirmed = await showConfirmation("Drop Item", `Drop ${item.name} on the ground?`, "Drop", "Cancel");
+                if (confirmed) {
+                    // Create the item drop at player's position
+                    createItemDrop(item.name, player.x, player.y, { 
+                        stats: item.stats, 
+                        rarity: item.rarity, 
+                        enhancement: item.enhancement,
+                        quantity: item.quantity,
+                        levelReq: item.levelReq,
+                        isQuestItem: item.isQuestItem
+                    });
+                    // Remove from inventory
+                    player.inventory[activeInventoryTab].splice(selectedInventoryIndex, 1);
+                    selectedInventoryIndex = null;
+                    updateInventoryUI();
+                }
+                return;
+            }
             if (e.target.closest('#inventory-trash-btn')) {
                 const item = player.inventory[activeInventoryTab]?.[selectedInventoryIndex];
                 if (!item) return;
