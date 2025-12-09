@@ -2335,7 +2335,7 @@ function createItemDrop(name, x, y, initialState = null, bypassLevelCheck = fals
     if (name === 'Gold') {
         newItem = { 
             name: 'Gold', 
-            id: Math.random(), 
+            id: initialState?.id || Math.random(), // Use server ID if provided
             amount: initialState?.amount || 1, 
             rarity: 'exp',
             // Preserve multiplayer ownership info if provided
@@ -2363,7 +2363,7 @@ function createItemDrop(name, x, y, initialState = null, bypassLevelCheck = fals
 
             newItem = { 
                 name, 
-                id: Math.random(), 
+                id: initialState?.id || Math.random(), // Use server ID if provided
                 rarity: baseItem.isQuestItem ? 'quest' : 'common', 
                 levelReq: baseItem.levelReq, 
                 isQuestItem: baseItem.isQuestItem || false, 

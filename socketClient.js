@@ -1494,6 +1494,7 @@ function handleMonsterKilledFromServer(data) {
         for (const drop of data.drops) {
             if (drop.name === 'Gold') {
                 createItemDrop('Gold', drop.x, drop.y, { 
+                    id: drop.id, // Use server-provided ID for reliable pickup sync
                     amount: drop.amount,
                     ownerId: data.lootRecipient,
                     ownerTimeout: Date.now() + 60000, // 60 seconds ownership
@@ -1506,6 +1507,7 @@ function handleMonsterKilledFromServer(data) {
                 }
             } else if (drop.name) {
                 createItemDrop(drop.name, drop.x, drop.y, {
+                    id: drop.id, // Use server-provided ID for reliable pickup sync
                     ownerId: data.lootRecipient,
                     ownerTimeout: Date.now() + 60000, // 60 seconds ownership
                     serverVelocityX: drop.velocityX,
