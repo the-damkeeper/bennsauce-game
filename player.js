@@ -2876,82 +2876,38 @@ function showDeathScreen() {
     // Hide player sprite
     document.getElementById('player').style.opacity = '0';
     
-    // Create death modal
-    const deathModal = document.createElement('div');
-    deathModal.id = 'death-modal';
-    deathModal.style.position = 'fixed';
-    deathModal.style.top = '0';
-    deathModal.style.left = '0';
-    deathModal.style.width = '100%';
-    deathModal.style.height = '100%';
-    deathModal.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-    deathModal.style.zIndex = '100000';
-    deathModal.style.display = 'flex';
-    deathModal.style.alignItems = 'center';
-    deathModal.style.justifyContent = 'center';
-    
-    const deathContent = document.createElement('div');
-    deathContent.style.backgroundColor = '#2c2c2c';
-    deathContent.style.padding = '40px';
-    deathContent.style.borderRadius = '12px';
-    deathContent.style.border = '3px solid #c0392b';
-    deathContent.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)';
-    deathContent.style.textAlign = 'center';
-    deathContent.style.maxWidth = '500px';
-    
-    const deathTitle = document.createElement('h2');
-    deathTitle.textContent = 'You Died';
-    deathTitle.style.color = '#e74c3c';
-    deathTitle.style.fontSize = '48px';
-    deathTitle.style.marginBottom = '20px';
-    deathTitle.style.textShadow = '2px 2px 4px rgba(0,0,0,0.5)';
-    
-    const deathMessage = document.createElement('p');
+    // Create death prompt using same styling as party/trade invites
+    const deathPrompt = document.createElement('div');
+    deathPrompt.className = 'invite-prompt death-prompt';
     const respawnLocation = player.hasLeftDewdrop ? 'Iron Haven' : 'Dewdrop Beach';
-    deathMessage.innerHTML = `
-        <div style="color: #ecf0f1; font-size: 18px; margin-bottom: 20px;">
-            You lost <span style="color: #e74c3c;">10% of your EXP</span>
-        </div>
-        <div style="color: #bdc3c7; font-size: 16px; margin-bottom: 30px;">
-            You will be teleported back to <span style="color: #3498db;">${respawnLocation}</span>
+    deathPrompt.innerHTML = `
+        <h3>You Died</h3>
+        <p>You lost <strong>10% of your EXP</strong><br>
+        You will be teleported back to <strong>${respawnLocation}</strong></p>
+        <div class="invite-buttons">
+            <button class="invite-accept-btn" onclick="dismissDeathPrompt();">Respawn</button>
         </div>
     `;
     
-    const okButton = document.createElement('button');
-    okButton.textContent = 'OK';
-    okButton.className = 'btn';
-    okButton.style.fontSize = '24px';
-    okButton.style.padding = '15px 50px';
-    okButton.style.backgroundColor = '#3498db';
-    okButton.style.color = 'white';
-    okButton.style.border = 'none';
-    okButton.style.borderRadius = '8px';
-    okButton.style.cursor = 'pointer';
-    okButton.style.transition = 'all 0.3s';
+    // Center the prompt on screen
+    deathPrompt.style.position = 'fixed';
+    deathPrompt.style.top = '50%';
+    deathPrompt.style.left = '50%';
+    deathPrompt.style.transform = 'translate(-50%, -50%)';
+    deathPrompt.style.zIndex = '100000';
     
-    okButton.onmouseover = () => {
-        okButton.style.backgroundColor = '#2980b9';
-        okButton.style.transform = 'scale(1.05)';
-    };
-    okButton.onmouseout = () => {
-        okButton.style.backgroundColor = '#3498db';
-        okButton.style.transform = 'scale(1)';
-    };
+    document.body.appendChild(deathPrompt);
+}
+
+// Global function to dismiss death prompt and respawn
+function dismissDeathPrompt() {
+    const deathPrompt = document.querySelector('.death-prompt');
+    const gravestone = document.getElementById('player-gravestone');
     
-    okButton.onclick = () => {
-        // Remove modal and gravestone
-        deathModal.remove();
-        gravestone.remove();
-        
-        // Respawn player
-        respawnPlayer();
-    };
+    if (deathPrompt) deathPrompt.remove();
+    if (gravestone) gravestone.remove();
     
-    deathContent.appendChild(deathTitle);
-    deathContent.appendChild(deathMessage);
-    deathContent.appendChild(okButton);
-    deathModal.appendChild(deathContent);
-    document.body.appendChild(deathModal);
+    respawnPlayer();
 }
 
 /**

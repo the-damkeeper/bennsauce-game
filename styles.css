@@ -2073,6 +2073,12 @@ body.gamepad-active #invite-prompt-container {
     background: #9b59b6;
 }
 
+/* Death Prompt - red accent */
+.death-prompt h3 {
+    background: #e74c3c;
+    color: white;
+}
+
 @keyframes inviteSlideUp {
     from {
         transform: translateY(50px);
