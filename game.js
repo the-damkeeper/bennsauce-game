@@ -1447,7 +1447,8 @@ function autoPetLoot() {
         const item = droppedItems[i];
         
         // Check loot ownership (multiplayer) - skip if someone else owns it and timeout hasn't passed
-        if (item.ownerId && item.ownerTimeout && Date.now() < item.ownerTimeout) {
+        // Only apply ownership if ownerId is actually set (not null/undefined)
+        if (item.ownerId && item.ownerId !== null && item.ownerTimeout && Date.now() < item.ownerTimeout) {
             if (typeof player !== 'undefined' && item.ownerId !== player.odId) {
                 continue; // Can't loot - belongs to another player
             }
@@ -1554,7 +1555,8 @@ function lootItems() {
         const item = droppedItems[i];
         
         // Check loot ownership (multiplayer) - skip if someone else owns it and timeout hasn't passed
-        if (item.ownerId && item.ownerTimeout && Date.now() < item.ownerTimeout) {
+        // Only apply ownership if ownerId is actually set (not null/undefined)
+        if (item.ownerId && item.ownerId !== null && item.ownerTimeout && Date.now() < item.ownerTimeout) {
             if (typeof player !== 'undefined' && item.ownerId !== player.odId) {
                 continue; // Can't loot - belongs to another player
             }
