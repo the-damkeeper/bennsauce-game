@@ -5003,8 +5003,10 @@ function checkCollisions() {
                         }
                     }
 
-                    // Elite Monster drops extra gold
+                    // Elite Monster drops (NOTE: In multiplayer, elite monsters should always be server monsters
+                    // and this code path should never execute. Elite drops are handled server-side.)
                     if (wasEliteMonster) {
+                        console.warn('[Elite Drop] Client-side elite drop - this should not happen in multiplayer!');
                         const eliteGoldAmount = Math.floor(50000 + Math.random() * 50000); // 50k-100k gold
                         createItemDrop('Gold', m.x - 40, m.y + m.height / 2, { amount: eliteGoldAmount });
                         updateBestiaryDrop(m.type, 'Gold', eliteGoldAmount);

@@ -31,11 +31,14 @@ function attemptEliteMonsterSpawn() {
     if (Math.random() > 0.3) return;
     
     // Get eligible monsters (exclude bosses, test dummies, and elite monsters)
+    // In multiplayer, ONLY transform server monsters (with serverId) to ensure synchronization
+    const isMultiplayer = typeof isServerAuthoritativeMonsters === 'function' && isServerAuthoritativeMonsters();
     const eligibleMonsters = monsters.filter(m => 
         !m.isMiniBoss && 
         !m.isEliteMonster && 
         m.type !== 'testDummy' &&
-        !m.isDead
+        !m.isDead &&
+        (!isMultiplayer || m.serverId) // In multiplayer, only transform server monsters
     );
     
     if (eligibleMonsters.length === 0) return;
