@@ -1543,6 +1543,13 @@ function updateTrialBossAnimation(monster) {
 // in monsters.js
 
 function createMonster(type, x, y, initialState = null) {
+    // In multiplayer, only create monsters from server sync (initialState will have serverId)
+    const isServerAuth = typeof window.isServerAuthoritativeMonsters === 'function' && window.isServerAuthoritativeMonsters();
+    if (isServerAuth && (!initialState || !initialState.serverId)) {
+        console.error('[SPAWN ERROR] Attempting to create local monster in multiplayer! Type:', type, 'hasInitialState:', !!initialState);
+        return null;
+    }
+    
     const monsterData = monsterTypes[type];
     
     // Guard against invalid monster types (e.g., world boss which uses separate system)

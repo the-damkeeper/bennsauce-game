@@ -2495,6 +2495,13 @@ function toggleDebugHitboxes(show) {
 
 // --- THIS IS THE NEW, CORRECTED FUNCTION ---
 function spawnMonster(monsterType) {
+    // In multiplayer, server handles ALL spawning
+    const isServerAuth = typeof isServerAuthoritativeMonsters === 'function' && isServerAuthoritativeMonsters();
+    if (isServerAuth) {
+        console.error('[SPAWN ERROR] spawnMonster() called in multiplayer mode! Type:', monsterType, '- This should not happen!');
+        return;
+    }
+    
     const monsterData = monsterTypes[monsterType];
     if (!monsterData) {
         console.error(`Attempted to spawn unknown monster type: ${monsterType}`);
@@ -4908,10 +4915,15 @@ function checkCollisions() {
                     }
                     
                     // Server-authoritative monsters: skip ALL local death processing (server handles everything)
-                    if (typeof isServerAuthoritativeMonsters === 'function' && isServerAuthoritativeMonsters() && m.serverId) {
-                        continue; // Server will send monsterKilled event with drops, exp, etc.
+                    const isServerAuth = typeof isServerAuthoritativeMonsters === 'function' && isServerAuthoritativeMonsters();
+                    if (isServerAuth) {
+                        if (!m.serverId) {
+                            console.error('[DROP ERROR] Monster died in multiplayer WITHOUT serverId! Type:', m.type, 'isElite:', m.isEliteMonster);
+                        }
+                        continue; // ALL monsters in multiplayer are handled server-side
                     }
                     
+                    console.log('[LOCAL DROP] Processing local monster death:', m.type, 'isElite:', m.isEliteMonster, 'serverAuth:', isServerAuth);
                     m.isDead = true;
                     if (m.hitboxElement) m.hitboxElement.remove();
                     m.element.classList.add('monster-death');
@@ -5003,10 +5015,9 @@ function checkCollisions() {
                         }
                     }
 
-                    // Elite Monster drops (NOTE: In multiplayer, elite monsters should always be server monsters
-                    // and this code path should never execute. Elite drops are handled server-side.)
+                    // Elite Monster drops (NOTE: In multiplayer, this code should NEVER execute.)
                     if (wasEliteMonster) {
-                        console.warn('[Elite Drop] Client-side elite drop - this should not happen in multiplayer!');
+                        console.error('[DROP ERROR] Client-side elite drop in multiplayer mode! This is a bug!');
                         const eliteGoldAmount = Math.floor(50000 + Math.random() * 50000); // 50k-100k gold
                         createItemDrop('Gold', m.x - 40, m.y + m.height / 2, { amount: eliteGoldAmount });
                         updateBestiaryDrop(m.type, 'Gold', eliteGoldAmount);
