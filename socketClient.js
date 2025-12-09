@@ -17,7 +17,7 @@ let lastSentPosition = { x: 0, y: 0 };
 // Configuration
 const SOCKET_CONFIG = {
     SERVER_URL: 'https://bennsauce-server.onrender.com', // Change this for production
-    POSITION_UPDATE_RATE: 50, // Send position every 50ms (20 times/sec) for smoother movement
+    POSITION_UPDATE_RATE: 33, // Send position every 33ms (~30 times/sec) for smoother movement
     POSITION_THRESHOLD: 1 // Only send if moved more than 1 pixel
 };
 
