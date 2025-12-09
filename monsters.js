@@ -1827,9 +1827,16 @@ function updateMonsters() {
         const isSpawnGracePeriod = m.spawnFrameCount !== undefined && m.spawnFrameCount > 0;
         if (isSpawnGracePeriod) {
             m.spawnFrameCount--;
+            // Fade in during spawn grace period to hide position correction snap
+            const fadeProgress = 1 - (m.spawnFrameCount / 5); // 5 frames total
+            m.element.style.opacity = fadeProgress;
         } else {
             m.velocityY += GRAVITY;
             m.y += m.velocityY;
+            // Ensure fully visible after spawn grace
+            if (m.element.style.opacity !== '1') {
+                m.element.style.opacity = '1';
+            }
         }
 
         // Map boundary collision
