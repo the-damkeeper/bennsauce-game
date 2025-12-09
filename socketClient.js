@@ -866,6 +866,9 @@ function updateRemotePlayers() {
     for (const odId in remotePlayers) {
         const remotePlayer = remotePlayers[odId];
         
+        // Skip updating dead players (gravestone is static)
+        if (remotePlayer.isDead) continue;
+        
         // Smooth interpolation towards target position (higher = snappier, lower = smoother but laggier)
         const lerpFactor = 0.4;
         remotePlayer.x += (remotePlayer.targetX - remotePlayer.x) * lerpFactor;
@@ -2102,7 +2105,7 @@ function handleRemotePlayerDeath(data) {
     const remotePlayer = remotePlayers[data.odId];
     if (!remotePlayer) return;
     
-    console.log(`[Client] ${data.name} died`);
+    console.log(`[Client] ${data.name} died at (${data.x}, ${data.y})`);
     
     // Mark player as dead
     remotePlayer.isDead = true;
@@ -2110,28 +2113,46 @@ function handleRemotePlayerDeath(data) {
     // Hide player element, show gravestone
     if (remotePlayer.element) {
         remotePlayer.element.style.opacity = '0';
+        remotePlayer.element.style.display = 'none';
+    }
+    
+    // Remove old gravestone if exists
+    if (remotePlayer.gravestone) {
+        remotePlayer.gravestone.remove();
     }
     
     // Create gravestone
-    if (!remotePlayer.gravestone) {
-        const gravestone = document.createElement('div');
-        gravestone.className = 'remote-player-gravestone';
-        gravestone.textContent = '🪦';
-        gravestone.style.position = 'absolute';
-        gravestone.style.fontSize = '48px';
-        gravestone.style.zIndex = '100';
-        gravestone.style.filter = 'drop-shadow(2px 2px 4px rgba(0,0,0,0.5))';
-        gravestone.style.pointerEvents = 'none';
-        document.getElementById('scaling-container').appendChild(gravestone);
-        remotePlayer.gravestone = gravestone;
-    }
+    const gravestone = document.createElement('div');
+    gravestone.className = 'remote-player-gravestone';
+    gravestone.textContent = '🪦';
+    gravestone.style.position = 'absolute';
+    gravestone.style.fontSize = '64px';
+    gravestone.style.zIndex = '9999';
+    gravestone.style.filter = 'drop-shadow(3px 3px 6px rgba(0,0,0,0.7))';
+    gravestone.style.pointerEvents = 'none';
+    gravestone.style.left = `${data.x}px`;
+    gravestone.style.top = `${data.y - 50}px`;
+    gravestone.style.display = 'block';
+    gravestone.style.transition = 'none';
     
-    // Position gravestone at death location
-    if (remotePlayer.gravestone) {
-        remotePlayer.gravestone.style.left = `${data.x}px`;
-        remotePlayer.gravestone.style.top = `${data.y - 40}px`;
-        remotePlayer.gravestone.style.display = 'block';
-    }
+    // Add name label to gravestone
+    const nameLabel = document.createElement('div');
+    nameLabel.textContent = data.name;
+    nameLabel.style.position = 'absolute';
+    nameLabel.style.bottom = '-25px';
+    nameLabel.style.left = '50%';
+    nameLabel.style.transform = 'translateX(-50%)';
+    nameLabel.style.color = '#95a5a6';
+    nameLabel.style.fontSize = '14px';
+    nameLabel.style.fontFamily = "'Ari9500', cursive";
+    nameLabel.style.textShadow = '1px 1px 2px rgba(0,0,0,0.8)';
+    nameLabel.style.whiteSpace = 'nowrap';
+    gravestone.appendChild(nameLabel);
+    
+    document.getElementById('scaling-container').appendChild(gravestone);
+    remotePlayer.gravestone = gravestone;
+    
+    console.log(`[Client] Gravestone created for ${data.name} at (${data.x}, ${data.y - 50})`);
 }
 
 /**
@@ -2149,6 +2170,7 @@ function handleRemotePlayerRespawn(data) {
     // Show player element
     if (remotePlayer.element) {
         remotePlayer.element.style.opacity = '1';
+        remotePlayer.element.style.display = 'block';
     }
     
     // Remove gravestone
