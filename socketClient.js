@@ -1113,6 +1113,7 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
     }
     
     // Build spawn surfaces list - MUST match game.js exactly
+    // ONLY platforms and ground - NOT structures
     const allSpawnSurfaces = [];
     
     // Add ground
@@ -1139,22 +1140,8 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
         }
     }
     
-    // Add structures - monsters spawn ON TOP
-    if (mapData.structures) {
-        for (const s of mapData.structures) {
-            if (!s.noSpawn && s.width >= 150) {
-                // Structure top = structure Y + offset - height
-                const structureTopY = s.y + GROUND_LEVEL_OFFSET - scaledTileSize;
-                allSpawnSurfaces.push({
-                    x: s.x,
-                    y: structureTopY,
-                    width: s.width,
-                    isGround: false,
-                    surfaceType: 'structure'
-                });
-            }
-        }
-    }
+    // NOTE: Structures are NOT spawn surfaces - they're solid decoration
+    // Monsters spawn on ground behind structures, not on top
     
     const validSpawnPoints = allSpawnSurfaces;
     
