@@ -2110,10 +2110,17 @@ function handleRemotePlayerDeath(data) {
     // Mark player as dead
     remotePlayer.isDead = true;
     
-    // Hide player element, show gravestone
-    if (remotePlayer.element) {
-        remotePlayer.element.style.opacity = '0';
-        remotePlayer.element.style.display = 'none';
+    // Hide player sprite (the canvas in spriteContainer)
+    if (remotePlayer.spriteContainer) {
+        remotePlayer.spriteContainer.style.display = 'none';
+    }
+    
+    // Hide nameplate and chat bubble
+    if (remotePlayer.nameplate) {
+        remotePlayer.nameplate.style.display = 'none';
+    }
+    if (remotePlayer.chatBubble) {
+        remotePlayer.chatBubble.style.display = 'none';
     }
     
     // Remove old gravestone if exists
@@ -2167,10 +2174,17 @@ function handleRemotePlayerRespawn(data) {
     // Mark player as alive
     remotePlayer.isDead = false;
     
-    // Show player element
-    if (remotePlayer.element) {
-        remotePlayer.element.style.opacity = '1';
-        remotePlayer.element.style.display = 'block';
+    // Show player sprite container again
+    if (remotePlayer.spriteContainer) {
+        remotePlayer.spriteContainer.style.display = 'block';
+    }
+    
+    // Show nameplate and chat bubble again
+    if (remotePlayer.nameplate) {
+        remotePlayer.nameplate.style.display = 'block';
+    }
+    if (remotePlayer.chatBubble) {
+        remotePlayer.chatBubble.style.display = 'block';
     }
     
     // Remove gravestone
