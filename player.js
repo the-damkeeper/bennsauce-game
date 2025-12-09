@@ -2847,7 +2847,111 @@ function handlePlayerDeath() {
     player.buffs = [];
     player.isInvisible = false;
 
-    setTimeout(respawnPlayer, 1500);
+    // Broadcast death to multiplayer server
+    if (typeof sendPlayerDeath === 'function') {
+        sendPlayerDeath();
+    }
+
+    // Show death screen and wait for user to click OK
+    showDeathScreen();
+}
+
+/**
+ * Show death screen with gravestone until user clicks OK
+ */
+function showDeathScreen() {
+    // Create gravestone element on player's body
+    const gravestone = document.createElement('div');
+    gravestone.id = 'player-gravestone';
+    gravestone.textContent = '🪦';
+    gravestone.style.position = 'absolute';
+    gravestone.style.fontSize = '64px';
+    gravestone.style.zIndex = '9999';
+    gravestone.style.filter = 'drop-shadow(3px 3px 6px rgba(0,0,0,0.7))';
+    gravestone.style.left = `${player.x}px`;
+    gravestone.style.top = `${player.y - 50}px`;
+    gravestone.style.pointerEvents = 'none';
+    document.getElementById('scaling-container').appendChild(gravestone);
+    
+    // Hide player sprite
+    document.getElementById('player').style.opacity = '0';
+    
+    // Create death modal
+    const deathModal = document.createElement('div');
+    deathModal.id = 'death-modal';
+    deathModal.style.position = 'fixed';
+    deathModal.style.top = '0';
+    deathModal.style.left = '0';
+    deathModal.style.width = '100%';
+    deathModal.style.height = '100%';
+    deathModal.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    deathModal.style.zIndex = '100000';
+    deathModal.style.display = 'flex';
+    deathModal.style.alignItems = 'center';
+    deathModal.style.justifyContent = 'center';
+    
+    const deathContent = document.createElement('div');
+    deathContent.style.backgroundColor = '#2c2c2c';
+    deathContent.style.padding = '40px';
+    deathContent.style.borderRadius = '12px';
+    deathContent.style.border = '3px solid #c0392b';
+    deathContent.style.boxShadow = '0 8px 32px rgba(0,0,0,0.5)';
+    deathContent.style.textAlign = 'center';
+    deathContent.style.maxWidth = '500px';
+    
+    const deathTitle = document.createElement('h2');
+    deathTitle.textContent = 'You Died';
+    deathTitle.style.color = '#e74c3c';
+    deathTitle.style.fontSize = '48px';
+    deathTitle.style.marginBottom = '20px';
+    deathTitle.style.textShadow = '2px 2px 4px rgba(0,0,0,0.5)';
+    
+    const deathMessage = document.createElement('p');
+    const respawnLocation = player.hasLeftDewdrop ? 'Iron Haven' : 'Dewdrop Beach';
+    deathMessage.innerHTML = `
+        <div style="color: #ecf0f1; font-size: 18px; margin-bottom: 20px;">
+            You lost <span style="color: #e74c3c;">10% of your EXP</span>
+        </div>
+        <div style="color: #bdc3c7; font-size: 16px; margin-bottom: 30px;">
+            You will be teleported back to <span style="color: #3498db;">${respawnLocation}</span>
+        </div>
+    `;
+    
+    const okButton = document.createElement('button');
+    okButton.textContent = 'OK';
+    okButton.className = 'btn';
+    okButton.style.fontSize = '24px';
+    okButton.style.padding = '15px 50px';
+    okButton.style.backgroundColor = '#3498db';
+    okButton.style.color = 'white';
+    okButton.style.border = 'none';
+    okButton.style.borderRadius = '8px';
+    okButton.style.cursor = 'pointer';
+    okButton.style.transition = 'all 0.3s';
+    
+    okButton.onmouseover = () => {
+        okButton.style.backgroundColor = '#2980b9';
+        okButton.style.transform = 'scale(1.05)';
+    };
+    okButton.onmouseout = () => {
+        okButton.style.backgroundColor = '#3498db';
+        okButton.style.transform = 'scale(1)';
+    };
+    
+    okButton.onclick = () => {
+        // Remove modal and gravestone
+        deathModal.remove();
+        gravestone.remove();
+        
+        // Respawn player
+        respawnPlayer();
+    };
+    
+    deathContent.appendChild(deathTitle);
+    deathContent.appendChild(deathMessage);
+    deathContent.appendChild(okButton);
+    deathModal.appendChild(deathContent);
+    document.body.appendChild(deathModal);
 }
 
 /**
@@ -2870,6 +2974,11 @@ function respawnPlayer() {
     // Update stat window in real-time if open (respawn changes HP/MP)
     if (statWindowElement && statWindowElement.style.display !== 'none') {
         updateStatWindowUI();
+    }
+    
+    // Broadcast respawn to multiplayer server
+    if (typeof sendPlayerRespawn === 'function') {
+        sendPlayerRespawn();
     }
 }
 

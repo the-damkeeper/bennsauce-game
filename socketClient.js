@@ -282,6 +282,16 @@ function setupSocketListeners() {
         handleEliteTransformFromServer(data);
     });
 
+    // Player died (show death visual for other players)
+    socket.on('playerDied', (data) => {
+        handleRemotePlayerDeath(data);
+    });
+
+    // Player respawned (remove death visual)
+    socket.on('playerRespawned', (data) => {
+        handleRemotePlayerRespawn(data);
+    });
+
     // Error from server
     socket.on('error', (data) => {
         console.error('[Socket] Server error:', data.message);
@@ -703,6 +713,16 @@ function updateRemotePlayerAppearance(data) {
 
     // Update nameplate to show guild and medals
     updateRemotePlayerNameplate(remotePlayer);
+    
+    // If inspector is open for this player, refresh it
+    const inspectWindow = document.getElementById('player-inspect-popup');
+    const inspectTitle = document.getElementById('inspect-popup-title');
+    if (inspectWindow && inspectWindow.style.display !== 'none' && 
+        inspectTitle && inspectTitle.textContent.includes(remotePlayer.name)) {
+        if (typeof inspectPlayer === 'function') {
+            inspectPlayer(remotePlayer.name);
+        }
+    }
 }
 
 /**
@@ -2050,8 +2070,98 @@ function createRemoteQuestVFXFallback(x, y) {
     animateVFX();
 }
 
+/**
+ * Send player death to server (broadcast to other players)
+ */
+function sendPlayerDeath() {
+    if (!socket || !isConnectedToServer) return;
+    
+    socket.emit('playerDeath', {
+        odId: player.odId,
+        name: player.name,
+        x: player.x,
+        y: player.y
+    });
+}
+
+/**
+ * Send player respawn to server
+ */
+function sendPlayerRespawn() {
+    if (!socket || !isConnectedToServer) return;
+    
+    socket.emit('playerRespawn', {
+        odId: player.odId
+    });
+}
+
+/**
+ * Handle remote player death (show gravestone/death visual)
+ */
+function handleRemotePlayerDeath(data) {
+    const remotePlayer = remotePlayers[data.odId];
+    if (!remotePlayer) return;
+    
+    console.log(`[Client] ${data.name} died`);
+    
+    // Mark player as dead
+    remotePlayer.isDead = true;
+    
+    // Hide player element, show gravestone
+    if (remotePlayer.element) {
+        remotePlayer.element.style.opacity = '0';
+    }
+    
+    // Create gravestone
+    if (!remotePlayer.gravestone) {
+        const gravestone = document.createElement('div');
+        gravestone.className = 'remote-player-gravestone';
+        gravestone.textContent = '🪦';
+        gravestone.style.position = 'absolute';
+        gravestone.style.fontSize = '48px';
+        gravestone.style.zIndex = '100';
+        gravestone.style.filter = 'drop-shadow(2px 2px 4px rgba(0,0,0,0.5))';
+        gravestone.style.pointerEvents = 'none';
+        document.getElementById('scaling-container').appendChild(gravestone);
+        remotePlayer.gravestone = gravestone;
+    }
+    
+    // Position gravestone at death location
+    if (remotePlayer.gravestone) {
+        remotePlayer.gravestone.style.left = `${data.x}px`;
+        remotePlayer.gravestone.style.top = `${data.y - 40}px`;
+        remotePlayer.gravestone.style.display = 'block';
+    }
+}
+
+/**
+ * Handle remote player respawn (remove gravestone, show player)
+ */
+function handleRemotePlayerRespawn(data) {
+    const remotePlayer = remotePlayers[data.odId];
+    if (!remotePlayer) return;
+    
+    console.log(`[Client] ${remotePlayer.name} respawned`);
+    
+    // Mark player as alive
+    remotePlayer.isDead = false;
+    
+    // Show player element
+    if (remotePlayer.element) {
+        remotePlayer.element.style.opacity = '1';
+    }
+    
+    // Remove gravestone
+    if (remotePlayer.gravestone) {
+        remotePlayer.gravestone.remove();
+        remotePlayer.gravestone = null;
+    }
+}
+
 // Export broadcast function for other scripts
 window.broadcastPlayerVFX = broadcastPlayerVFX;
+window.sendPlayerDeath = sendPlayerDeath;
+window.sendPlayerRespawn = sendPlayerRespawn;
 
 // Export interpolation function for game loop
 window.interpolateMonsterPositions = interpolateMonsterPositions;
