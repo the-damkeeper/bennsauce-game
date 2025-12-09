@@ -1490,7 +1490,9 @@ function handleMonsterKilledFromServer(data) {
     
     // Create drops from server-provided drop list (same for all clients)
     if (data.drops && data.drops.length > 0 && typeof createItemDrop === 'function') {
-        console.log('[Socket] Creating drops:', data.drops);
+        console.log('[Socket] Creating drops:', data.drops.length, 'items');
+        let createdCount = 0;
+        const beforeCount = typeof droppedItems !== 'undefined' ? droppedItems.length : 0;
         for (const drop of data.drops) {
             if (drop.name === 'Gold') {
                 createItemDrop('Gold', drop.x, drop.y, { 
@@ -1501,6 +1503,7 @@ function handleMonsterKilledFromServer(data) {
                     serverVelocityX: drop.velocityX,
                     serverVelocityY: drop.velocityY
                 });
+                createdCount++;
                 // Track bestiary drops if we're the loot recipient
                 if (weGetLoot && typeof updateBestiaryDrop === 'function') {
                     updateBestiaryDrop(data.type, 'Gold', drop.amount);
@@ -1513,12 +1516,15 @@ function handleMonsterKilledFromServer(data) {
                     serverVelocityX: drop.velocityX,
                     serverVelocityY: drop.velocityY
                 });
+                createdCount++;
                 // Track bestiary drops if we're the loot recipient
                 if (weGetLoot && typeof updateBestiaryDrop === 'function') {
                     updateBestiaryDrop(data.type, drop.name);
                 }
             }
         }
+        const afterCount = typeof droppedItems !== 'undefined' ? droppedItems.length : 0;
+        console.log(`[Socket] Drop creation complete: requested=${data.drops.length}, attempted=${createdCount}, actual new items=${afterCount - beforeCount}`);
     }
     
     if (weGetLoot && monsterData) {
