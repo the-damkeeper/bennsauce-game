@@ -5271,8 +5271,8 @@ function isGroundAt(x, y) {
             if (s.y === undefined) continue;
             const structureSurfaceTop = s.y;
             const structureSurfaceBottom = s.y + 50; // Structures have ~50px height tolerance
-            const structureStartX = s.x + 10; // Small edge padding
-            const structureEndX = s.x + s.width - 10;
+            const structureStartX = s.x + 3; // Small edge padding
+            const structureEndX = s.x + s.width - 3;
             if (x >= structureStartX && x <= structureEndX && y >= structureSurfaceTop && y <= structureSurfaceBottom) {
                 return true;
             }

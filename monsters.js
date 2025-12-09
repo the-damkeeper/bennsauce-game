@@ -67,6 +67,11 @@ function transformToEliteMonster(monster) {
     playSound('quest'); // Use quest sound for dramatic effect
     
     currentEliteMonster = monster;
+    
+    // If multiplayer, broadcast the transformation to server
+    if (typeof sendEliteTransformToServer === 'function' && monster.serverId) {
+        sendEliteTransformToServer(monster.serverId, monster.maxHp, monster.damage, monster.originalMaxHp, monster.originalDamage);
+    }
 }
 
 function createEliteMonsterHPBar(monster) {

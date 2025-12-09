@@ -277,6 +277,11 @@ function setupSocketListeners() {
         handleMonsterPositionsFromServer(data.monsters);
     });
 
+    // Monster transformed to elite (broadcast from server)
+    socket.on('monsterTransformedElite', (data) => {
+        handleEliteTransformFromServer(data);
+    });
+
     // Error from server
     socket.on('error', (data) => {
         console.error('[Socket] Server error:', data.message);
@@ -1305,6 +1310,38 @@ function createMonsterFromServer(serverMonster) {
         localMonster.hp = serverMonster.hp;
         localMonster.maxHp = serverMonster.maxHp || localMonster.maxHp;
         
+        // Sync special monster flags
+        localMonster.isMiniBoss = serverMonster.isMiniBoss || false;
+        localMonster.isEliteMonster = serverMonster.isEliteMonster || false;
+        localMonster.isTrialBoss = serverMonster.isTrialBoss || false;
+        
+        // Sync elite monster properties
+        if (serverMonster.isEliteMonster) {
+            localMonster.originalMaxHp = serverMonster.originalMaxHp;
+            localMonster.originalDamage = serverMonster.originalDamage;
+            localMonster.damage = serverMonster.damage;
+            
+            // Add elite visual effects
+            if (localMonster.element) {
+                localMonster.element.classList.add('elite-monster');
+            }
+            
+            // Create elite HP bar
+            if (typeof createEliteMonsterHPBar === 'function') {
+                createEliteMonsterHPBar(localMonster);
+            }
+            
+            // Set as current elite
+            if (typeof currentEliteMonster !== 'undefined') {
+                currentEliteMonster = localMonster;
+            }
+        }
+        
+        // Create mini boss HP bar if needed
+        if (serverMonster.isMiniBoss && typeof createMiniBossHPBar === 'function') {
+            createMiniBossHPBar(localMonster);
+        }
+        
         // Store patrol bounds from server (used to clamp position during interpolation)
         if (serverMonster.patrolMinX !== undefined) {
             localMonster.patrolMinX = serverMonster.patrolMinX;
@@ -1319,7 +1356,7 @@ function createMonsterFromServer(serverMonster) {
         }
         
         // Debug logging
-        console.log(`[MONSTER SPAWN] Type: ${serverMonster.type}, ID: ${serverMonster.id}, Spawn Position: (${serverMonster.x.toFixed(1)}, ${serverMonster.y.toFixed(1)})`);
+        console.log(`[MONSTER SPAWN] Type: ${serverMonster.type}, ID: ${serverMonster.id}, Spawn Position: (${serverMonster.x.toFixed(1)}, ${serverMonster.y.toFixed(1)}), Elite: ${serverMonster.isEliteMonster}, MiniBoss: ${serverMonster.isMiniBoss}`);
     } else {
         console.error('[Socket] createMonster returned null/undefined for', serverMonster.type);
     }
@@ -1538,6 +1575,59 @@ function sendMonsterAttack(monsterId, damage, isCritical, attackType) {
  */
 function isServerAuthoritativeMonsters() {
     return serverAuthoritativeMonsters && isConnectedToServer;
+}
+
+/**
+ * Send elite monster transformation to server
+ */
+function sendEliteTransformToServer(serverId, maxHp, damage, originalMaxHp, originalDamage) {
+    if (!socket || !isConnectedToServer) return;
+    
+    socket.emit('transformElite', {
+        monsterId: serverId,
+        maxHp: maxHp,
+        damage: damage,
+        originalMaxHp: originalMaxHp,
+        originalDamage: originalDamage
+    });
+}
+
+/**
+ * Handle elite transformation received from server
+ */
+function handleEliteTransformFromServer(data) {
+    const localMonster = serverMonsterMapping[data.monsterId];
+    if (!localMonster) {
+        console.log('[Socket] Monster not found for elite transform:', data.monsterId);
+        return;
+    }
+    
+    // Apply elite transformation (visual only if already transformed locally)
+    if (!localMonster.isEliteMonster) {
+        localMonster.isEliteMonster = true;
+        localMonster.originalMaxHp = data.originalMaxHp;
+        localMonster.originalDamage = data.originalDamage;
+        localMonster.maxHp = data.maxHp;
+        localMonster.hp = data.hp;
+        localMonster.damage = data.damage;
+        
+        // Add visual effects
+        if (localMonster.element) {
+            localMonster.element.classList.add('elite-monster');
+        }
+        
+        // Create elite HP bar if not already created
+        if (typeof createEliteMonsterHPBar === 'function' && !localMonster.eliteHPBar) {
+            createEliteMonsterHPBar(localMonster);
+        }
+        
+        // Update current elite reference
+        if (typeof currentEliteMonster !== 'undefined') {
+            currentEliteMonster = localMonster;
+        }
+        
+        console.log(`[Socket] Monster ${data.monsterId} transformed to ELITE (received from server)`);
+    }
 }
 
 /**

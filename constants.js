@@ -22,7 +22,7 @@ const GAME_CONFIG = {
     LADDER_CENTER_EASING: 0.15,
     GROUND_Y: 281, // Shifted up 100px (was 181, now 281)
     GROUND_LEVEL_OFFSET: -100, // Offset to adjust map layouts for ground level change
-    PLATFORM_EDGE_PADDING: 19,
+    PLATFORM_EDGE_PADDING: 5,
     
     // UI
     NPC_INTERACTION_RANGE: 75,
