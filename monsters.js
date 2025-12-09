@@ -1829,13 +1829,13 @@ function updateMonsters() {
             m.spawnFrameCount--;
             // Fade in during spawn grace period to hide position correction snap
             const fadeProgress = 1 - (m.spawnFrameCount / 5); // 5 frames total
-            m.element.style.opacity = fadeProgress;
-            console.log(`[SPAWN FADE] ${m.type} ${m.id}: frame ${m.spawnFrameCount} remaining, opacity=${fadeProgress.toFixed(2)}`);
+            m.element.style.opacity = String(fadeProgress);
+            console.log(`[SPAWN FADE] ${m.type} ${m.id}: frame ${m.spawnFrameCount}, opacity=${fadeProgress.toFixed(2)}, element.style.opacity=${m.element.style.opacity}`);
         } else {
             m.velocityY += GRAVITY;
             m.y += m.velocityY;
             // Ensure fully visible after spawn grace
-            if (m.element.style.opacity !== '1') {
+            if (m.element && m.element.style.opacity !== '1') {
                 m.element.style.opacity = '1';
             }
         }
