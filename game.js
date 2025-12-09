@@ -4608,13 +4608,28 @@ function checkCollisions() {
                         m.animationTimer = 0;
                     }
 
+                    // Robust monster hit calculation
                     const levelDifference = player.level - m.level;
-                    if (levelDifference >= 5) {
-                        showDamageNumber(0, player.x + player.width / 2, player.y, true, { isMiss: true });
-                        continue; // Try next monster
+                    let monsterHitChance = 100;
+                    
+                    // Level-based avoidance (player dodges lower level monsters easier)
+                    if (levelDifference > 0) {
+                        // For each level above the monster, reduce monster's hit chance by 4%
+                        // At +5 levels: 80% monster hit, at +10 levels: 60% hit, at +15 levels: 40% hit
+                        const levelAdvantage = levelDifference * 4;
+                        monsterHitChance = Math.max(5, 100 - levelAdvantage);
                     }
-
-                    const monsterHitChance = Math.max(5, 95 + (m.accuracy - finalStats.finalAvoidability * 0.05));
+                    
+                    // Accuracy vs Avoidability calculation
+                    const accuracyDifference = m.accuracy - finalStats.finalAvoidability;
+                    // Each point of accuracy advantage gives monster +2% hit chance
+                    // Each point of avoidability advantage gives player better dodge
+                    const accuracyHitChance = Math.max(5, Math.min(100, 80 + (accuracyDifference * 2)));
+                    
+                    // Use the LOWER of level-based and accuracy-based hit chances
+                    monsterHitChance = Math.min(monsterHitChance, accuracyHitChance);
+                    
+                    // Check if monster misses
                     if (Math.random() * 100 > monsterHitChance) {
                         showDamageNumber(0, player.x + player.width / 2, player.y, true, { isMiss: true });
                         continue; // Try next monster
@@ -4673,17 +4688,36 @@ function checkCollisions() {
 
             if (isColliding(attack, m)) {
 
-                let playerHitChance = 100;
+                // Robust level and accuracy-based hit calculation
                 const levelDifference = player.level - m.level;
                 const monsterReqAccuracy = m.reqAccuracy || 0;
+                let playerHitChance = 100;
                 
-                // Calculate hit chance based on accuracy vs required accuracy
-                if (levelDifference < 5 && monsterReqAccuracy > 0) {
-                    const accuracyDifference = finalStats.finalAccuracy - monsterReqAccuracy;
-                    // 100% hit when accuracy equals reqAccuracy, drops by 2.5% per missing accuracy point
-                    playerHitChance = Math.max(5, Math.min(100, 100 + (accuracyDifference * 2.5)));
+                // Level-based miss chance (applies when fighting higher level monsters)
+                if (levelDifference < 0) {
+                    // For each level below the monster, reduce hit chance by 5%
+                    // At -5 levels: 75% hit, at -10 levels: 50% hit, at -20 levels: 0% hit
+                    const levelPenalty = Math.abs(levelDifference) * 5;
+                    playerHitChance = Math.max(0, 100 - levelPenalty);
                 }
-
+                
+                // Accuracy-based miss chance (applies regardless of level difference)
+                if (monsterReqAccuracy > 0) {
+                    const accuracyDifference = finalStats.finalAccuracy - monsterReqAccuracy;
+                    // Each point of missing accuracy reduces hit chance by 3%
+                    // Meeting reqAccuracy = 100% hit, -10 accuracy = 70% hit
+                    const accuracyHitChance = Math.max(0, Math.min(100, 100 + (accuracyDifference * 3)));
+                    
+                    // Use the LOWER of level-based and accuracy-based hit chances
+                    playerHitChance = Math.min(playerHitChance, accuracyHitChance);
+                }
+                
+                // Always keep a minimum 5% hit chance if within reasonable level range (-10)
+                if (levelDifference > -10) {
+                    playerHitChance = Math.max(5, playerHitChance);
+                }
+                
+                // Check if attack misses
                 if (Math.random() * 100 > playerHitChance) {
                     showDamageNumber(0, m.x + m.width / 2, m.y, false, { isMiss: true });
                     attack.hitMonsters.push(m.id);
