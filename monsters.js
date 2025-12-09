@@ -1853,8 +1853,14 @@ function updateMonsters() {
         }
         let onAnySurface = false;
 
+        // Skip platform collision during spawn grace period to prevent ejection on spawn
+        const isSpawning = m.spawnFrameCount > 0;
+
         platforms.forEach(p => {
             if (p.isLadder || p.y === undefined) return;
+            
+            // Skip collision check during spawn grace
+            if (isSpawning) return;
             
             // Check if monster is colliding with platform
             if (isColliding(m, p)) {
