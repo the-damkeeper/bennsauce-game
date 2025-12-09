@@ -1543,9 +1543,6 @@ function createMonster(type, x, y, initialState = null) {
         chaseStartTime: 0, // Track when chase started
         lastInteractionTime: 0 // Track last damage dealt/received
     };
-    
-    // Log spawn event for position tracker
-    console.log(`%c[MONSTER CREATE] ${type} created at (${x.toFixed(1)}, ${y.toFixed(1)}) with velocityY=${newMonster.velocityY}`, 'background: #0f0; color: #000;');
 
     const monsterHitbox = document.createElement('div');
     monsterHitbox.className = 'debug-hitbox';
@@ -1833,6 +1830,7 @@ function updateMonsters() {
             // Fade in during spawn grace period to hide position correction snap
             const fadeProgress = 1 - (m.spawnFrameCount / 5); // 5 frames total
             m.element.style.opacity = fadeProgress;
+            console.log(`[SPAWN FADE] ${m.type} ${m.id}: frame ${m.spawnFrameCount} remaining, opacity=${fadeProgress.toFixed(2)}`);
         } else {
             m.velocityY += GRAVITY;
             m.y += m.velocityY;
@@ -1899,7 +1897,6 @@ function updateMonsters() {
                     m.velocityY = 0;
                     m.isJumping = false;
                     onAnySurface = true;
-                    console.log(`%c[EJECTION] ${m.type} was stuck inside platform! Ejected from ${oldY.toFixed(1)} to ${m.y.toFixed(1)}`, 'background: #ff0; color: #000; font-weight: bold;');
                 }
             }
         });
