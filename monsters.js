@@ -140,7 +140,6 @@ let activeAoeZones = []; // Track active AoE warning zones
 const WORLD_BOSS_TYPES = {
     ancientDragon: {
         name: 'Ancient Dragon',
-        icon: '🐉',
         baseHp: 1000000, // 1 million HP
         damage: 500,
         defense: 200,
@@ -155,7 +154,6 @@ const WORLD_BOSS_TYPES = {
     },
     voidTitan: {
         name: 'Void Titan',
-        icon: '👁️',
         baseHp: 5000000, // 5 million HP
         damage: 750,
         defense: 250,
@@ -170,7 +168,6 @@ const WORLD_BOSS_TYPES = {
     },
     stormColossus: {
         name: 'Storm Colossus',
-        icon: '⚡',
         baseHp: 2500000, // 2.5 million HP
         damage: 600,
         defense: 220,
@@ -190,6 +187,10 @@ let worldBossPromptShown = false; // Track if we've shown the prompt for current
 let lastWorldBossEventId = null; // Track the event we've already seen
 
 function initWorldBossSystem() {
+    // TEMPORARILY DISABLED - World boss events are being fixed
+    console.log('World boss system is currently disabled');
+    return;
+    
     if (typeof db === 'undefined') {
         console.warn('Firebase not available for World Boss system');
         return;
@@ -238,7 +239,6 @@ function showWorldBossWarpPrompt(data) {
     prompt.id = 'world-boss-warp-prompt';
     prompt.innerHTML = `
         <div class="world-boss-prompt-content">
-            <div class="world-boss-prompt-icon">${bossType.icon}</div>
             <div class="world-boss-prompt-title">⚠️ WORLD BOSS ALERT ⚠️</div>
             <div class="world-boss-prompt-name">${bossType.name}</div>
             <div class="world-boss-prompt-desc">A powerful world boss has appeared! Join forces with other players to defeat it!</div>
@@ -306,7 +306,7 @@ function joinWorldBossEvent(bossTypeKey) {
     const bossType = WORLD_BOSS_TYPES[bossTypeKey] || WORLD_BOSS_TYPES.ancientDragon;
     startWorldBossEvent({ bossType: bossTypeKey, currentHp: bossType.baseHp });
     
-    addChatMessage(`🌍 You have joined the World Boss battle!`, 'boss');
+    addChatMessage(`You have joined the World Boss battle!`, 'boss');
 }
 
 // Player declines world boss event
@@ -373,7 +373,7 @@ function startWorldBossEvent(data) {
     createWorldBossUI();
     
     // Show announcement
-    addChatMessage(`🌍 WORLD BOSS: ${bossType.icon} ${bossType.name} - FIGHT!`, 'boss');
+    addChatMessage(`WORLD BOSS: ${bossType.icon} ${bossType.name} - FIGHT!`, 'boss');
     showNotification(`World Boss Battle Started!`, 'boss');
     
     // Play dramatic sound
@@ -964,7 +964,7 @@ function warpBackFromArena(delay = 0) {
     
     const doWarp = () => {
         if (currentMapId === 'worldBossArena' && playerOriginalMap) {
-            addChatMessage(`📍 Returning to ${playerOriginalMap}...`, 'system');
+            addChatMessage(`Returning to ${playerOriginalMap}...`, 'system');
             if (typeof changeMap === 'function') {
                 changeMap(playerOriginalMap, playerOriginalX || 500);
             }
@@ -988,7 +988,7 @@ function warpBackFromArena(delay = 0) {
 // Check if player should be warped out of arena (called from handlePlayerDeath)
 function checkWorldBossArenaOnDeath() {
     if (currentMapId === 'worldBossArena') {
-        addChatMessage(`💀 You died in the World Boss arena! Warping back...`, 'system');
+        addChatMessage(`You died in the World Boss arena! Warping back...`, 'system');
         
         // Force warp back - don't rely on event state
         const targetMap = playerOriginalMap || 'ironHaven';
@@ -1138,7 +1138,7 @@ function triggerWorldBossEvent(bossType = 'ancientDragon') {
         damageContribution: {},
         triggeredBy: player?.name || 'System'
     }).then(() => {
-        addChatMessage(`🌍 World Boss Event triggered! All online players will receive a notification.`, 'boss');
+        addChatMessage(`World Boss Event triggered! All online players will receive a notification.`, 'boss');
     }).catch(err => {
         console.error('Failed to trigger world boss event:', err);
         addChatMessage('Failed to trigger world boss event. Using local test mode.', 'error');

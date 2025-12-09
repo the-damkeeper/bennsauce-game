@@ -1494,7 +1494,7 @@ function handleMonsterKilledFromServer(data) {
             gainExp(monsterData.exp || 0);
         }
         
-        // Update quests
+        // Update quests - SAME MAP PLAYERS GET QUEST CREDIT
         if (typeof updateQuestProgress === 'function') {
             updateQuestProgress(data.type);
         }
@@ -1504,7 +1504,7 @@ function handleMonsterKilledFromServer(data) {
             updateAchievementProgress('kill', data.type);
         }
         
-        // Update bestiary
+        // Update bestiary (only killer gets bestiary credit)
         if (typeof updateBestiaryKill === 'function') {
             updateBestiaryKill(data.type);
         }
@@ -1518,7 +1518,13 @@ function handleMonsterKilledFromServer(data) {
             }
         }
     } else if (!weGetLoot && monsterData) {
-        // Party member kill - check if we're in the partyMembers list from server
+        // Not the killer - check if we should get quest credit or party EXP
+        
+        // ALL players on same map get quest progress
+        if (typeof updateQuestProgress === 'function') {
+            updateQuestProgress(data.type);
+        }
+        // Party member EXP - check if we're in the partyMembers list from server
         console.log('[Socket] Party check - partyMembers:', data.partyMembers, 'my odId:', player?.odId);
         if (typeof player !== 'undefined' && data.partyMembers && data.partyMembers.length > 0) {
             // Server sent list of party members who should get shared EXP
@@ -1542,6 +1548,9 @@ function handleMonsterKilledFromServer(data) {
                         showNotification(`+${sharedExp} Party EXP`, 'partyExp');
                     }
                 }
+                
+                // NOTE: Party members do NOT get bestiary credit
+                // Only the actual killer gets bestiary updates
             }
         }
     }
@@ -1657,6 +1666,14 @@ function handleEliteTransformFromServer(data) {
         // Update current elite reference
         if (typeof currentEliteMonster !== 'undefined') {
             currentEliteMonster = localMonster;
+        }
+        
+        // Show announcement to all players
+        if (typeof addChatMessage === 'function') {
+            addChatMessage(`⚠️ A ELITE ${localMonster.name.toUpperCase()} has appeared! ⚠️`, 'boss');
+        }
+        if (typeof playSound === 'function') {
+            playSound('quest'); // Dramatic effect
         }
         
         console.log(`[Socket] Monster ${data.monsterId} transformed to ELITE (received from server)`);

@@ -223,7 +223,7 @@ function createGhostPlayer(x, y, mapId) {
  */
 function areGhostPlayersEnabled() {
     const savedPref = localStorage.getItem('evergreenRPG_ghostPlayersEnabled');
-    return savedPref === null || savedPref === 'true'; // Default to enabled
+    return savedPref === 'true'; // Default to disabled
 }
 
 // Trial maps where ghost players should not spawn (solo content)

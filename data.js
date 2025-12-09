@@ -4358,7 +4358,7 @@ const maps = {
             { type: 'welcomeGuide', x: 400 }
         ],
         monsters: [
-            { type: 'testDummy', count: 1, x: 600, y: 450, fixedPosition: true }
+            { type: 'testDummy', count: 1, x: 600, fixedPosition: true }
         ],
         portals: [
             { x: 900, targetMap: 'dewdropTraining', targetX: 100 }
