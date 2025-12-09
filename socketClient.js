@@ -1432,6 +1432,16 @@ function handleMonsterDamageFromServer(data) {
         localMonster.hpBar.style.width = `${Math.max(0, data.currentHp) / data.maxHp * 100}%`;
     }
     
+    // Update mini boss HP bar if this is a mini boss
+    if (localMonster.isMiniBoss && typeof updateMiniBossHPBar === 'function') {
+        updateMiniBossHPBar(localMonster);
+    }
+    
+    // Update elite monster HP bar if this is an elite
+    if (localMonster.isEliteMonster && typeof updateEliteMonsterHPBar === 'function') {
+        updateEliteMonsterHPBar(localMonster);
+    }
+    
     // Show HP bar and nameplate on hit (same as local damage)
     if (localMonster.hpBarContainer) localMonster.hpBarContainer.style.display = 'block';
     if (localMonster.nameplateElement) localMonster.nameplateElement.style.display = 'block';
@@ -1480,6 +1490,13 @@ function handleMonsterKilledFromServer(data) {
         }
         if (typeof addChatMessage === 'function') {
             addChatMessage(`⭐ ELITE ${localMonster.name?.toUpperCase() || data.type.toUpperCase()} DEFEATED! ⭐`, 'legendary');
+        }
+    }
+    
+    // Handle mini boss death
+    if (localMonster.isMiniBoss) {
+        if (typeof removeMiniBossHPBar === 'function') {
+            removeMiniBossHPBar();
         }
     }
     
@@ -1535,6 +1552,11 @@ function handleMonsterKilledFromServer(data) {
         }
         const afterCount = typeof droppedItems !== 'undefined' ? droppedItems.length : 0;
         console.log(`[Socket] Drop creation complete: requested=${data.drops.length}, attempted=${createdCount}, actual new items=${afterCount - beforeCount}`);
+    }
+    
+    // Check for trial boss kill (both loot recipient and party members can complete trials)
+    if (typeof checkTrialBossKill === 'function') {
+        checkTrialBossKill(data.type);
     }
     
     if (weGetLoot && monsterData) {
@@ -1976,6 +1998,11 @@ function shareGoldWithParty(totalAmount) {
     // Check if in a party
     const partyInfo = typeof getPartyInfo === 'function' ? getPartyInfo() : null;
     if (!partyInfo || !partyInfo.inParty) return { shouldAddGold: true, amount: totalAmount, isSharing: false };
+    
+    // Check if party has more than just ourselves (need at least 2 members to share)
+    if (!partyInfo.members || partyInfo.members.length < 2) {
+        return { shouldAddGold: true, amount: totalAmount, isSharing: false };
+    }
     
     // Send to server to determine party members and distribute
     // Server will figure out how many members are on the map and split accordingly

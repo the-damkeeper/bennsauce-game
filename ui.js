@@ -6854,7 +6854,6 @@ function inspectPlayer(playerName) {
                 ${!isSelf && !isBuddy ? `<button class="inspect-btn" onclick="addBuddy('${playerName}'); closeInspectWindow();">Add Buddy</button>` : ''}
                 ${!isSelf && isBuddy ? `<button class="inspect-btn inspect-btn-danger" onclick="removeBuddy('${playerName}'); closeInspectWindow();">Remove Buddy</button>` : ''}
                 ${!isSelf ? `<button class="inspect-btn" onclick="initiateTradeWith('${playerName}'); closeInspectWindow();"${targetPlayer.status === 'afk' ? ' title="Player is AFK"' : ''}>Trade</button>` : ''}
-                ${!isSelf && isBuddy ? `<button class="inspect-btn inspect-btn-gift" onclick="openGiftWindow('${playerName}'); closeInspectWindow();">🎁 Send Gift</button>` : ''}
                 ${canInviteParty && !inOtherParty ? `<button class="inspect-btn" onclick="if(typeof sendPartyInvite==='function')sendPartyInvite('${playerName}'); closeInspectWindow();">Party Invite</button>` : ''}
                 ${canInviteGuild ? `<button class="inspect-btn" onclick="inviteToGuild('${playerName}'); closeInspectWindow();">Guild Invite</button>` : ''}
                 ${canTeleport ? `<button class="inspect-btn inspect-btn-teleport" onclick="teleportToPlayer('${playerName}', '${targetPlayer.currentMap}'); closeInspectWindow();">Teleport</button>` : ''}
@@ -12168,6 +12167,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const buffEffectContainer = document.getElementById('player-buff-effects');
             if (buffContainer) buffContainer.innerHTML = '';
             if (buffEffectContainer) buffEffectContainer.innerHTML = '';
+            
+            // Clean up boss/elite HP bars
+            if (typeof removeMiniBossHPBar === 'function') {
+                removeMiniBossHPBar();
+            }
+            if (typeof removeEliteMonsterHPBar === 'function') {
+                removeEliteMonsterHPBar();
+            }
+            // Also clear any world boss UI
+            const worldBossUI = document.getElementById('world-boss-ui');
+            if (worldBossUI) worldBossUI.remove();
             // --- END OF FIX ---
 
             showStartScreen();
