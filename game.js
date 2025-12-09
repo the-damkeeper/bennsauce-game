@@ -2966,44 +2966,8 @@ function changeMap(mapId, spawnX, spawnY) {
         worldState[mapId].droppedItems.forEach(itemState => createItemDrop(itemState.name, itemState.x, itemState.y, itemState));
     }
     
-    // NEVER spawn monsters locally - server handles everything
-    if (false && map.monsters) {
-            map.monsters.forEach(m => {
-                const monsterData = monsterTypes[m.type];
-                if (!monsterData) {
-                    console.warn(`Monster type "${m.type}" not found in monsterTypes data. Skipping spawn.`);
-                    return;
-                }
-                
-                // Trial bosses: spawn exactly 1, no more
-                if (monsterData.isTrialBoss) {
-                    const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
-                    const spawnY = groundLevel - monsterData.height;
-                    const spawnX = m.x !== undefined ? m.x : map.width / 2;
-                    createMonster(m.type, spawnX, spawnY);
-                    return; // Only spawn one trial boss
-                }
-                
-                // Spawn regular monsters OR mini-bosses with fixed positions
-                if (!monsterData.isMiniBoss) {
-                    for (let i = 0; i < m.count; i++) {
-                        // If fixed position is provided, use it; otherwise use random spawn
-                        if (m.x !== undefined) {
-                            const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
-                            const spawnY = groundLevel - monsterData.height;
-                            createMonster(m.type, m.x, spawnY);
-                        } else {
-                            spawnMonster(m.type);
-                        }
-                    }
-                } else if (monsterData.isMiniBoss && m.x !== undefined) {
-                    // Mini-bosses with fixed positions spawn immediately
-                    const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
-                    const spawnY = groundLevel - monsterData.height;
-                    createMonster(m.type, m.x, spawnY);
-                }
-            });
-        }
+    // Save initial map state (for dropped items tracking)
+    if (!worldState[mapId]) {
         saveMapState(mapId);
     }
 
