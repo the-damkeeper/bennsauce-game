@@ -1797,9 +1797,10 @@ function handleItemPickedUp(data) {
         return;
     }
     
-    console.log(`[Socket] ${pickedUpByName} picked up item at (${x}, ${y})`);
+    console.log(`[Socket] ${pickedUpByName} picked up item at (${x}, ${y}), itemId: ${itemId}`);
     
     // Find and remove the item by matching id or position (within tolerance)
+    let found = false;
     for (let i = droppedItems.length - 1; i >= 0; i--) {
         const item = droppedItems[i];
         
@@ -1819,9 +1820,20 @@ function handleItemPickedUp(data) {
             }
             droppedItems.splice(i, 1);
             
-            console.log(`[Socket] Removed item from local droppedItems`);
+            console.log(`[Socket] Removed item from local droppedItems (${matchesId ? 'ID match' : 'position match'})`);
+            found = true;
             break;
         }
+    }
+    
+    if (!found) {
+        console.warn(`[Socket] Failed to find item to remove! itemId: ${itemId}, position: (${x}, ${y})`);
+        console.warn(`[Socket] Current droppedItems:`, droppedItems.map(item => ({ 
+            id: item.id, 
+            name: item.name, 
+            x: Math.round(item.x), 
+            y: Math.round(item.y) 
+        })));
     }
 }
 
