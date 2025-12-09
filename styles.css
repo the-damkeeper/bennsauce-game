@@ -7497,6 +7497,11 @@ body.gamepad-active #notification-container {
     line-height: 1;
     text-align: center; /* Center text within each medal */
     border: 1px solid rgba(255, 255, 255, 0.3);
+    /* Force crisp text rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    backface-visibility: hidden;
 }
 
 .monster-killer-medal-display.bronze { 
@@ -8366,6 +8371,12 @@ body {
     image-rendering: pixelated;
     line-height: 1;
     pointer-events: none;
+    /* Force crisp text rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    backface-visibility: hidden;
+    will-change: transform;
 }
 
 .ghost-chat-bubble {

@@ -787,9 +787,15 @@ function updateRemotePlayerNameplate(remotePlayer) {
             padding: 1px 4px;
             border-radius: 2px;
             font-size: 10px;
+            font-family: 'Ari9500';
+            font-weight: bold;
             white-space: nowrap;
             pointer-events: none;
             z-index: 1001;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            backface-visibility: hidden;
         `;
         
         const guildName = typeof remotePlayer.guild === 'string' ? remotePlayer.guild : remotePlayer.guild.name;
