@@ -2352,10 +2352,15 @@ function render() {
         effectCtx.clearRect(0, 0, effectCanvas.width, effectCanvas.height);
         
         const frame = effectData.frames[player.levelUpEffect.animationFrame];
-        const lvlupImage = new Image();
-        lvlupImage.src = artAssets.lvlupEffect;
         
-        if (lvlupImage.complete) {
+        // Cache the image globally to avoid recreating it every frame
+        if (!window.cachedLvlupImage) {
+            window.cachedLvlupImage = new Image();
+            window.cachedLvlupImage.src = artAssets.lvlupEffect;
+        }
+        
+        const lvlupImage = window.cachedLvlupImage;
+        if (lvlupImage.complete && lvlupImage.naturalWidth > 0) {
             effectCtx.drawImage(
                 lvlupImage,
                 frame.x, frame.y,

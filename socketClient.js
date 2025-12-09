@@ -962,10 +962,14 @@ function updateRemotePlayers() {
                 
                 const frame = effectData.frames[remotePlayer.levelUpEffect.animationFrame];
                 if (typeof artAssets !== 'undefined' && artAssets.lvlupEffect) {
-                    const lvlupImage = new Image();
-                    lvlupImage.src = artAssets.lvlupEffect;
+                    // Cache the image globally to avoid recreating it every frame
+                    if (!window.cachedLvlupImage) {
+                        window.cachedLvlupImage = new Image();
+                        window.cachedLvlupImage.src = artAssets.lvlupEffect;
+                    }
                     
-                    if (lvlupImage.complete) {
+                    const lvlupImage = window.cachedLvlupImage;
+                    if (lvlupImage.complete && lvlupImage.naturalWidth > 0) {
                         const PIXEL_ART_SCALE = typeof window.PIXEL_ART_SCALE !== 'undefined' ? window.PIXEL_ART_SCALE : 3;
                         effectCtx.drawImage(
                             lvlupImage,
