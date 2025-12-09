@@ -5847,31 +5847,19 @@ document.addEventListener('keydown', (e) => {
                     e.preventDefault();
                     return;
                 }
-                // Check for !makemeGM command (works without GM Hat)
-                else if (message === '!makemeGM') {
-                    const gmHat = {
-                        name: 'GM Hat',
-                        type: 'helmet',
-                        stats: { attack: 999, defense: 999, hp: 99999, mp: 99999, str: 999, dex: 999, int: 999, luk: 999 },
-                        levelReq: 1,
-                        rarity: 'legendary',
-                        enhancement: 0
-                    };
-                    
-                    // Flag player as having used GM privileges (permanently disqualifies from server-first medals)
-                    player.hasUsedGMPrivileges = true;
-                    if (typeof saveCharacter === 'function') saveCharacter();
-                    
-                    if (addItemToInventory(gmHat)) {
-                        addChatMessage('✨ GM Hat has been granted! Equip it to use GM commands.', 'legendary');
-                        addChatMessage('⚠️ Note: You are now ineligible for server-first medals.', 'system');
-                        showNotification('Received GM Hat', 'legendary');
-                        updateInventoryUI();
+                // Check for GM authentication command - password is verified server-side
+                else if (message.startsWith('!gm ')) {
+                    const password = message.slice(4).trim();
+                    if (password && typeof requestGMAuth === 'function') {
+                        requestGMAuth(password);
                     } else {
-                        addChatMessage('Inventory full!', 'error');
+                        addChatMessage('Usage: !gm <password>', 'error');
                     }
+                    chatInput.value = '';
+                    e.preventDefault();
+                    return;
                 } else if (message.startsWith('!')) {
-                    // Check for other GM commands (requires GM Hat)
+                    // Check for other GM commands (requires server-side GM authorization AND GM Hat)
                     const equippedHelmet = player.equipped?.helmet;
                     const cosmeticHelmet = player.cosmeticEquipped?.helmet;
                     const hasGMHat = (equippedHelmet && equippedHelmet.name === 'GM Hat') || 
@@ -5879,13 +5867,18 @@ document.addEventListener('keydown', (e) => {
                                     equippedHelmet === 'GM Hat' || 
                                     cosmeticHelmet === 'GM Hat';
                     
-                    if (hasGMHat) {
+                    // Check server-side GM authorization
+                    const isServerAuthorized = typeof window.isGMAuthorized !== 'undefined' && window.isGMAuthorized === true;
+                    
+                    if (hasGMHat && isServerAuthorized) {
                         // Process GM command using the function from this file
                         if (typeof handleGMCommand === 'function') {
                             handleGMCommand(message);
                         } else {
                             addChatMessage('GM command system not available!', 'error');
                         }
+                    } else if (!isServerAuthorized) {
+                        addChatMessage('GM authorization required. Use !gm <password> to authenticate.', 'error');
                     } else {
                         addChatMessage('You need to equip the GM Hat to use GM commands!', 'error');
                     }

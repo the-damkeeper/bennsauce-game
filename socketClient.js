@@ -298,6 +298,16 @@ function setupSocketListeners() {
         console.error('[Socket] Server error:', data.message);
     });
     
+    // GM authentication result
+    socket.on('gmAuthResult', (data) => {
+        handleGMAuthResult(data);
+    });
+    
+    // GM authorization status check result
+    socket.on('gmAuthStatus', (data) => {
+        window.isGMAuthorized = data.authorized;
+    });
+    
     // Item picked up by another player - remove it locally
     socket.on('itemPickedUp', (data) => {
         handleItemPickedUp(data);
@@ -2361,6 +2371,83 @@ function handleRemotePlayerRespawn(data) {
         remotePlayer.gravestone = null;
     }
 }
+
+/**
+ * Request GM authentication from server
+ * Password is verified server-side, not stored in client code
+ */
+function requestGMAuth(password) {
+    if (!socket || !socket.connected) {
+        if (typeof addChatMessage === 'function') {
+            addChatMessage('Not connected to server!', 'error');
+        }
+        return;
+    }
+    
+    socket.emit('gmAuth', { password });
+}
+
+/**
+ * Handle GM authentication result from server
+ */
+function handleGMAuthResult(data) {
+    if (data.success) {
+        window.isGMAuthorized = true;
+        
+        // Grant GM Hat
+        const gmHat = {
+            name: 'GM Hat',
+            type: 'helmet',
+            stats: { attack: 999, defense: 999, hp: 99999, mp: 99999, str: 999, dex: 999, int: 999, luk: 999 },
+            levelReq: 1,
+            rarity: 'legendary',
+            enhancement: 0
+        };
+        
+        // Flag player as having used GM privileges
+        if (typeof player !== 'undefined') {
+            player.hasUsedGMPrivileges = true;
+            if (typeof saveCharacter === 'function') saveCharacter();
+        }
+        
+        if (typeof addItemToInventory === 'function' && addItemToInventory(gmHat)) {
+            if (typeof addChatMessage === 'function') {
+                addChatMessage('✨ GM access granted! GM Hat added to inventory.', 'legendary');
+                addChatMessage('⚠️ Note: You are now ineligible for server-first medals.', 'system');
+            }
+            if (typeof showNotification === 'function') {
+                showNotification('GM Access Granted', 'legendary');
+            }
+            if (typeof updateInventoryUI === 'function') {
+                updateInventoryUI();
+            }
+        } else {
+            if (typeof addChatMessage === 'function') {
+                addChatMessage('✨ GM access granted! (Inventory full - clear space for GM Hat)', 'legendary');
+            }
+        }
+    } else {
+        window.isGMAuthorized = false;
+        if (typeof addChatMessage === 'function') {
+            addChatMessage(`GM authentication failed: ${data.message}`, 'error');
+        }
+    }
+}
+
+/**
+ * Check if current session is GM authorized
+ */
+function checkGMAuth() {
+    if (!socket || !socket.connected) {
+        return false;
+    }
+    socket.emit('checkGmAuth');
+}
+
+// Export GM auth functions
+window.requestGMAuth = requestGMAuth;
+window.checkGMAuth = checkGMAuth;
+window.isGMAuthorized = false; // Default to not authorized
 
 // Export broadcast function for other scripts
 window.broadcastPlayerVFX = broadcastPlayerVFX;
