@@ -1828,12 +1828,8 @@ function handleItemPickedUp(data) {
     
     if (!found) {
         console.warn(`[Socket] Failed to find item to remove! itemId: ${itemId}, position: (${x}, ${y})`);
-        console.warn(`[Socket] Current droppedItems:`, droppedItems.map(item => ({ 
-            id: item.id, 
-            name: item.name, 
-            x: Math.round(item.x), 
-            y: Math.round(item.y) 
-        })));
+        const itemsInfo = droppedItems.map(item => `${item.name}[id=${item.id}]@(${Math.round(item.x)},${Math.round(item.y)})`);
+        console.warn(`[Socket] Current droppedItems (${droppedItems.length}): ${itemsInfo.join(', ')}`);
     }
 }
 
