@@ -4902,14 +4902,14 @@ function checkCollisions() {
                 }
 
                 if (m.hp <= 0 && m.type !== 'testDummy') {
-                    // Server-authoritative monsters: skip local death processing (server handles it)
-                    if (typeof isServerAuthoritativeMonsters === 'function' && isServerAuthoritativeMonsters() && m.serverId) {
-                        continue; // Server will send monsterKilled event
-                    }
-                    
                     // World boss death is handled by endWorldBossEvent, not here
                     if (m.isWorldBoss) {
                         continue; // Skip normal death handling - damageWorldBoss triggers endWorldBossEvent
+                    }
+                    
+                    // Server-authoritative monsters: skip ALL local death processing (server handles everything)
+                    if (typeof isServerAuthoritativeMonsters === 'function' && isServerAuthoritativeMonsters() && m.serverId) {
+                        continue; // Server will send monsterKilled event with drops, exp, etc.
                     }
                     
                     m.isDead = true;

@@ -1491,6 +1491,10 @@ function handleMonsterKilledFromServer(data) {
                     serverVelocityX: drop.velocityX,
                     serverVelocityY: drop.velocityY
                 });
+                // Track bestiary drops if we're the loot recipient
+                if (weGetLoot && typeof updateBestiaryDrop === 'function') {
+                    updateBestiaryDrop(data.type, 'Gold', drop.amount);
+                }
             } else if (drop.name) {
                 createItemDrop(drop.name, drop.x, drop.y, {
                     ownerId: data.lootRecipient,
@@ -1498,14 +1502,19 @@ function handleMonsterKilledFromServer(data) {
                     serverVelocityX: drop.velocityX,
                     serverVelocityY: drop.velocityY
                 });
+                // Track bestiary drops if we're the loot recipient
+                if (weGetLoot && typeof updateBestiaryDrop === 'function') {
+                    updateBestiaryDrop(data.type, drop.name);
+                }
             }
         }
     }
     
     if (weGetLoot && monsterData) {
-        // Loot recipient gains EXP
+        // Loot recipient gains EXP (elite monsters give 10x EXP)
         if (typeof gainExp === 'function') {
-            gainExp(monsterData.exp || 0);
+            const expMultiplier = data.isEliteMonster ? 10 : 1;
+            gainExp((monsterData.exp || 0) * expMultiplier);
         }
         
         // Update quests - SAME MAP PLAYERS GET QUEST CREDIT
