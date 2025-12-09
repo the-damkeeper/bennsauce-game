@@ -1451,6 +1451,19 @@ function handleMonsterKilledFromServer(data) {
     localMonster.isDead = true;
     localMonster.hp = 0;
     
+    // Handle elite monster death
+    if (data.isEliteMonster || localMonster.isEliteMonster) {
+        if (typeof removeEliteMonsterHPBar === 'function') {
+            removeEliteMonsterHPBar();
+        }
+        if (typeof currentEliteMonster !== 'undefined') {
+            currentEliteMonster = null;
+        }
+        if (typeof addChatMessage === 'function') {
+            addChatMessage(`⭐ ELITE ${localMonster.name?.toUpperCase() || data.type.toUpperCase()} DEFEATED! ⭐`, 'legendary');
+        }
+    }
+    
     // Play death animation
     if (localMonster.element) {
         localMonster.element.classList.add('monster-death');
