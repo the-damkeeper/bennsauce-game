@@ -469,7 +469,7 @@ function getCharacterDataForCloud() {
         totalGoldEarned: player.totalGoldEarned || 0,
         highestDamage: player.highestDamage || 0,
         discoveredMaps: discoveredMaps,
-        currentMapId: player.currentMapId || (typeof currentMapId !== 'undefined' ? currentMapId : 'ironhaven'),
+        currentMapId: player.currentMapId || (typeof currentMapId !== 'undefined' ? currentMapId : 'ironHaven'),
         activePet: player.activePet || null,
         ownedPets: player.ownedPets || [],
         medals: player.medals || [],
@@ -4452,7 +4452,7 @@ async function updatePresence() {
     if (!rankingsInitialized || !player || !player.name) return;
 
     try {
-        const mapName = player.currentMapId || 'ironhaven';
+        const mapName = player.currentMapId || 'ironHaven';
         const mapInfo = typeof maps !== 'undefined' ? maps[mapName] : null;
         const mapDisplayName = mapInfo?.displayName || mapName;
         

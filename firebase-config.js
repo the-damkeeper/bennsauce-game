@@ -2214,7 +2214,7 @@ async function updatePresence() {
     if (!rankingsInitialized || !player || !player.name) return;
 
     try {
-        const mapName = player.currentMapId || 'ironhaven';
+        const mapName = player.currentMapId || 'ironHaven';
         const mapInfo = typeof maps !== 'undefined' ? maps[mapName] : null;
         const mapDisplayName = mapInfo?.displayName || mapName;
 

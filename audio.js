@@ -31,7 +31,7 @@ const audioAssets = {
 
 
     // BGM (Background Music)
-    ironhaven: new Audio('https://sounds.larry.science/sounds/C19F549E33DFBA0B470E21E26FA018B87E161A5EF2CAA37C78C1F0BDB17A5C3E.mp3'),
+    ironHaven: new Audio('https://sounds.larry.science/sounds/C19F549E33DFBA0B470E21E26FA018B87E161A5EF2CAA37C78C1F0BDB17A5C3E.mp3'),
     onyxCity: new Audio('https://sounds.larry.science/sounds/40A04FA380078485E539909B348C8E44EBCA73A9631ED7FDCF5B6BA3B92B9B21.mp3'),
     hauntedMansion: new Audio('https://sounds.larry.science/sounds/EB9A77ACE9AFC1D4EEC44A4EF4A40BB089DEFED5FE316AF1A3332FDFA9AEBC5D.mp3'),
     stonepeak: new Audio('https://sounds.larry.science/sounds/6B63051503801E464904D8B3EC5CD42231F212DFF76ABCAF807F0BCFE2D35591.mp3'),
@@ -50,7 +50,7 @@ const audioAssets = {
 // Pre-configure all audio elements for volume and looping
 for (const key in audioAssets) {
     audioAssets[key].volume = 0.5; // Set a default volume
-    if (['title', 'ironhaven', 'huntingground', 'onyxCity', 'hauntedMansion', 'stonepeak', 'nautilus', 'florinaBeach', 'elnath', 'iceValley', 'dewdropIsland', 'skypalace', 'clockTower', 'deepClocktower'].includes(key)) {
+    if (['title', 'ironHaven', 'huntingground', 'onyxCity', 'hauntedMansion', 'stonepeak', 'nautilus', 'florinaBeach', 'elnath', 'iceValley', 'dewdropIsland', 'skypalace', 'clockTower', 'deepClocktower'].includes(key)) {
         audioAssets[key].loop = true; // Make sure BGM tracks loop
         audioAssets[key].volume = 0.3; // BGM should be quieter
     }
@@ -181,7 +181,7 @@ function applyAudioSettings() {
     const finalSfxVolume = convertVolume(sfxVolume);
 
     for (const key in audioAssets) {
-        if (['title', 'ironhaven', 'huntingground', 'onyxCity', 'hauntedMansion', 'stonepeak', 'nautilus', 'florinaBeach', 'elnath', 'iceValley', 'dewdropIsland', 'skypalace', 'clockTower', 'deepClocktower'].includes(key)) {
+        if (['title', 'ironHaven', 'huntingground', 'onyxCity', 'hauntedMansion', 'stonepeak', 'nautilus', 'florinaBeach', 'elnath', 'iceValley', 'dewdropIsland', 'skypalace', 'clockTower', 'deepClocktower'].includes(key)) {
             audioAssets[key].volume = finalBgmVolume;
         } else {
             audioAssets[key].volume = finalSfxVolume;

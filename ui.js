@@ -3831,7 +3831,7 @@ function updateWorldMapUI(layout) {
     svg.setAttribute('id', 'world-map-connections');
     grid.appendChild(svg);
 
-    if (!player.discoveredMaps) player.discoveredMaps = new Set(['ironhaven']);
+    if (!player.discoveredMaps) player.discoveredMaps = new Set(['ironHaven']);
 
     for (const mapId in maps) {
         if (player.discoveredMaps.has(mapId) && maps[mapId].portals) {
@@ -9391,7 +9391,7 @@ function openDialogue(npc) {
                 dialogueText = `<p>"I can take you to Iron Haven, but I recommend completing all the challenges here first. You won't be able to return!"</p>`;
             }
         }
-        optionsHtml += `<button id="transport-ironhaven">Travel to Iron Haven</button>`;
+        optionsHtml += `<button id="transport-ironHaven">Travel to Iron Haven</button>`;
     }
 
     // Job Advancement Trial Retry
@@ -9568,7 +9568,7 @@ function openDialogue(npc) {
             }
         });
         
-        document.getElementById('transport-ironhaven')?.addEventListener('click', () => {
+        document.getElementById('transport-ironHaven')?.addEventListener('click', () => {
             // Transport to Iron Haven with confirmation
             content.innerHTML = `
                 <p><strong>⚠ WARNING:</strong> Once you leave Dewdrop Island, you can NEVER return!</p>
@@ -9580,10 +9580,10 @@ function openDialogue(npc) {
             document.getElementById('confirm-transport').addEventListener('click', () => {
                 toggleWindow(dialogueWindowElement);
                 addChatMessage("Farewell, Dewdrop Island!", 'quest-complete');
-                fadeAndChangeMap('ironhaven', 150, 300);
+                fadeAndChangeMap('ironHaven', 150, 300);
                 // Add Iron Haven to discovered maps
-                if (!player.discoveredMaps.has('ironhaven')) {
-                    player.discoveredMaps.add('ironhaven');
+                if (!player.discoveredMaps.has('ironHaven')) {
+                    player.discoveredMaps.add('ironHaven');
                 }
                 // Mark that player has left Dewdrop Island permanently
                 player.hasLeftDewdrop = true;
@@ -9632,17 +9632,17 @@ function openDialogue(npc) {
             // Transport back to Iron Haven from Sky Palace
             content.innerHTML = `
                 <p>"Ready to leave this dark place? I'll take you safely back to Iron Haven."</p>
-                <button id="confirm-return-ironhaven">Return to Iron Haven</button>
+                <button id="confirm-return-ironHaven">Return to Iron Haven</button>
                 <button id="close-dialogue">Not Yet</button>
             `;
             document.getElementById('close-dialogue').addEventListener('click', () => toggleWindow(dialogueWindowElement));
-            document.getElementById('confirm-return-ironhaven').addEventListener('click', () => {
+            document.getElementById('confirm-return-ironHaven').addEventListener('click', () => {
                 toggleWindow(dialogueWindowElement);
                 addChatMessage("Sailing back to Iron Haven!", 'quest-complete');
-                fadeAndChangeMap('ironhaven', 1850, 300);
+                fadeAndChangeMap('ironHaven', 1850, 300);
                 // Make sure Iron Haven is discovered
-                if (!player.discoveredMaps.has('ironhaven')) {
-                    player.discoveredMaps.add('ironhaven');
+                if (!player.discoveredMaps.has('ironHaven')) {
+                    player.discoveredMaps.add('ironHaven');
                 }
             });
         });
@@ -10457,7 +10457,7 @@ function openJobAdvancementWindow(level) {
                 player.pendingJobAdvancement = {
                     targetClass: newClass,
                     trialMap: trialMap,
-                    returnMap: player.currentMapId || 'ironhaven',
+                    returnMap: player.currentMapId || 'ironHaven',
                     returnX: player.x,
                     returnY: player.y
                 };
@@ -10611,7 +10611,7 @@ function completeJobTrial() {
     
     // Teleport back after a short delay
     setTimeout(() => {
-        fadeAndChangeMap('ironhaven', 500, 600);
+        fadeAndChangeMap('ironHaven', 500, 600);
         activeJobTrial = null;
         
         // Show success modal
@@ -10664,7 +10664,7 @@ function failJobTrial(reason) {
     
     // Teleport to Iron Haven after a short delay
     setTimeout(() => {
-        fadeAndChangeMap('ironhaven', 500, 600);
+        fadeAndChangeMap('ironHaven', 500, 600);
         activeJobTrial = null;
         
         // Show failure modal

@@ -1539,7 +1539,7 @@ function loadCharacter(characterName) {
     if (player.discoveredMaps && Array.isArray(player.discoveredMaps)) {
         player.discoveredMaps = new Set(player.discoveredMaps);
     } else {
-        player.discoveredMaps = new Set(['ironhaven']);
+        player.discoveredMaps = new Set(['ironHaven']);
     }
 
     // Convert talkedNPCs to Set if it's an array from save data
@@ -2863,7 +2863,7 @@ function respawnPlayer() {
     setTimeout(() => { player.isInvincible = false; }, 1500);
 
     // Respawn in appropriate location based on whether player has left Dewdrop Island
-    const respawnMap = player.hasLeftDewdrop ? 'ironhaven' : 'dewdropBeach';
+    const respawnMap = player.hasLeftDewdrop ? 'ironHaven' : 'dewdropBeach';
     fadeAndChangeMap(respawnMap, respawnMap === 'dewdropBeach' ? 400 : 150);
     updateUI();
     

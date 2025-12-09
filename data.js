@@ -4779,7 +4779,7 @@ const maps = {
         ],
         portals: [
             { x: 50, y: 300, targetMap: 'stonepeakTrail', targetX: 1950 },
-            { x: 2100,targetMap: 'ironhaven', targetX: 100 }
+            { x: 2100,targetMap: 'ironHaven', targetX: 100 }
         ],
         platforms: [
             { x: 1210, y: 425, width: 80, noSpawn: true },
@@ -4795,10 +4795,10 @@ const maps = {
             { x: 1300, y: 383, width: 1000, z: -1}
         ]
     },
-    ironhaven: {
+    ironHaven: {
         width: 2000,
         backgroundColor: '#3498db',
-        bgm: 'ironhaven',
+        bgm: 'ironHaven',
         groundType: 'grass',
         parallax: [
             {
@@ -4902,7 +4902,7 @@ const maps = {
         ],
         portals: [
             { x: 1200, y: 330, targetMap: 'slimeHuntingGround', targetX: 100 },
-            { x: 50, targetMap: 'ironhaven', targetX: 1900 },
+            { x: 50, targetMap: 'ironHaven', targetX: 1900 },
             { x: 2300, targetMap: 'onyxCity', targetX: 20 },
             { x: 1860, y: 250, targetMap: 'hiddenSlimeGlade', targetX: 100, isHidden: true }
         ],
@@ -6559,7 +6559,7 @@ const worldMapLayout = {
     'stonepeak': { x: 15, y: 50 },
     'stonepeakTrail': { x: 30, y: 50 },
     'westRockyMountain': { x: 45, y: 50 },
-    'ironhaven': { x: 60, y: 50 },
+    'ironHaven': { x: 60, y: 50 },
     'evergreenRoad': { x: 75, y: 50 },
     'slimeHuntingGround': { x: 65, y: 50 },
     'hiddenSlimeGlade': { x: 55, y: 50 },

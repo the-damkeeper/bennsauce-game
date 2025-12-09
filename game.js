@@ -117,7 +117,7 @@ let sceneryObjects = [];
 let clouds = [];
 
 let keys = {}; // Object to track currently pressed keys
-let currentMapId = 'ironhaven';
+let currentMapId = 'ironHaven';
 let gameLoopId;
 let isGameActive = false;
 
@@ -747,7 +747,7 @@ function startGame(isNewCharacter = false) {
         delete player.activePet.imageElement;
     }
 
-    changeMap(player.currentMapId || 'ironhaven', player.x, player.y);
+    changeMap(player.currentMapId || 'ironHaven', player.x, player.y);
 
     updateUI();
     updateSkillHotbarUI();
@@ -1780,7 +1780,7 @@ function handleGMCommand(command) {
                 fadeAndChangeMap(foundMap, spawn.x, spawn.y);
                 addChatMessage(`Teleported to ${foundMap}`, 'legendary');
             } else {
-                addChatMessage('Map not found! Try: ironhaven, stonepeak, woodbrook, etc.', 'error');
+                addChatMessage('Map not found! Try: ironHaven, stonepeak, woodbrook, etc.', 'error');
             }
             break;
             
@@ -5253,6 +5253,7 @@ function isGroundAt(x, y) {
         return true;
     }
 
+    // Check platforms
     for (const p of platforms) {
         if (p.isLadder || p.y === undefined) continue;
         const platformSurfaceTop = p.y;
@@ -5263,6 +5264,21 @@ function isGroundAt(x, y) {
             return true;
         }
     }
+    
+    // Check structures (similar to platforms but defined in map data)
+    if (map.structures) {
+        for (const s of map.structures) {
+            if (s.y === undefined) continue;
+            const structureSurfaceTop = s.y;
+            const structureSurfaceBottom = s.y + 50; // Structures have ~50px height tolerance
+            const structureStartX = s.x + 10; // Small edge padding
+            const structureEndX = s.x + s.width - 10;
+            if (x >= structureStartX && x <= structureEndX && y >= structureSurfaceTop && y <= structureSurfaceBottom) {
+                return true;
+            }
+        }
+    }
+    
     return false;
 }
 
