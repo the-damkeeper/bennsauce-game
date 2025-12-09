@@ -2333,7 +2333,7 @@ function createItemDrop(name, x, y, initialState = null, bypassLevelCheck = fals
     el.className = 'item-drop';
     
     // Debug: Log what ID we're receiving
-    console.log(`[createItemDrop] Creating ${name}, initialState.id: ${initialState?.id}`);
+    console.log(`[createItemDrop] Creating ${name}, id: ${initialState?.id}`);
 
     if (name === 'Gold') {
         newItem = { 
@@ -2353,7 +2353,7 @@ function createItemDrop(name, x, y, initialState = null, bypassLevelCheck = fals
         // Always start by looking up the base item to ensure name is valid
         const baseItem = itemData[name];
         if (!baseItem) {
-            console.error(`Attempted to drop an item that does not exist in itemData: "${name}"`);
+            console.error(`[createItemDrop] FAILED: Item "${name}" does not exist in itemData! ID was: ${initialState?.id}`);
             return;
         }
         
@@ -2362,7 +2362,10 @@ function createItemDrop(name, x, y, initialState = null, bypassLevelCheck = fals
             newItem = { name, ...initialState };
         } else {
             // Generate item properties (for single player OR multiplayer with partial state)
-            if (!bypassLevelCheck && baseItem.category === 'Equip' && player.level < baseItem.levelReq) return;
+            if (!bypassLevelCheck && baseItem.category === 'Equip' && player.level < baseItem.levelReq) {
+                console.warn(`[createItemDrop] SKIPPED: ${name} - player level ${player.level} < required ${baseItem.levelReq}. ID was: ${initialState?.id}`);
+                return;
+            }
 
             newItem = { 
                 name, 
