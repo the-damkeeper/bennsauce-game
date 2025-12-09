@@ -4700,7 +4700,7 @@ const maps = {
             { type: 'johnLumberjack', x: 800, y: 343 }],
         monsters: [],
         portals: [
-            { x: 50, targetMap: 'elnath', targetX: 1900 },
+            { x: 50, targetMap: 'elNath', targetX: 1900 },
             { x: 1100, targetMap: 'stonepeakTrail', targetX: 100 }],
         platforms: [
             { x: 250, y: 528, width: 200 },
@@ -5223,7 +5223,7 @@ const maps = {
             { type: 'coconon', count: 15 }],
         portals: [
             { x: 50, targetMap: 'nautilus', targetX: 1100 },
-            { x: 1950, targetMap: 'elnath', targetX: 100 }],
+            { x: 1950, targetMap: 'elNath', targetX: 100 }],
         platforms: [
             { x: 150, y: 548, width: 400 },
             { x: 700, y: 528, width: 300 },
@@ -5233,7 +5233,7 @@ const maps = {
             { x: 500, y: 458, width: 150, noSpawn: true }
         ]
     },
-    elnath: {
+    elNath: {
         width: 2000,
         background: '#a2d2ff',
         bgm: 'iceValley',
@@ -5268,7 +5268,7 @@ const maps = {
         ],
         monsters: [{ type: 'yeti', count: 1 }],
         portals: [
-            { x: 50, targetMap: 'elnath', targetX: 1050 }
+            { x: 50, targetMap: 'elNath', targetX: 1050 }
         ],
         platforms: [
             { x: 200, y: 548, width: 200 },
@@ -6571,7 +6571,7 @@ const worldMapLayout = {
     'abandonedPlatform': { x: 75, y: 80 }, // Moved Abandoned Platform down
     'nautilus': { x: 90, y: 85 },
     'coconutBeach': { x: 75, y: 85 },
-    'elnath': { x: 60, y: 85 },
+    'elNath': { x: 60, y: 85 },
     'deadMine': { x: 45, y: 85 }
 };
 

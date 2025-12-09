@@ -37,7 +37,7 @@ const audioAssets = {
     stonepeak: new Audio('https://sounds.larry.science/sounds/6B63051503801E464904D8B3EC5CD42231F212DFF76ABCAF807F0BCFE2D35591.mp3'),
     nautilus: new Audio('https://sounds.larry.science/sounds/177419B9699093AD86C37583B6BB8F6064E78D5047BAAF00E4E79671B404F433.mp3'),
     florinaBeach: new Audio('https://sounds.larry.science/sounds/D00F1250B5F784770982A7BC21AF2B9A21A158BE86A3E5A14632F3B1BCF78005.mp3'),
-    elnath: new Audio('https://sounds.larry.science/sounds/07C105FFDD0031B40E88FBD97E325C72E32631341B3D690D53A10DBDDD9BFB78.mp3'),
+    elNath: new Audio('https://sounds.larry.science/sounds/07C105FFDD0031B40E88FBD97E325C72E32631341B3D690D53A10DBDDD9BFB78.mp3'),
     iceValley: new Audio('https://sounds.larry.science/sounds/AD1D3A6D7AF197141E0D759E000240DC92F1D109B1B40370A29D513C138BF25B.mp3'),
     title: new Audio('https://sounds.larry.science/sounds/0328D1FFDFF102AC30F19ADE2150B94DA03A4992FD4C41E3EC1016D8AB82CE48.mp3'),
     huntingground: new Audio('https://sounds.larry.science/sounds/FFB07F5DB2DC5F4548B3167D7AF31952371B04E8C43C6D9F226CD2827755158A.mp3'),
@@ -50,7 +50,7 @@ const audioAssets = {
 // Pre-configure all audio elements for volume and looping
 for (const key in audioAssets) {
     audioAssets[key].volume = 0.5; // Set a default volume
-    if (['title', 'ironHaven', 'huntingground', 'onyxCity', 'hauntedMansion', 'stonepeak', 'nautilus', 'florinaBeach', 'elnath', 'iceValley', 'dewdropIsland', 'skypalace', 'clockTower', 'deepClocktower'].includes(key)) {
+    if (['title', 'ironHaven', 'huntingground', 'onyxCity', 'hauntedMansion', 'stonepeak', 'nautilus', 'florinaBeach', 'elNath', 'iceValley', 'dewdropIsland', 'skypalace', 'clockTower', 'deepClocktower'].includes(key)) {
         audioAssets[key].loop = true; // Make sure BGM tracks loop
         audioAssets[key].volume = 0.3; // BGM should be quieter
     }
@@ -181,7 +181,7 @@ function applyAudioSettings() {
     const finalSfxVolume = convertVolume(sfxVolume);
 
     for (const key in audioAssets) {
-        if (['title', 'ironHaven', 'huntingground', 'onyxCity', 'hauntedMansion', 'stonepeak', 'nautilus', 'florinaBeach', 'elnath', 'iceValley', 'dewdropIsland', 'skypalace', 'clockTower', 'deepClocktower'].includes(key)) {
+        if (['title', 'ironHaven', 'huntingground', 'onyxCity', 'hauntedMansion', 'stonepeak', 'nautilus', 'florinaBeach', 'elNath', 'iceValley', 'dewdropIsland', 'skypalace', 'clockTower', 'deepClocktower'].includes(key)) {
             audioAssets[key].volume = finalBgmVolume;
         } else {
             audioAssets[key].volume = finalSfxVolume;

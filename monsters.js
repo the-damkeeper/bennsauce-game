@@ -1894,27 +1894,8 @@ function updateMonsters() {
             
             // Check if monster is colliding with platform
             if (isColliding(m, p)) {
-                const monsterBottom = m.y + anchorY;
-                const monsterTop = m.y;
-                const platformTop = p.y;
-                const platformBottom = p.y + (p.height || 20);
-                
                 // If monster is falling down and was above platform, land on it
                 if (m.velocityY >= 0 && (m.y - m.velocityY + anchorY) <= p.y) {
-                    const oldY = m.y;
-                    const deltaY = Math.abs(oldY - (p.y - anchorY));
-                    m.y = p.y - anchorY;
-                    m.velocityY = 0;
-                    m.isJumping = false;
-                    onAnySurface = true;
-                    // Only log large snaps (potential teleportation issues)
-                    if (deltaY > 10) {
-                        console.log(`%c[COLLISION SNAP] ${m.type} | Before: ${oldY.toFixed(1)} → After: ${m.y.toFixed(1)} | ΔY: ${deltaY.toFixed(1)}px | Platform: ${p.y.toFixed(1)} | Anchor: ${anchorY.toFixed(1)}`, 'color: #f00; font-weight: bold;');
-                    }
-                }
-                // CRITICAL FIX: If monster somehow got stuck INSIDE or BELOW platform, eject it upward
-                else if (monsterBottom > platformTop && monsterTop < platformBottom) {
-                    const oldY = m.y;
                     m.y = p.y - anchorY;
                     m.velocityY = 0;
                     m.isJumping = false;
@@ -1922,6 +1903,32 @@ function updateMonsters() {
                 }
             }
         });
+
+        // Check structure collision (structures need separate handling since they have different properties)
+        if (map.structures && !isSpawning) {
+            map.structures.forEach(s => {
+                if (s.y === undefined) return;
+                
+                const structureTop = s.y + GROUND_LEVEL_OFFSET;
+                const structureHeight = 50; // Structures have consistent collision height
+                const monsterBottom = m.y + anchorY;
+                
+                // Check if monster is horizontally overlapping with structure
+                const monsterRight = m.x + m.width;
+                const structureRight = s.x + s.width;
+                const horizontalOverlap = !(m.x > structureRight || monsterRight < s.x);
+                
+                if (horizontalOverlap) {
+                    // If monster is falling and close to structure top, land on it
+                    if (m.velocityY >= 0 && monsterBottom >= structureTop && monsterBottom <= structureTop + structureHeight) {
+                        m.y = structureTop - anchorY;
+                        m.velocityY = 0;
+                        m.isJumping = false;
+                        onAnySurface = true;
+                    }
+                }
+            });
+        }
 
         // Skip slope snapping during spawn grace period to prevent interference with spawn positioning
         if (!isSpawnGracePeriod) {
