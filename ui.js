@@ -6715,6 +6715,9 @@ function inspectPlayer(playerName) {
         const remotePlayer = Object.values(remotePlayers).find(p => p.name === playerName);
         if (remotePlayer) {
             // Convert remote player to inspector format
+            // Try to get additional data from online players list
+            const onlinePlayerData = onlinePlayers.find(p => p.playerName === remotePlayer.name);
+            
             targetPlayer = {
                 playerName: remotePlayer.name,
                 level: remotePlayer.level || 1,
@@ -6723,9 +6726,9 @@ function inspectPlayer(playerName) {
                 equipped: remotePlayer.cosmeticEquipped || remotePlayer.equipped || {},
                 guildName: remotePlayer.guild?.name || null,
                 guildRole: remotePlayer.guild?.role || null,
-                totalKills: 0, // Unknown for remote players
-                achievementCount: 0, // Unknown for remote players
-                combatScore: 0, // Unknown for remote players
+                totalKills: onlinePlayerData?.totalKills || 0,
+                achievementCount: onlinePlayerData?.achievementCount || 0,
+                combatScore: onlinePlayerData?.combatScore || 0,
                 currentMap: player.currentMapId, // Same map as us
                 mapDisplayName: maps?.[player.currentMapId]?.displayName || player.currentMapId,
                 status: 'online',

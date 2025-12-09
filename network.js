@@ -4377,6 +4377,7 @@ async function initializePresence() {
                             guildIcon: data.guildIcon || null,
                             totalKills: data.totalKills || 0,
                             achievementCount: data.achievementCount || 0,
+                            combatScore: data.combatScore || 0,
                             // Avatar visual data for player inspection
                             customization: data.customization || { skinTone: 0, eyeColor: 0, hairStyle: 0, hairColor: 0 },
                             equipped: data.equipped || {}
@@ -4460,6 +4461,9 @@ async function updatePresence() {
         const totalKills = player.bestiary?.monsterKills ? 
             Object.values(player.bestiary.monsterKills).reduce((sum, k) => sum + k, 0) : 0;
         
+        // Calculate combat score
+        const combatScore = typeof calculateCombatScore === 'function' ? calculateCombatScore() : 0;
+        
         // Get visual equipped items for avatar rendering (cosmetic overrides regular)
         const visualEquipped = {};
         const allSlots = ['weapon', 'helmet', 'top', 'bottom', 'gloves', 'shoes', 'cape', 'earring', 'ring', 'pendant', 'shield', 'face', 'eye'];
@@ -4488,6 +4492,7 @@ async function updatePresence() {
             guildIcon: player.guild?.icon || null,
             totalKills: totalKills,
             achievementCount: Object.keys(player.achievements?.completed || {}).length,
+            combatScore: combatScore,
             // Avatar visual data
             customization: player.customization || { skinTone: 0, eyeColor: 0, hairStyle: 0, hairColor: 0 },
             equipped: visualEquipped
