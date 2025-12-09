@@ -284,14 +284,53 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize all DOM references first
     initializeDOMReferences();
     
-    // Set title card images from artAssets
+    // Set up animated title cards
     const loadingTitleCard = document.getElementById('loading-title-card');
     const startTitleCard = document.getElementById('start-title-card');
-    if (loadingTitleCard && artAssets && artAssets.titleCard) {
-        loadingTitleCard.src = artAssets.titleCard;
+    
+    // Initialize title card animation
+    let titleCardFrame = 0;
+    let titleCardTimer = 0;
+    const TITLE_CARD_ANIMATION_SPEED = 8; // Frames per animation frame
+    
+    function updateTitleCardAnimation() {
+        if (!artAssets || !artAssets.titleCard || !spriteData.titleCard) return;
+        
+        titleCardTimer++;
+        if (titleCardTimer >= TITLE_CARD_ANIMATION_SPEED) {
+            titleCardTimer = 0;
+            titleCardFrame = (titleCardFrame + 1) % spriteData.titleCard.animations.display.length;
+            
+            // Create a canvas to render the current frame
+            const frameData = spriteData.titleCard.animations.display[titleCardFrame];
+            const canvas = document.createElement('canvas');
+            canvas.width = spriteData.titleCard.frameWidth;
+            canvas.height = spriteData.titleCard.frameHeight;
+            const ctx = canvas.getContext('2d');
+            
+            const img = new Image();
+            img.src = artAssets.titleCard;
+            img.onload = () => {
+                ctx.drawImage(
+                    img,
+                    frameData.x, frameData.y,
+                    spriteData.titleCard.frameWidth, spriteData.titleCard.frameHeight,
+                    0, 0,
+                    spriteData.titleCard.frameWidth, spriteData.titleCard.frameHeight
+                );
+                
+                const frameDataUrl = canvas.toDataURL();
+                if (loadingTitleCard) loadingTitleCard.src = frameDataUrl;
+                if (startTitleCard) startTitleCard.src = frameDataUrl;
+            };
+        }
+        
+        requestAnimationFrame(updateTitleCardAnimation);
     }
-    if (startTitleCard && artAssets && artAssets.titleCard) {
-        startTitleCard.src = artAssets.titleCard;
+    
+    // Start the animation
+    if (artAssets && artAssets.titleCard && spriteData.titleCard) {
+        updateTitleCardAnimation();
     }
     
     // Set up chat input listener for channel switching with space
