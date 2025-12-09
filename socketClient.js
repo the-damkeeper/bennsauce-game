@@ -1809,16 +1809,12 @@ function handleItemPickedUp(data) {
     
     console.log(`[Socket] ${pickedUpByName} picked up item at (${x}, ${y}), itemId: ${itemId}`);
     
-    // Try to find and remove the item
+    // Try to find and remove the item by ID only (no position fallback - it causes wrong matches)
     let found = false;
     for (let i = droppedItems.length - 1; i >= 0; i--) {
         const item = droppedItems[i];
         
-        // Match by ID (primary) or by approximate position (fallback)
-        const matchesId = item.id === itemId;
-        const matchesPosition = Math.abs(item.x - x) < 50 && Math.abs(item.y - y) < 50;
-        
-        if (matchesId || matchesPosition) {
+        if (item.id === itemId) {
             // Play pickup VFX at item location
             if (typeof createPixelArtEffect === 'function') {
                 createPixelArtEffect('spawnEffect', item.x, item.y, item.width, item.height);
@@ -1830,7 +1826,7 @@ function handleItemPickedUp(data) {
             }
             droppedItems.splice(i, 1);
             
-            console.log(`[Socket] Removed item from local droppedItems (${matchesId ? 'ID match' : 'position match'})`);
+            console.log(`[Socket] Removed item from local droppedItems (ID match)`);
             found = true;
             break;
         }
