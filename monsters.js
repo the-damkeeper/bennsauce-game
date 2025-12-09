@@ -1531,7 +1531,8 @@ function createMonster(type, x, y, initialState = null) {
         velocityX: 0, velocityY: 0,
         onPlatform: null,
         spawnFrameCount: 5, // Skip gravity for 5 frames to ensure stable spawn positioning
-        spawnFadeFrames: 30, // Fade in over 30 frames (~300ms at 100fps) for visible effect
+        spawnFadeFrames: -1, // -1 means fade hasn't started yet (starts after physics grace period)
+        deathFadeFrames: 0, // For death fade-out animation
         element: el,
         direction: Math.random() < 0.5 ? 1 : -1,
         aiState: 'idle',
@@ -1756,6 +1757,14 @@ function updateMonsters() {
         // --- NEW LOGIC FOR DEAD MONSTERS ---
         // This block now handles physics AND collision for dying monsters.
         if (m.isDead) {
+            // Death fade-out effect
+            if (m.deathFadeFrames === undefined) m.deathFadeFrames = 30;
+            if (m.deathFadeFrames > 0) {
+                m.deathFadeFrames--;
+                const fadeProgress = m.deathFadeFrames / 30; // Fade from 1 to 0
+                m.element.style.setProperty('opacity', String(fadeProgress), 'important');
+            }
+            
             // Apply physics
             m.x += m.velocityX;
             m.velocityX *= 0.85; // Slower friction for a better knockback feel
@@ -1824,21 +1833,28 @@ function updateMonsters() {
         }
         
         // Always apply gravity and vertical physics (both single and multiplayer)
-        // Skip gravity for first 2 frames to prevent spawned monsters from falling through platforms
+        // Skip gravity for first 5 frames to prevent spawned monsters from falling through platforms
         const isSpawnGracePeriod = m.spawnFrameCount !== undefined && m.spawnFrameCount > 0;
         if (isSpawnGracePeriod) {
             m.spawnFrameCount--;
+            // Keep monster invisible during physics settling
+            m.element.style.setProperty('opacity', '0', 'important');
         } else {
             m.velocityY += GRAVITY;
             m.y += m.velocityY;
+            
+            // Start fade-in AFTER physics grace period ends
+            if (m.spawnFadeFrames === -1) {
+                m.spawnFadeFrames = 30; // Start 30 frame fade-in now
+            }
         }
         
-        // Separate fade-in effect (longer duration for visibility)
+        // Fade-in effect (only runs after physics grace period)
         if (m.spawnFadeFrames !== undefined && m.spawnFadeFrames > 0) {
             m.spawnFadeFrames--;
             const fadeProgress = 1 - (m.spawnFadeFrames / 30); // 30 frames total
             m.element.style.setProperty('opacity', String(fadeProgress), 'important');
-        } else if (m.element && m.element.style.opacity !== '1') {
+        } else if (m.spawnFadeFrames === 0 && m.element && m.element.style.opacity !== '1') {
             m.element.style.setProperty('opacity', '1', 'important');
         }
 
