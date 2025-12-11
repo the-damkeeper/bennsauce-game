@@ -338,6 +338,16 @@ function setupSocketListeners() {
     socket.on('remoteProjectile', (data) => {
         createRemoteProjectile(data);
     });
+    
+    // Remote player projectile hit (stop/remove projectile)
+    socket.on('remoteProjectileHit', (data) => {
+        handleRemoteProjectileHit(data);
+    });
+    
+    // Remote player skill VFX (melee attack effects, spell visuals)
+    socket.on('remoteSkillVFX', (data) => {
+        createRemoteSkillVFX(data);
+    });
 }
 
 /**
@@ -2239,6 +2249,9 @@ function handleRemotePlayerVFX(data) {
 // Store remote projectiles separately (visual only, no damage)
 let remoteProjectiles = [];
 
+// Queue of pending projectile hit events (in case hit arrives before projectile)
+let pendingProjectileHits = [];
+
 /**
  * Broadcast a projectile event to other players
  * @param {string} spriteName - Name of the projectile sprite
@@ -2250,10 +2263,16 @@ let remoteProjectiles = [];
  * @param {boolean} isGrenade - Whether this is a grenade projectile
  * @param {boolean} isHoming - Whether this is a homing projectile
  */
-function broadcastProjectile(spriteName, x, y, velocityX, velocityY, angle, isGrenade, isHoming) {
-    if (!socket || !isConnectedToServer) return;
+function broadcastProjectile(projectileId, spriteName, x, y, velocityX, velocityY, angle, isGrenade, isHoming) {
+    if (!socket || !isConnectedToServer) {
+        console.log('[Projectile] Not broadcasting - not connected');
+        return;
+    }
+    
+    console.log('[Projectile] Broadcasting:', projectileId, spriteName, 'at', x, y, 'velocity:', velocityX, velocityY);
     
     socket.emit('playerProjectile', {
+        projectileId: projectileId,
         spriteName: spriteName,
         x: x,
         y: y,
@@ -2266,11 +2285,31 @@ function broadcastProjectile(spriteName, x, y, velocityX, velocityY, angle, isGr
 }
 
 /**
+ * Broadcast when a projectile hits something and should stop
+ * @param {number} projectileId - The unique ID of the projectile
+ * @param {number} hitX - X position where the projectile hit
+ * @param {number} hitY - Y position where the projectile hit
+ */
+function broadcastProjectileHit(projectileId, hitX, hitY) {
+    if (!socket || !isConnectedToServer) return;
+    
+    console.log('[Projectile] Broadcasting hit:', projectileId, 'at', hitX, hitY);
+    
+    socket.emit('playerProjectileHit', {
+        projectileId: projectileId,
+        x: hitX,
+        y: hitY
+    });
+}
+
+/**
  * Create a visual-only projectile from a remote player
  * These projectiles don't deal damage - damage is handled by the originating player
  * @param {Object} data - Projectile data from server
  */
 function createRemoteProjectile(data) {
+    console.log('[Projectile] Creating remote projectile:', data.spriteName, 'at', data.x, data.y);
+    
     // Check if we have sprites available
     if (typeof sprites === 'undefined' || !sprites[data.spriteName]) {
         console.warn('[Projectile] Sprite not found:', data.spriteName);
@@ -2278,7 +2317,10 @@ function createRemoteProjectile(data) {
     }
     
     const worldContent = document.getElementById('world-content');
-    if (!worldContent) return;
+    if (!worldContent) {
+        console.warn('[Projectile] worldContent not found');
+        return;
+    }
     
     const el = document.createElement('div');
     el.className = 'projectile remote-projectile';
@@ -2286,6 +2328,10 @@ function createRemoteProjectile(data) {
     const pWidth = 20, pHeight = 20;
     el.style.width = `${pWidth}px`;
     el.style.height = `${pHeight}px`;
+    
+    // Set initial position
+    el.style.left = `${data.x}px`;
+    el.style.top = `${data.y}px`;
     
     // Apply initial transform based on direction/angle
     if (data.angle && data.angle !== 0) {
@@ -2295,6 +2341,8 @@ function createRemoteProjectile(data) {
     }
     
     const projectile = {
+        id: data.projectileId, // Store the projectile ID for hit detection
+        odId: data.odId, // Store owner's odId for matching
         x: data.x,
         y: data.y,
         width: pWidth,
@@ -2309,6 +2357,70 @@ function createRemoteProjectile(data) {
     
     worldContent.appendChild(el);
     remoteProjectiles.push(projectile);
+    console.log('[Projectile] Remote projectile created, id:', data.projectileId, 'odId:', data.odId, 'total:', remoteProjectiles.length);
+    
+    // Process any pending hits that may have arrived before this projectile
+    processPendingProjectileHits();
+}
+
+/**
+ * Handle a remote projectile hit event - stop and remove the projectile
+ * @param {Object} data - Hit data from server { odId, projectileId, x, y }
+ */
+function handleRemoteProjectileHit(data) {
+    console.log('[Projectile] Received hit event for projectile:', data.projectileId, 'from player:', data.odId, 'current remotes:', remoteProjectiles.map(p => ({id: p.id, odId: p.odId})));
+    
+    // Find and remove the matching projectile
+    for (let i = remoteProjectiles.length - 1; i >= 0; i--) {
+        const p = remoteProjectiles[i];
+        if (p.id === data.projectileId && p.odId === data.odId) {
+            console.log('[Projectile] Removing hit projectile:', p.id);
+            if (p.element) {
+                p.element.remove();
+            }
+            remoteProjectiles.splice(i, 1);
+            return;
+        }
+    }
+    
+    // Projectile not found - queue the hit for later (may arrive before projectile creation)
+    console.log('[Projectile] Hit projectile not found, queueing for later...');
+    pendingProjectileHits.push({
+        ...data,
+        queuedAt: Date.now()
+    });
+}
+
+/**
+ * Process pending projectile hits - called after creating new projectiles
+ */
+function processPendingProjectileHits() {
+    const now = Date.now();
+    
+    // Process pending hits
+    for (let h = pendingProjectileHits.length - 1; h >= 0; h--) {
+        const hit = pendingProjectileHits[h];
+        
+        // Remove stale pending hits (older than 2 seconds)
+        if (now - hit.queuedAt > 2000) {
+            pendingProjectileHits.splice(h, 1);
+            continue;
+        }
+        
+        // Try to find the projectile
+        for (let i = remoteProjectiles.length - 1; i >= 0; i--) {
+            const p = remoteProjectiles[i];
+            if (p.id === hit.projectileId && p.odId === hit.odId) {
+                console.log('[Projectile] Processing queued hit for projectile:', p.id);
+                if (p.element) {
+                    p.element.remove();
+                }
+                remoteProjectiles.splice(i, 1);
+                pendingProjectileHits.splice(h, 1);
+                break;
+            }
+        }
+    }
 }
 
 /**
@@ -2396,6 +2508,90 @@ function clearRemoteProjectiles() {
         }
     }
     remoteProjectiles = [];
+}
+
+// =============================================
+// REMOTE SKILL VFX SYSTEM
+// =============================================
+
+/**
+ * Broadcast a skill VFX effect to other players
+ * @param {string} effectName - Name of the effect sprite (e.g., 'slashBlastEffect', 'thunderboltEffect')
+ * @param {number} x - X position
+ * @param {number} y - Y position
+ * @param {number} width - Width of the effect
+ * @param {number} height - Height of the effect
+ * @param {string} facing - Direction ('left' or 'right')
+ * @param {number} duration - Duration in ms (default 300)
+ */
+function broadcastSkillVFX(effectName, x, y, width, height, facing, duration) {
+    if (!socket || !isConnectedToServer) {
+        console.log('[SkillVFX] Not broadcasting - not connected');
+        return;
+    }
+    
+    console.log('[SkillVFX] Broadcasting:', effectName, 'at', x, y);
+    
+    socket.emit('playerSkillVFX', {
+        effectName: effectName,
+        x: x,
+        y: y,
+        width: width || 150,
+        height: height || 150,
+        facing: facing || 'right',
+        duration: duration || 300
+    });
+}
+
+/**
+ * Create a skill VFX effect from a remote player
+ * These are visual-only effects (melee slashes, spell effects, etc.)
+ * @param {Object} data - VFX data from server
+ */
+function createRemoteSkillVFX(data) {
+    console.log('[SkillVFX] Creating remote skill VFX:', data.effectName, 'at', data.x, data.y);
+    
+    // Check if we have sprites available
+    if (typeof sprites === 'undefined' || !sprites[data.effectName]) {
+        console.warn('[SkillVFX] Sprite not found:', data.effectName);
+        return;
+    }
+    
+    const worldContent = document.getElementById('world-content');
+    if (!worldContent) {
+        console.warn('[SkillVFX] worldContent not found');
+        return;
+    }
+    
+    const el = document.createElement('div');
+    el.className = 'attack-box remote-skill-vfx';
+    el.innerHTML = sprites[data.effectName];
+    el.style.position = 'absolute';
+    el.style.left = `${data.x}px`;
+    el.style.top = `${data.y}px`;
+    el.style.width = `${data.width || 150}px`;
+    el.style.height = `${data.height || 150}px`;
+    el.style.background = 'none';
+    el.style.border = 'none';
+    el.style.pointerEvents = 'none';
+    el.style.zIndex = '15';
+    
+    // Apply facing direction
+    if (data.facing === 'left') {
+        el.style.transform = 'scaleX(-1)';
+    }
+    
+    // Apply fade animation
+    el.style.animation = `attack-fade ${(data.duration || 300) / 1000}s forwards`;
+    
+    worldContent.appendChild(el);
+    
+    // Remove after animation completes
+    setTimeout(() => {
+        if (el.parentNode) {
+            el.remove();
+        }
+    }, data.duration || 300);
 }
 
 /**
@@ -2657,8 +2853,13 @@ window.sendPlayerRespawn = sendPlayerRespawn;
 
 // Export projectile functions for multiplayer sync
 window.broadcastProjectile = broadcastProjectile;
+window.broadcastProjectileHit = broadcastProjectileHit;
 window.updateRemoteProjectiles = updateRemoteProjectiles;
 window.clearRemoteProjectiles = clearRemoteProjectiles;
+window.processPendingProjectileHits = processPendingProjectileHits;
+
+// Export skill VFX functions for multiplayer sync
+window.broadcastSkillVFX = broadcastSkillVFX;
 
 // Export interpolation function for game loop
 window.interpolateMonsterPositions = interpolateMonsterPositions;

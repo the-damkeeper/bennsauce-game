@@ -242,5 +242,3 @@ function removeAttackFromSpatialGrid(attack) {
         attack._inGrid = false;
     }
 }
-
-console.log('[SpatialGrid] Collision optimization system initialized');

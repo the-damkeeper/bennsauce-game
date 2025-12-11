@@ -14,11 +14,11 @@ const GAME_CONFIG = {
     
     // Physics
     SCALE: 0.8,
-    GRAVITY: 0.5, // Stronger gravity for less floaty feeling
-    JUMP_FORCE: -10, // Stronger jump force to compensate
+    GRAVITY: 0.4, // Stronger gravity for less floaty feeling
+    JUMP_FORCE: -8, // Stronger jump force to compensate
     GROUND_FRICTION: 0.85,
     AIR_FRICTION: 0.97,
-    KNOCKBACK_FORCE: 6, // Stronger knockback
+    KNOCKBACK_FORCE: 4, // Stronger knockback
     LADDER_SPEED: 1.5,
     
     // Rendering
@@ -39,10 +39,10 @@ const GAME_CONFIG = {
     
     // EXP Curve - Single source of truth for all characters
     BASE_EXP: 100,           // EXP needed for level 1 -> 2
-    EXP_GROWTH_RATE: 1.13,   // 13% increase per level
+    EXP_GROWTH_RATE: 1.14,   // 14% increase per level
     
     HP_REGEN_INTERVAL: 6000,
-    HP_REGEN_AMOUNT: 5,
+    HP_REGEN_AMOUNT: 4,
     MP_REGEN_INTERVAL: 3000,
     MP_REGEN_AMOUNT: 2,
     RESPAWN_TIME: 2000,

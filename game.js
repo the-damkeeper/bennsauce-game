@@ -113,6 +113,7 @@ let npcs = [];
 let droppedItems = [];
 let activeAttacks = [];
 let projectiles = [];
+let nextProjectileId = 1; // Unique ID counter for projectile multiplayer sync
 let portals = [];
 let platforms = [];
 let monsterSpawners = [];
@@ -705,7 +706,7 @@ function startGame(isNewCharacter = false) {
     player.animationState = 'idle';
 
     player.originalSpeed = 2;
-    player.originalJumpForce = -9;
+    player.originalJumpForce = JUMP_FORCE; // Use constant from constants.js
     player.speed = player.originalSpeed;
     player.jumpForce = player.originalJumpForce;
     player.buffs = [];
@@ -4187,6 +4188,11 @@ function handlePlayerAttack(ability) {
                 attack.element.style.border = 'none';
                 attack.element.style.animation = 'attack-fade 0.3s forwards';
                 worldContent.appendChild(attack.element);
+                
+                // Broadcast VFX to other players
+                if (typeof broadcastSkillVFX === 'function') {
+                    broadcastSkillVFX('slashBlastEffect', attackX, attackY, attackBoxWidth, attackBoxHeight, player.facing, 300);
+                }
             } else if (ability.name === 'Thunderbolt') {
                 attack.element.className = 'attack-box';
                 attack.element.innerHTML = sprites.thunderboltEffect;
@@ -4194,6 +4200,11 @@ function handlePlayerAttack(ability) {
                 attack.element.style.border = 'none';
                 attack.element.style.animation = 'attack-fade 0.3s forwards';
                 worldContent.appendChild(attack.element);
+                
+                // Broadcast VFX to other players
+                if (typeof broadcastSkillVFX === 'function') {
+                    broadcastSkillVFX('thunderboltEffect', attackX, attackY, attackBoxWidth, attackBoxHeight, player.facing, 300);
+                }
             }
 
             activeAttacks.push(attack);
@@ -4212,7 +4223,9 @@ function createProjectile(spriteName, damageMultiplier, startX, startY, angle = 
     const pX = startX !== undefined ? startX : (player.facing === 'right' ? player.x + player.width : player.x - pWidth);
     const pY = startY !== undefined ? startY : player.y + player.height / 2 - pHeight / 2;
 
+    const projectileId = nextProjectileId++;
     const projectile = {
+        id: projectileId, // Unique ID for multiplayer sync
         x: pX, y: pY, width: pWidth, height: pHeight,
         damageMultiplier, element: el, hitMonsters: [],
         createdAt: Date.now()
@@ -4267,9 +4280,11 @@ function createProjectile(spriteName, damageMultiplier, startX, startY, angle = 
     worldContent.appendChild(el);
     projectiles.push(projectile);
     
+    console.log('[Game] Projectile created with id:', projectileId, 'sprite:', spriteName, 'isHoming:', isHoming);
+    
     // Broadcast projectile to other players for multiplayer sync
     if (typeof broadcastProjectile === 'function') {
-        broadcastProjectile(spriteName, pX, pY, projectile.velocityX, projectile.velocityY, angle, spriteName === 'grenadeIcon', isHoming);
+        broadcastProjectile(projectileId, spriteName, pX, pY, projectile.velocityX, projectile.velocityY, angle, spriteName === 'grenadeIcon', isHoming);
     }
 }
 
@@ -4297,6 +4312,11 @@ function explodeGrenade(grenade) {
 
     // Add the explosion to activeAttacks so it can deal damage
     activeAttacks.push(explosion);
+    
+    // Broadcast explosion VFX to other players
+    if (typeof broadcastSkillVFX === 'function') {
+        broadcastSkillVFX('grenadeEffect', explosion.x, explosion.y, 100, 100, 'right', 400);
+    }
 
     // Remove the grenade's visual element from the game
     grenade.element.remove();
@@ -4472,7 +4492,7 @@ function showDamageNumber(amount, x, y, isPlayerDamage, options = {}) {
     }, 1000);
 }
 
-function createEffect(effectName, x, y, duration = 200) {
+function createEffect(effectName, x, y, duration = 200, broadcast = true) {
     const el = document.createElement('div');
     el.className = 'attack-box'; // We can reuse the attack-box style for positioning and fading
     el.style.width = '50px';
@@ -4485,6 +4505,11 @@ function createEffect(effectName, x, y, duration = 200) {
     el.innerHTML = sprites[effectName];
     worldContent.appendChild(el);
     setTimeout(() => el.remove(), duration);
+    
+    // Broadcast effect to other players
+    if (broadcast && typeof broadcastSkillVFX === 'function') {
+        broadcastSkillVFX(effectName, x, y, 50, 50, 'right', duration);
+    }
 }
 
 function showNotification(text, rarity) {
@@ -4656,6 +4681,10 @@ function checkCollisions() {
             if (m.isDead || m.isSpawning || attack.hitMonsters.includes(m.id)) continue;
 
             if (isColliding(attack, m)) {
+                // Debug: Log when projectile collision is detected
+                if (attack.id) {
+                    console.log('[Game] Projectile collision detected! id:', attack.id, 'monster:', m.type);
+                }
 
                 // Robust level and accuracy-based hit calculation
                 const levelDifference = player.level - m.level;
@@ -4690,7 +4719,14 @@ function checkCollisions() {
                 if (Math.random() * 100 > playerHitChance) {
                     showDamageNumber(0, m.x + m.width / 2, m.y, false, { isMiss: true });
                     attack.hitMonsters.push(m.id);
-                    if (!attack.isMultiTarget) { attack.toRemove = true; }
+                    if (!attack.isMultiTarget) {
+                        attack.toRemove = true;
+                        // Broadcast projectile hit (even on miss) to stop remote visual
+                        if (attack.id && typeof broadcastProjectileHit === 'function') {
+                            console.log('[Game] Broadcasting projectile hit for miss, id:', attack.id);
+                            broadcastProjectileHit(attack.id, attack.x, attack.y);
+                        }
+                    }
                     continue;
                 }
 
@@ -4762,6 +4798,11 @@ function checkCollisions() {
                     attack.hitMonsters.push(m.id);
                     if (!attack.isMultiTarget) {
                         attack.toRemove = true;
+                        // Broadcast projectile hit to other players
+                        if (attack.id && typeof broadcastProjectileHit === 'function') {
+                            console.log('[Game] Broadcasting projectile hit for server-auth damage, id:', attack.id);
+                            broadcastProjectileHit(attack.id, attack.x, attack.y);
+                        }
                         break; // Single-target attack - stop after first hit
                     }
                     continue; // Skip local damage processing
@@ -4889,6 +4930,11 @@ function checkCollisions() {
                 attack.hitMonsters.push(m.id);
                 if (!attack.isMultiTarget) {
                     attack.toRemove = true;
+                    // Broadcast projectile hit to other players (local/offline mode)
+                    if (attack.id && typeof broadcastProjectileHit === 'function') {
+                        console.log('[Game] Broadcasting projectile hit for local damage, id:', attack.id);
+                        broadcastProjectileHit(attack.id, attack.x, attack.y);
+                    }
                     break;
                 }
             }
