@@ -2279,21 +2279,28 @@ function interpolateMonsterPositions() {
         }
         
         // Correct Y position if drifted too far from server (keeps platform monsters synced)
+        // For jumping/falling monsters, we need tighter sync
         if (m.serverTargetY !== undefined) {
             const dy = m.serverTargetY - m.y;
-            if (Math.abs(dy) > Y_CORRECTION_THRESHOLD) {
-                // Significant drift - correct toward server position
-                m.y += dy * Y_CORRECTION_SPEED;
-                m.velocityY = 0; // Reset velocity to prevent fighting
+            const isAirborne = m.serverIsJumping || m.serverVelocityY !== 0;
+            
+            // Use tighter threshold when monster is jumping/falling
+            const threshold = isAirborne ? 5 : Y_CORRECTION_THRESHOLD;
+            const speed = isAirborne ? 0.5 : Y_CORRECTION_SPEED;
+            
+            if (Math.abs(dy) > threshold) {
+                // Correct toward server position
+                m.y += dy * speed;
             }
         }
         
         // Sync jumping state from server
         if (m.serverIsJumping !== undefined) {
             m.isJumping = m.serverIsJumping;
-            if (m.serverVelocityY !== undefined) {
-                m.velocityY = m.serverVelocityY;
-            }
+        }
+        // Always sync velocityY from server
+        if (m.serverVelocityY !== undefined) {
+            m.velocityY = m.serverVelocityY;
         }
         
         // Update facing and direction (direction controls sprite flip: 1=right, -1=left)
