@@ -13,6 +13,7 @@ let socketInitialized = false; // Track if socket initialization has completed (
 let remotePlayers = {}; // { odId: playerData }
 let positionUpdateInterval = null;
 let lastSentPosition = { x: 0, y: 0 };
+let lastJoinedOdId = null; // Track the odId we joined with (for character switching)
 
 // Configuration
 const SOCKET_CONFIG = {
@@ -450,8 +451,88 @@ function joinGameServer() {
 
     socket.emit('join', joinData);
     hasJoinedServer = true;
+    lastJoinedOdId = joinData.odId; // Track the odId we joined with
     
     // Initialize monsters for this map after joining
+    setTimeout(() => {
+        initMapMonstersOnServer();
+    }, 500);
+}
+
+/**
+ * Rejoin the server with a new character (character switch)
+ * This tells the server to clean up the old character and register the new one
+ */
+function rejoinWithNewCharacter() {
+    if (!socket || !isConnectedToServer) return;
+    if (typeof player === 'undefined' || !player) return;
+    if (typeof currentMapId === 'undefined' || !currentMapId) return;
+
+    console.log('[Socket] Rejoining with new character:', player.name);
+
+    // Extract just item names from equipped
+    const equippedNames = {};
+    if (player.equipped) {
+        for (const slot in player.equipped) {
+            const item = player.equipped[slot];
+            if (item) {
+                equippedNames[slot] = typeof item === 'string' ? item : (item.name || null);
+            } else {
+                equippedNames[slot] = null;
+            }
+        }
+    }
+    
+    // Also check cosmeticEquipped
+    const cosmeticNames = {};
+    if (player.cosmeticEquipped) {
+        for (const slot in player.cosmeticEquipped) {
+            const item = player.cosmeticEquipped[slot];
+            cosmeticNames[slot] = item ? (typeof item === 'string' ? item : (item.name || null)) : null;
+        }
+    }
+
+    // Get party info if available
+    let partyId = null;
+    if (typeof getPartyInfo === 'function') {
+        const partyInfo = getPartyInfo();
+        partyId = partyInfo.partyId || null;
+    }
+
+    const rejoinData = {
+        odId: player.odId || generateTempOdId(),
+        name: player.name || 'Unknown',
+        mapId: currentMapId,
+        x: player.x,
+        y: player.y,
+        customization: player.customization || {},
+        level: player.level || 1,
+        playerClass: player.class || 'Beginner',
+        guild: player.guild || null,
+        equipped: equippedNames,
+        cosmeticEquipped: cosmeticNames,
+        equippedMedal: player.equippedMedal || null,
+        displayMedals: player.displayMedals || [],
+        partyId: partyId,
+        oldOdId: lastJoinedOdId // Send the old odId so server can clean it up
+    };
+    
+    // Clear remote players from old session
+    clearRemotePlayers();
+    clearRemoteProjectiles();
+    
+    // Update tracking
+    if (!player.odId) {
+        player.odId = rejoinData.odId;
+    }
+    lastJoinedOdId = rejoinData.odId;
+
+    socket.emit('rejoin', rejoinData);
+    hasJoinedServer = true;
+    
+    console.log('[Socket] Sent rejoin with new character:', player.name, 'odId:', player.odId);
+    
+    // Re-initialize monsters for this map
     setTimeout(() => {
         initMapMonstersOnServer();
     }, 500);
@@ -2102,6 +2183,7 @@ window.sendMapChat = sendMapChat;
 window.updateRemotePlayers = updateRemotePlayers;
 window.remotePlayers = remotePlayers;
 window.joinGameServer = joinGameServer;
+window.rejoinWithNewCharacter = rejoinWithNewCharacter; // For character switching
 
 // Monster management exports (Phase 2)
 window.initMapMonstersOnServer = initMapMonstersOnServer;

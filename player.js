@@ -1583,6 +1583,13 @@ function loadCharacter(characterName) {
     document.getElementById('player-nameplate').textContent = player.name;
     updatePlayerNameplate();
     
+    // If we're already connected to the multiplayer server, rejoin with new character
+    // This ensures other players see the new character, not the old one
+    if (typeof rejoinWithNewCharacter === 'function' && typeof hasJoinedServer === 'function' && hasJoinedServer()) {
+        console.log('[Player] Switching character while connected to server, rejoining...');
+        rejoinWithNewCharacter();
+    }
+    
     // Sync with cloud storage (async, won't block)
     syncCharacterWithCloud(characterName);
     
