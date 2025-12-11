@@ -1844,7 +1844,7 @@ function updateMonsters() {
         };
 
         // --- LOGIC FOR LIVING MONSTERS ---
-        // For multiplayer: Server runs AI for X movement, client handles Y (physics/gravity)
+        // For multiplayer: Server runs AI for X movement, client handles Y (physics/gravity) + jumping
         const serverRunsAI = typeof window.isServerAuthoritativeMonsters === 'function' && window.isServerAuthoritativeMonsters();
         
         if (!serverRunsAI) {
@@ -1864,6 +1864,26 @@ function updateMonsters() {
                 // Update server target to new position after knockback
                 if (m.serverTargetX !== undefined && m.knockbackEndTime && Date.now() < m.knockbackEndTime) {
                     m.serverTargetX = m.x;
+                }
+            }
+            
+            // Client-side jumping for multiplayer (uses same logic as offline)
+            if (m.canJump && !m.isJumping) {
+                if (m.aiState === 'chasing') {
+                    // Jump while chasing - more aggressive for bosses
+                    const playerAbove = typeof player !== 'undefined' && player.y < m.y - 30;
+                    const jumpChance = (m.isTrialBoss || m.isMiniBoss) ? (playerAbove ? 0.03 : 0.015) : 0;
+                    if (Math.random() < jumpChance) {
+                        m.velocityY = m.jumpForce || -8;
+                        m.isJumping = true;
+                    }
+                } else {
+                    // Random jump while patrolling
+                    const jumpChance = m.isMiniBoss ? 0.01 : 0.005;
+                    if (Math.random() < jumpChance) {
+                        m.velocityY = m.jumpForce || -6;
+                        m.isJumping = true;
+                    }
                 }
             }
         }

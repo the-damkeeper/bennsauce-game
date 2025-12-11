@@ -2216,8 +2216,8 @@ window.partyMemberStats = window.partyMemberStats || {};
 
 /**
  * Handle monster position updates from server
- * Server controls X position and AI state
- * Client handles all Y physics (gravity, jumping) at 60fps for smooth movement
+ * Server controls X position and AI state only
+ * Client handles Y physics (gravity, jumping) locally using original offline logic
  */
 function handleMonsterPositionsFromServer(monsterPositions) {
     if (!monsterPositions || !Array.isArray(monsterPositions)) return;
@@ -2226,85 +2226,65 @@ function handleMonsterPositionsFromServer(monsterPositions) {
         const localMonster = serverMonsterMapping[pos.id];
         if (!localMonster || localMonster.isDead) continue;
         
-        // Store target X position for interpolation
+        // Store server X for interpolation
         localMonster.serverTargetX = pos.x;
         localMonster.serverFacing = pos.facing;
         localMonster.serverDirection = pos.direction;
         localMonster.serverAiState = pos.aiState;
         localMonster.serverVelocityX = pos.velocityX || 0;
         localMonster.lastServerUpdate = Date.now();
-        
-        // Handle jump trigger from server - client applies physics at 60fps
-        if (pos.jumpTriggered && !localMonster.isJumping) {
-            // Apply jump with client-side physics (same feel as player)
-            const jumpForce = localMonster.jumpForce || -10;
-            localMonster.velocityY = jumpForce;
-            localMonster.isJumping = true;
-        }
     }
 }
 
 /**
- * Interpolate monster positions toward server positions
- * Server controls X (AI movement), client handles Y (gravity/jump physics at 60fps)
+ * Interpolate monster X positions toward server positions
+ * Server controls X, client handles all Y physics locally
  */
 function interpolateMonsterPositions() {
     if (!serverAuthoritativeMonsters) return;
     
     const now = Date.now();
-    const INTERPOLATION_SPEED = 0.2; // How quickly to move toward server position
     
     for (const serverId in serverMonsterMapping) {
         const m = serverMonsterMapping[serverId];
         if (!m || m.isDead) continue;
         if (m.serverTargetX === undefined) continue;
         
-        // Skip if update is too old (>1 second)
+        // Skip if update is too old
         if (now - (m.lastServerUpdate || 0) > 1000) continue;
         
-        // Skip interpolation if monster is being knocked back
+        // Skip during knockback
         if (m.knockbackEndTime && now < m.knockbackEndTime) continue;
         
-        // Interpolate X position (server authoritative)
+        // Simple X interpolation - lerp toward server position
         const dx = m.serverTargetX - m.x;
-        
-        // Snap if very close, otherwise interpolate
-        // Use faster interpolation to catch up but cap max movement per frame to prevent teleporting
-        if (Math.abs(dx) < 2) {
-            m.x = m.serverTargetX;
-        } else if (Math.abs(dx) > 200) {
-            // Too far - snap to prevent rubberbanding
+        if (Math.abs(dx) < 1) {
             m.x = m.serverTargetX;
         } else {
-            // Smooth interpolation with speed cap
-            const maxMovePerFrame = 8; // Cap movement to prevent visual jumping
-            const moveAmount = Math.max(-maxMovePerFrame, Math.min(maxMovePerFrame, dx * INTERPOLATION_SPEED * 2));
-            m.x += moveAmount;
+            // Smooth interpolation
+            m.x += dx * 0.15;
         }
         
-        // When chasing (aiState from server), allow falling off platforms
-        // When patrolling, clamp to patrol bounds
+        // Clamp to patrol bounds when patrolling
         if (m.serverAiState !== 'chasing' && m.patrolMinX !== undefined && m.patrolMaxX !== undefined) {
             m.x = Math.max(m.patrolMinX, Math.min(m.patrolMaxX, m.x));
         }
         
-        // Update facing and direction (direction controls sprite flip: 1=right, -1=left)
+        // Update facing/direction
         if (m.serverDirection !== undefined) {
             m.direction = m.serverDirection;
             m.facing = m.direction === 1 ? 'right' : 'left';
-            
-            // Apply sprite flip immediately for non-pixel-art monsters
             if (m.element && !m.isPixelArt) {
                 m.element.style.transform = m.direction === 1 ? 'scaleX(1)' : 'scaleX(-1)';
             }
-        } else if (m.serverFacing) {
-            m.facing = m.serverFacing;
-            m.direction = m.serverFacing === 'right' ? 1 : -1;
-            
-            // Apply sprite flip immediately for non-pixel-art monsters
-            if (m.element && !m.isPixelArt) {
-                m.element.style.transform = m.direction === 1 ? 'scaleX(1)' : 'scaleX(-1)';
-            }
+        }
+        
+        // Sync AI state for local jumping logic
+        if (m.serverAiState) {
+            m.aiState = m.serverAiState;
+        }
+    }
+}
         }
         
         // Update AI state for animations
