@@ -9746,6 +9746,7 @@ function openDialogue(npc) {
             `;
             document.getElementById('close-dialogue').addEventListener('click', () => toggleWindow(dialogueWindowElement));
             document.getElementById('confirm-pq-entry').addEventListener('click', () => {
+                console.log('[PQ] Begin Party Quest button clicked!');
                 toggleWindow(dialogueWindowElement);
                 
                 // Store original map for all party members before entering
@@ -9753,9 +9754,14 @@ function openDialogue(npc) {
                 player.pqOriginalX = player.x;
                 player.pqOriginalY = player.y;
                 
+                console.log('[PQ] Socket status:', window.socket ? 'exists' : 'null', 'connected:', window.socket?.connected);
+                console.log('[PQ] partyInfo:', partyInfo);
+                console.log('[PQ] leaderId:', player.odId);
+                
                 // Emit socket event to start party quest for all members
                 // All members (including leader) will warp via the socket handler
                 if (window.socket && window.socket.connected) {
+                    console.log('[PQ] Emitting startPartyQuest event...');
                     window.socket.emit('startPartyQuest', {
                         pqId: 'kerningPQ',
                         partyId: partyInfo.id,
@@ -9764,8 +9770,15 @@ function openDialogue(npc) {
                         originalX: player.x,
                         originalY: player.y
                     });
+                    addChatMessage('Starting Party Quest...', 'system');
+                } else {
+                    // Fallback: warp locally if socket isn't connected
+                    console.log('[PQ] Socket not connected, warping locally');
+                    addChatMessage('Starting Party Quest (offline mode)...', 'system');
+                    if (typeof fadeAndChangeMap === 'function') {
+                        fadeAndChangeMap('pqStage1', 200, 300);
+                    }
                 }
-                // Note: Don't warp locally here - let the socket handler do it for consistency
             });
         });
         
