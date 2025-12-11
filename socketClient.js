@@ -2185,6 +2185,9 @@ window.remotePlayers = remotePlayers;
 window.joinGameServer = joinGameServer;
 window.rejoinWithNewCharacter = rejoinWithNewCharacter; // For character switching
 
+// Expose the socket itself for direct access (needed for PQ events etc.)
+window.getSocket = () => socket;
+
 // Monster management exports (Phase 2)
 window.initMapMonstersOnServer = initMapMonstersOnServer;
 window.sendMonsterAttack = sendMonsterAttack;

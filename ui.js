@@ -9822,15 +9822,17 @@ function openDialogue(npc) {
                 player.pqOriginalX = player.x;
                 player.pqOriginalY = player.y;
                 
-                console.log('[PQ] Socket status:', window.socket ? 'exists' : 'null', 'connected:', window.socket?.connected);
+                // Get socket using the getter function
+                const socket = window.getSocket ? window.getSocket() : null;
+                console.log('[PQ] Socket status:', socket ? 'exists' : 'null', 'connected:', socket?.connected);
                 console.log('[PQ] partyInfo:', partyInfo);
                 console.log('[PQ] leaderId:', player.odId);
                 
                 // Emit socket event to start party quest for all members
                 // All members (including leader) will warp via the socket handler
-                if (window.socket && window.socket.connected) {
+                if (socket && socket.connected) {
                     console.log('[PQ] Emitting startPartyQuest event...');
-                    window.socket.emit('startPartyQuest', {
+                    socket.emit('startPartyQuest', {
                         pqId: 'kerningPQ',
                         partyId: partyInfo.id,
                         leaderId: player.odId,
@@ -9840,12 +9842,9 @@ function openDialogue(npc) {
                     });
                     addChatMessage('Starting Party Quest...', 'system');
                 } else {
-                    // Fallback: warp locally if socket isn't connected
-                    console.log('[PQ] Socket not connected, warping locally');
-                    addChatMessage('Starting Party Quest (offline mode)...', 'system');
-                    if (typeof fadeAndChangeMap === 'function') {
-                        fadeAndChangeMap('pqStage1', 200, 300);
-                    }
+                    // Socket not connected - show error, don't allow PQ without server
+                    console.error('[PQ] Cannot start PQ - not connected to server!');
+                    addChatMessage('Error: Not connected to server! Cannot start Party Quest.', 'error');
                 }
             });
         });
