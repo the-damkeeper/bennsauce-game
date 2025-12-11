@@ -2216,8 +2216,8 @@ window.partyMemberStats = window.partyMemberStats || {};
 
 /**
  * Handle monster position updates from server
- * Server runs AI, all clients just receive and interpolate
- * NOTE: Only X position is controlled by server - Y is handled by client physics
+ * Server controls X position and AI state
+ * Client handles all Y physics (gravity, jumping) at 60fps for smooth movement
  */
 function handleMonsterPositionsFromServer(monsterPositions) {
     if (!monsterPositions || !Array.isArray(monsterPositions)) return;
@@ -2228,29 +2228,31 @@ function handleMonsterPositionsFromServer(monsterPositions) {
         
         // Store target X position for interpolation
         localMonster.serverTargetX = pos.x;
-        // Store server Y - we'll sync if client drifts too far
-        localMonster.serverTargetY = pos.y;
         localMonster.serverFacing = pos.facing;
         localMonster.serverDirection = pos.direction;
         localMonster.serverAiState = pos.aiState;
         localMonster.serverVelocityX = pos.velocityX || 0;
-        localMonster.serverVelocityY = pos.velocityY || 0;
-        localMonster.serverIsJumping = pos.isJumping || false;
         localMonster.lastServerUpdate = Date.now();
+        
+        // Handle jump trigger from server - client applies physics at 60fps
+        if (pos.jumpTriggered && !localMonster.isJumping) {
+            // Apply jump with client-side physics (same feel as player)
+            const jumpForce = localMonster.jumpForce || -10;
+            localMonster.velocityY = jumpForce;
+            localMonster.isJumping = true;
+        }
     }
 }
 
 /**
  * Interpolate monster positions toward server positions
- * Called from game loop - server runs AI for X movement, client handles Y (physics)
+ * Server controls X (AI movement), client handles Y (gravity/jump physics at 60fps)
  */
 function interpolateMonsterPositions() {
     if (!serverAuthoritativeMonsters) return;
     
     const now = Date.now();
     const INTERPOLATION_SPEED = 0.2; // How quickly to move toward server position
-    const Y_CORRECTION_THRESHOLD = 30; // Only correct Y if drift exceeds this
-    const Y_CORRECTION_SPEED = 0.3; // Faster Y correction to prevent visible drift
     
     for (const serverId in serverMonsterMapping) {
         const m = serverMonsterMapping[serverId];
@@ -2263,7 +2265,7 @@ function interpolateMonsterPositions() {
         // Skip interpolation if monster is being knocked back
         if (m.knockbackEndTime && now < m.knockbackEndTime) continue;
         
-        // Interpolate X position
+        // Interpolate X position (server authoritative)
         const dx = m.serverTargetX - m.x;
         
         // Snap if very close, otherwise interpolate
@@ -2273,34 +2275,10 @@ function interpolateMonsterPositions() {
             m.x += dx * INTERPOLATION_SPEED;
         }
         
-        // Clamp X to patrol bounds if available (prevents visual drift off platforms)
-        if (m.patrolMinX !== undefined && m.patrolMaxX !== undefined) {
+        // When chasing (aiState from server), allow falling off platforms
+        // When patrolling, clamp to patrol bounds
+        if (m.serverAiState !== 'chasing' && m.patrolMinX !== undefined && m.patrolMaxX !== undefined) {
             m.x = Math.max(m.patrolMinX, Math.min(m.patrolMaxX, m.x));
-        }
-        
-        // Correct Y position if drifted too far from server (keeps platform monsters synced)
-        // For jumping/falling monsters, we need tighter sync
-        if (m.serverTargetY !== undefined) {
-            const dy = m.serverTargetY - m.y;
-            const isAirborne = m.serverIsJumping || m.serverVelocityY !== 0;
-            
-            // Use tighter threshold when monster is jumping/falling
-            const threshold = isAirborne ? 5 : Y_CORRECTION_THRESHOLD;
-            const speed = isAirborne ? 0.5 : Y_CORRECTION_SPEED;
-            
-            if (Math.abs(dy) > threshold) {
-                // Correct toward server position
-                m.y += dy * speed;
-            }
-        }
-        
-        // Sync jumping state from server
-        if (m.serverIsJumping !== undefined) {
-            m.isJumping = m.serverIsJumping;
-        }
-        // Always sync velocityY from server
-        if (m.serverVelocityY !== undefined) {
-            m.velocityY = m.serverVelocityY;
         }
         
         // Update facing and direction (direction controls sprite flip: 1=right, -1=left)

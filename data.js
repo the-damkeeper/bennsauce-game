@@ -4606,8 +4606,8 @@ const maps = {
             }
         ],
         ladders: [
-            { x: 350, y1: 473, y2: 600 },
-            { x: 600, y1: 408, y2: 528 },
+            { x: 350, y1: 450, y2: 600 },
+            { x: 600, y1: 353, y2: 528 },
             { x: 950, y1: 473, y2: 600 },
             { x: 1200, y1: 353, y2: 528 },
             { x: 1550, y1: 473, y2: 600 }
@@ -4622,8 +4622,8 @@ const maps = {
             { x: 1700, targetMap: 'dewdropCave', targetX: 100 }
         ],
         platforms: [
-            { x: 150, y: 528, width: 300 },
-            { x: 300, y: 478, width: 150 },
+            { x: 150, y: 528, width: 350 },
+            { x: 300, y: 450, width: 150, noSpawn: true },
             { x: 550, y: 413, width: 200 },
             { x: 900, y: 528, width: 300 },
             { x: 1150, y: 358, width: 200 },
