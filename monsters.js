@@ -2362,10 +2362,7 @@ function createItemDrop(name, x, y, initialState = null, bypassLevelCheck = fals
             newItem = { name, ...initialState };
         } else {
             // Generate item properties (for single player OR multiplayer with partial state)
-            if (!bypassLevelCheck && baseItem.category === 'Equip' && player.level < baseItem.levelReq) {
-                console.warn(`[createItemDrop] SKIPPED: ${name} - player level ${player.level} < required ${baseItem.levelReq}. ID was: ${initialState?.id}`);
-                return;
-            }
+            // Removed level check - items drop regardless of player level
 
             newItem = { 
                 name, 
