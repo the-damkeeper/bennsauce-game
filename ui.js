@@ -8921,6 +8921,70 @@ function getItemIcon(itemName) {
     return '';
 }
 
+/**
+ * Update the Party Quest objective UI
+ * Shows the current stage objective when in a PQ map
+ */
+function updatePQObjectiveUI() {
+    let pqObjectiveUI = document.getElementById('pq-objective-ui');
+    
+    // Check if we're in a PQ map
+    const map = maps[currentMapId];
+    const isInPQ = map && map.isPartyQuest && map.pqStage > 0 && map.pqObjective !== 'reward';
+    
+    if (isInPQ) {
+        // Create UI if it doesn't exist
+        if (!pqObjectiveUI) {
+            pqObjectiveUI = document.createElement('div');
+            pqObjectiveUI.id = 'pq-objective-ui';
+            pqObjectiveUI.style.cssText = `
+                position: fixed;
+                top: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(180deg, rgba(30, 30, 60, 0.95) 0%, rgba(20, 20, 40, 0.95) 100%);
+                border: 2px solid #ffd700;
+                border-radius: 10px;
+                padding: 15px 30px;
+                color: white;
+                font-family: 'Press Start 2P', monospace;
+                z-index: 1000;
+                text-align: center;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3);
+                min-width: 300px;
+            `;
+            document.body.appendChild(pqObjectiveUI);
+        }
+        
+        // Update content
+        const stageText = map.pqStage === 5 ? 'BOSS STAGE' : `STAGE ${map.pqStage}`;
+        const objectiveText = map.pqObjectiveText || 'Defeat all monsters!';
+        
+        // Count remaining monsters
+        const aliveMonsters = (typeof monsters !== 'undefined') 
+            ? monsters.filter(m => m && !m.isDead).length 
+            : 0;
+        
+        pqObjectiveUI.innerHTML = `
+            <div style="color: #ffd700; font-size: 14px; margin-bottom: 8px;">${stageText}</div>
+            <div style="color: #fff; font-size: 11px; margin-bottom: 10px;">${objectiveText}</div>
+            <div style="color: ${aliveMonsters === 0 ? '#4ade80' : '#ff6b6b'}; font-size: 10px;">
+                ${aliveMonsters === 0 ? '✓ COMPLETE!' : `Monsters Remaining: ${aliveMonsters}`}
+            </div>
+        `;
+        
+        pqObjectiveUI.style.display = 'block';
+    } else {
+        // Hide UI if not in PQ
+        if (pqObjectiveUI) {
+            pqObjectiveUI.style.display = 'none';
+        }
+    }
+}
+
+// Export the function
+window.updatePQObjectiveUI = updatePQObjectiveUI;
+
 // Replace the updateMiniMap function in ui.js with this one.
 
 function updateMiniMap() {
@@ -8952,6 +9016,10 @@ function updateMiniMap() {
     const scale = containerWidth / mapWidth;
 
     mapNameElement.textContent = currentMapId.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+    
+    // Update PQ objective UI if in a party quest map
+    updatePQObjectiveUI();
+    
     minimapContent.innerHTML = '';
     minimapContent.style.width = `${mapWidth * scale}px`;
     minimapContent.style.height = `${mapHeight * scale}px`;
@@ -9788,20 +9856,20 @@ function openDialogue(npc) {
             
             // Give rewards
             const expReward = 5000 * player.level;
-            const mesoReward = 10000 + (Math.random() * 5000 | 0);
+            const goldReward = 10000 + (Math.random() * 5000 | 0);
             
             if (typeof gainExperience === 'function') {
                 gainExperience(expReward);
             }
-            player.meso = (player.meso || 0) + mesoReward;
+            player.gold = (player.gold || 0) + goldReward;
             
             // Show reward notifications
             if (typeof showNotification === 'function') {
                 showNotification(`Gained ${expReward.toLocaleString()} EXP!`, 'epic');
-                setTimeout(() => showNotification(`Gained ${mesoReward.toLocaleString()} Meso!`, 'epic'), 500);
+                setTimeout(() => showNotification(`Gained ${goldReward.toLocaleString()} Gold!`, 'epic'), 500);
             }
             if (typeof addChatMessage === 'function') {
-                addChatMessage(`🎁 Party Quest Rewards: ${expReward.toLocaleString()} EXP, ${mesoReward.toLocaleString()} Meso!`, 'quest-complete');
+                addChatMessage(`🎁 Party Quest Rewards: ${expReward.toLocaleString()} EXP, ${goldReward.toLocaleString()} Gold!`, 'quest-complete');
             }
             
             // Update achievement if exists
@@ -11112,7 +11180,7 @@ function updatePetWindow() {
     if (!statusDisplay || !petList) return;
     
     // Initialize pet loot settings if not set
-    if (player.petLootMesos === undefined) player.petLootMesos = true;
+    if (player.petLootGold === undefined) player.petLootGold = true;
     if (player.petLootItems === undefined) player.petLootItems = true;
     
     // Update loot toggles section
@@ -11121,7 +11189,7 @@ function updatePetWindow() {
             <h4>Auto-Loot Settings</h4>
             <div class="pet-toggle-row">
                 <span class="pet-toggle-label">Loot Gold</span>
-                <div class="pet-toggle-switch ${player.petLootMesos ? 'active' : ''}" data-toggle="gold"></div>
+                <div class="pet-toggle-switch ${player.petLootGold ? 'active' : ''}" data-toggle="gold"></div>
             </div>
             <div class="pet-toggle-row">
                 <span class="pet-toggle-label">Loot Items</span>
@@ -11134,8 +11202,8 @@ function updatePetWindow() {
             toggle.addEventListener('click', (e) => {
                 const toggleType = e.target.dataset.toggle;
                 if (toggleType === 'gold') {
-                    player.petLootMesos = !player.petLootMesos;
-                    showNotification(`Pet gold looting ${player.petLootMesos ? 'enabled' : 'disabled'}`, player.petLootMesos ? 'exp' : 'common');
+                    player.petLootGold = !player.petLootGold;
+                    showNotification(`Pet gold looting ${player.petLootGold ? 'enabled' : 'disabled'}`, player.petLootGold ? 'exp' : 'common');
                 } else if (toggleType === 'items') {
                     player.petLootItems = !player.petLootItems;
                     showNotification(`Pet item looting ${player.petLootItems ? 'enabled' : 'disabled'}`, player.petLootItems ? 'rare' : 'common');

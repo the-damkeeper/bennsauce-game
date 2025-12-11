@@ -1450,7 +1450,7 @@ function autoPetLoot() {
     if (!petInfo) return;
     
     // Initialize pet loot settings if not set (default to true)
-    if (player.petLootMesos === undefined) player.petLootMesos = true;
+    if (player.petLootGold === undefined) player.petLootGold = true;
     if (player.petLootItems === undefined) player.petLootItems = true;
     
     for (let i = droppedItems.length - 1; i >= 0; i--) {
@@ -1473,8 +1473,8 @@ function autoPetLoot() {
         if (petDistance < petInfo.lootRange) {
             let itemWasPickedUp = false;
             if (item.name === 'Gold') {
-                // Skip mesos if toggle is off
-                if (!player.petLootMesos) continue;
+                // Skip gold if toggle is off
+                if (!player.petLootGold) continue;
                 // Check if we should share gold with party members
                 let shareResult = { shouldAddGold: true, amount: item.amount, isSharing: false };
                 if (typeof shareGoldWithParty === 'function') {

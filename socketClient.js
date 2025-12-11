@@ -3226,6 +3226,11 @@ function checkPQStageCompletion(monsterType, deadMonster) {
     const mapData = maps[currentMapId];
     if (!mapData || !mapData.isPartyQuest) return;
     
+    // Update the PQ objective UI
+    if (typeof updatePQObjectiveUI === 'function') {
+        setTimeout(() => updatePQObjectiveUI(), 100); // Small delay to let monster be removed
+    }
+    
     // Only check defeat objectives
     if (mapData.pqObjective !== 'defeat' && mapData.pqObjective !== 'boss') return;
     

@@ -2382,17 +2382,17 @@ const skillData = {
             ]
         },
         {
-            name: 'Meso Guard', displayName: 'Meso Guard', levelReq: 40, maxLevel: 20, type: 'buff', levels: [
-                { mpCost: 20, duration: 60000, effect: { mesoGuard: 10 }, desc: 'Uses mesos to absorb 10% of damage taken.' }, { mpCost: 22, duration: 70000, effect: { mesoGuard: 12 }, desc: 'Uses mesos to absorb 12% of damage taken.' },
-                { mpCost: 24, duration: 80000, effect: { mesoGuard: 14 }, desc: 'Uses mesos to absorb 14% of damage taken.' }, { mpCost: 26, duration: 90000, effect: { mesoGuard: 16 }, desc: 'Uses mesos to absorb 16% of damage taken.' },
-                { mpCost: 28, duration: 100000, effect: { mesoGuard: 18 }, desc: 'Uses mesos to absorb 18% of damage taken.' }, { mpCost: 30, duration: 110000, effect: { mesoGuard: 20 }, desc: 'Uses mesos to absorb 20% of damage taken.' },
-                { mpCost: 32, duration: 120000, effect: { mesoGuard: 22 }, desc: 'Uses mesos to absorb 22% of damage taken.' }, { mpCost: 34, duration: 130000, effect: { mesoGuard: 24 }, desc: 'Uses mesos to absorb 24% of damage taken.' },
-                { mpCost: 36, duration: 140000, effect: { mesoGuard: 26 }, desc: 'Uses mesos to absorb 26% of damage taken.' }, { mpCost: 38, duration: 150000, effect: { mesoGuard: 28 }, desc: 'Uses mesos to absorb 28% of damage taken.' },
-                { mpCost: 40, duration: 160000, effect: { mesoGuard: 30 }, desc: 'Uses mesos to absorb 30% of damage taken.' }, { mpCost: 42, duration: 170000, effect: { mesoGuard: 32 }, desc: 'Uses mesos to absorb 32% of damage taken.' },
-                { mpCost: 44, duration: 180000, effect: { mesoGuard: 34 }, desc: 'Uses mesos to absorb 34% of damage taken.' }, { mpCost: 46, duration: 190000, effect: { mesoGuard: 36 }, desc: 'Uses mesos to absorb 36% of damage taken.' },
-                { mpCost: 48, duration: 200000, effect: { mesoGuard: 38 }, desc: 'Uses mesos to absorb 38% of damage taken.' }, { mpCost: 50, duration: 210000, effect: { mesoGuard: 40 }, desc: 'Uses mesos to absorb 40% of damage taken.' },
-                { mpCost: 52, duration: 220000, effect: { mesoGuard: 42 }, desc: 'Uses mesos to absorb 42% of damage taken.' }, { mpCost: 54, duration: 230000, effect: { mesoGuard: 44 }, desc: 'Uses mesos to absorb 44% of damage taken.' },
-                { mpCost: 56, duration: 240000, effect: { mesoGuard: 46 }, desc: 'Uses mesos to absorb 46% of damage taken.' }, { mpCost: 60, duration: 300000, effect: { mesoGuard: 50 }, desc: 'Uses mesos to absorb 50% of damage taken.' },
+            name: 'Gold Guard', displayName: 'Gold Guard', levelReq: 40, maxLevel: 20, type: 'buff', levels: [
+                { mpCost: 20, duration: 60000, effect: { goldGuard: 10 }, desc: 'Uses gold to absorb 10% of damage taken.' }, { mpCost: 22, duration: 70000, effect: { goldGuard: 12 }, desc: 'Uses gold to absorb 12% of damage taken.' },
+                { mpCost: 24, duration: 80000, effect: { goldGuard: 14 }, desc: 'Uses gold to absorb 14% of damage taken.' }, { mpCost: 26, duration: 90000, effect: { goldGuard: 16 }, desc: 'Uses gold to absorb 16% of damage taken.' },
+                { mpCost: 28, duration: 100000, effect: { goldGuard: 18 }, desc: 'Uses gold to absorb 18% of damage taken.' }, { mpCost: 30, duration: 110000, effect: { goldGuard: 20 }, desc: 'Uses gold to absorb 20% of damage taken.' },
+                { mpCost: 32, duration: 120000, effect: { goldGuard: 22 }, desc: 'Uses gold to absorb 22% of damage taken.' }, { mpCost: 34, duration: 130000, effect: { goldGuard: 24 }, desc: 'Uses gold to absorb 24% of damage taken.' },
+                { mpCost: 36, duration: 140000, effect: { goldGuard: 26 }, desc: 'Uses gold to absorb 26% of damage taken.' }, { mpCost: 38, duration: 150000, effect: { goldGuard: 28 }, desc: 'Uses gold to absorb 28% of damage taken.' },
+                { mpCost: 40, duration: 160000, effect: { goldGuard: 30 }, desc: 'Uses gold to absorb 30% of damage taken.' }, { mpCost: 42, duration: 170000, effect: { goldGuard: 32 }, desc: 'Uses gold to absorb 32% of damage taken.' },
+                { mpCost: 44, duration: 180000, effect: { goldGuard: 34 }, desc: 'Uses gold to absorb 34% of damage taken.' }, { mpCost: 46, duration: 190000, effect: { goldGuard: 36 }, desc: 'Uses gold to absorb 36% of damage taken.' },
+                { mpCost: 48, duration: 200000, effect: { goldGuard: 38 }, desc: 'Uses gold to absorb 38% of damage taken.' }, { mpCost: 50, duration: 210000, effect: { goldGuard: 40 }, desc: 'Uses gold to absorb 40% of damage taken.' },
+                { mpCost: 52, duration: 220000, effect: { goldGuard: 42 }, desc: 'Uses gold to absorb 42% of damage taken.' }, { mpCost: 54, duration: 230000, effect: { goldGuard: 44 }, desc: 'Uses gold to absorb 44% of damage taken.' },
+                { mpCost: 56, duration: 240000, effect: { goldGuard: 46 }, desc: 'Uses gold to absorb 46% of damage taken.' }, { mpCost: 60, duration: 300000, effect: { goldGuard: 50 }, desc: 'Uses gold to absorb 50% of damage taken.' },
             ]
         },
         {
@@ -3076,7 +3076,7 @@ const questData = {
         levelReq: 20,
         startText: "Business is booming thanks to you! But now there's an even bigger problem. The <b>Phantoms</b> have organized themselves. Defeat <b>25 more Phantoms</b> to send them a message!",
         inProgressText: "These Phantoms are getting bold. Show them who's boss!",
-        completeText: "That ought to keep them in line! You're worth every meso I pay you!",
+        completeText: "That ought to keep them in line! You're worth every gold I pay you!",
         objective: { type: 'kill', target: 'phantom', count: 25 },
         reward: { exp: 2800, gold: 2200 }
     },
@@ -6625,15 +6625,13 @@ const maps = {
         isPartyQuest: true,
         pqId: 'kerningPQ',
         pqStage: 1,
-        pqObjective: 'defeat', // Defeat all monsters
+        pqObjective: 'defeat',
+        pqObjectiveText: 'Defeat all 15 Zombies!',
         npcs: [],
         monsters: [
             { type: 'zombie', count: 15 }
         ],
-        portals: [
-            { x: 50, targetMap: 'pqLobby', targetX: 1050, pqPortal: true },
-            { x: 1500, targetMap: 'pqStage2', targetX: 100, pqPortal: true, requireStageComplete: true }
-        ],
+        portals: [],
         platforms: [
             { x: 200, y: 500, width: 400 },
             { x: 800, y: 400, width: 400 },
@@ -6650,15 +6648,13 @@ const maps = {
         isPartyQuest: true,
         pqId: 'kerningPQ',
         pqStage: 2,
-        pqObjective: 'defeat', // Defeat all monsters
+        pqObjective: 'defeat',
+        pqObjectiveText: 'Defeat all 20 Phantoms!',
         npcs: [],
         monsters: [
             { type: 'phantom', count: 20 }
         ],
-        portals: [
-            { x: 50, targetMap: 'pqStage1', targetX: 1450, pqPortal: true },
-            { x: 1700, targetMap: 'pqStage3', targetX: 100, pqPortal: true, requireStageComplete: true }
-        ],
+        portals: [],
         platforms: [
             { x: 100, y: 600, width: 400 },
             { x: 600, y: 500, width: 300 },
@@ -6681,16 +6677,14 @@ const maps = {
         isPartyQuest: true,
         pqId: 'kerningPQ',
         pqStage: 3,
-        pqObjective: 'defeat', // Defeat all monsters
+        pqObjective: 'defeat',
+        pqObjectiveText: 'Defeat 8 Jr. Wraiths & 8 Zombies!',
         npcs: [],
         monsters: [
             { type: 'jrWraith', count: 8 },
             { type: 'zombie', count: 8 }
         ],
-        portals: [
-            { x: 50, targetMap: 'pqStage2', targetX: 1650, pqPortal: true },
-            { x: 1900, targetMap: 'pqStage4', targetX: 100, pqPortal: true, requireStageComplete: true }
-        ],
+        portals: [],
         platforms: [
             { x: 200, y: 700, width: 500 },
             { x: 800, y: 550, width: 400 },
@@ -6713,16 +6707,14 @@ const maps = {
         isPartyQuest: true,
         pqId: 'kerningPQ',
         pqStage: 4,
-        pqObjective: 'defeat', // Defeat all monsters before boss
+        pqObjective: 'defeat',
+        pqObjectiveText: 'Defeat 10 Phantoms & 10 Jr. Wraiths!',
         npcs: [],
         monsters: [
             { type: 'phantom', count: 10 },
             { type: 'jrWraith', count: 10 }
         ],
-        portals: [
-            { x: 50, targetMap: 'pqStage3', targetX: 1850, pqPortal: true },
-            { x: 2100, targetMap: 'pqBoss', targetX: 100, pqPortal: true, requireStageComplete: true }
-        ],
+        portals: [],
         platforms: [
             // Puzzle platforms - requires coordination
             { x: 100, y: 800, width: 200 },
@@ -6750,14 +6742,12 @@ const maps = {
         pqId: 'kerningPQ',
         pqStage: 5,
         pqObjective: 'boss',
+        pqObjectiveText: '👑 BOSS: Defeat King Slime!',
         npcs: [],
         monsters: [
             { type: 'pqKingSlime', count: 1, x: 800, fixedPosition: true }
         ],
-        portals: [
-            { x: 50, targetMap: 'pqStage4', targetX: 2050, pqPortal: true },
-            { x: 1500, targetMap: 'pqReward', targetX: 600, pqPortal: true, requireStageComplete: true }
-        ],
+        portals: [],
         platforms: [
             { x: 200, y: 600, width: 400 },
             { x: 1000, y: 600, width: 400 },
