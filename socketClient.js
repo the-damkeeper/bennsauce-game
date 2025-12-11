@@ -2285,14 +2285,6 @@ function interpolateMonsterPositions() {
         }
     }
 }
-        }
-        
-        // Update AI state for animations
-        if (m.serverAiState) {
-            m.aiState = m.serverAiState;
-        }
-    }
-}
 
 /**
  * Broadcast a VFX event to other players
