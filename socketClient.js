@@ -2265,10 +2265,8 @@ function interpolateMonsterPositions() {
             m.x += dx * 0.15;
         }
         
-        // Clamp to patrol bounds when patrolling
-        if (m.serverAiState !== 'chasing' && m.patrolMinX !== undefined && m.patrolMaxX !== undefined) {
-            m.x = Math.max(m.patrolMinX, Math.min(m.patrolMaxX, m.x));
-        }
+        // Server is authoritative for X position - no client-side clamping
+        // Server handles patrol bounds and updates them when aggro ends
         
         // Update facing/direction
         if (m.serverDirection !== undefined) {
