@@ -770,6 +770,20 @@
                     <button id="create-new-char-btn">Create New Character</button>
                     <button id="account-btn" onclick="showAccountModal()">Login / Register</button>
                     <button id="recovery-code-btn" onclick="showRecoveryCodeModal()">Recovery Code</button>
+                    <button id="changelog-btn" onclick="showChangelogModal()">📋 Changelog</button>
+                </div>
+            </div>
+            
+            <!-- Changelog Modal -->
+            <div id="changelog-modal" class="modal-overlay" style="display: none;">
+                <div class="modal-content" style="max-width: 600px; max-height: 80vh;">
+                    <div class="modal-header">
+                        <h2>📋 Changelog</h2>
+                        <button class="modal-close" onclick="hideChangelogModal()">✖</button>
+                    </div>
+                    <div class="modal-body" style="overflow-y: auto; max-height: 60vh;">
+                        <div id="changelog-content" style="font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.6; text-align: left;"></div>
+                    </div>
                 </div>
             </div>
             

@@ -578,6 +578,64 @@ window.handleSaveToCloud = handleSaveToCloud;
 window.handleLoadFromCloud = handleLoadFromCloud;
 window.handleCreateRecoveryCode = handleCreateRecoveryCode;
 window.handleUpdateRecoveryCode = handleUpdateRecoveryCode;
+
+// =============================================
+// CHANGELOG MODAL
+// =============================================
+
+const CHANGELOG_DATA = [
+    { date: "2025-12-11 12:23", msg: "Increase spawn grace period to prevent monsters flying-in" },
+    { date: "2025-12-11 12:16", msg: "Fix monster snap-back after aggro ends" },
+    { date: "2025-12-11 12:04", msg: "Revert to simple monster AI - client jumping, no proximity aggro" },
+    { date: "2025-12-11 11:56", msg: "Fix monster rubberbanding issues" },
+    { date: "2025-12-11 11:34", msg: "Fix monster Y sync for jumping" },
+    { date: "2025-12-11 11:19", msg: "Add proximity aggro detection and jumping support for monsters" },
+    { date: "2025-12-11 11:13", msg: "Rename pirate Double Shot to Duo Shot (fix naming conflict)" },
+    { date: "2025-12-11 11:02", msg: "Rebalance EXP curve - slower progression" },
+    { date: "2025-12-11 10:47", msg: "Fix Party Quest - remove portals, add objective UI, auto-warp" },
+    { date: "2025-12-11 10:33", msg: "Fix character switch bug - old character shown to remote players" },
+    { date: "2025-12-11 10:25", msg: "Fix Party Quest bugs: intro popup, warp all members, rewards" },
+    { date: "2025-12-11 09:04", msg: "Add Kerning-style Party Quest system (4 stages + King Slime boss)" },
+    { date: "2025-12-11 03:10", msg: "Remove level requirement check for item drops" },
+    { date: "2025-12-11 02:54", msg: "Add multiplayer projectile sync with hit detection" },
+    { date: "2025-12-10 19:48", msg: "Fix browser resize exploit, add level editor" },
+    { date: "2025-12-09 15:11", msg: "Smoother multiplayer movement (33ms update rate)" },
+    { date: "2025-12-09 14:37", msg: "Fix double attack bug and item looting" },
+    { date: "2025-12-09 14:06", msg: "Fix EXP system to use flat values" },
+    { date: "2025-12-09 14:03", msg: "Fix EXP curve, multi-target hitbox, knockback rubber-banding" },
+    { date: "2025-12-09 13:51", msg: "Add drop item on ground feature" },
+    { date: "2025-12-09 13:41", msg: "Various bug fixes and improvements" },
+    { date: "2025-12-09 00:25", msg: "Security: Move GM authentication to server-side" },
+    { date: "2025-12-08 23:35", msg: "Fix race condition for fast looting" },
+    { date: "2025-12-08 22:54", msg: "Add unique IDs to server drops for reliable pickup sync" },
+    { date: "2025-12-08 22:45", msg: "Enforce 100% server-authoritative mode" },
+    { date: "2025-12-08 22:30", msg: "Fix elite monsters only transforming server monsters" },
+];
+
+function showChangelogModal() {
+    const modal = document.getElementById('changelog-modal');
+    const content = document.getElementById('changelog-content');
+    if (modal && content) {
+        // Generate changelog HTML
+        let html = '<div style="color: #aaa; margin-bottom: 15px;">Recent updates and bug fixes:</div>';
+        CHANGELOG_DATA.forEach(entry => {
+            html += `<div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #333;">
+                <span style="color: #f39c12; font-size: 11px;">${entry.date}</span><br>
+                <span style="color: #ecf0f1;">${entry.msg}</span>
+            </div>`;
+        });
+        content.innerHTML = html;
+        modal.style.display = 'flex';
+    }
+}
+
+function hideChangelogModal() {
+    const modal = document.getElementById('changelog-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+window.showChangelogModal = showChangelogModal;
+window.hideChangelogModal = hideChangelogModal;
 window.handleLoadFromRecoveryCode = handleLoadFromRecoveryCode;
 window.copyRecoveryCode = copyRecoveryCode;
 
