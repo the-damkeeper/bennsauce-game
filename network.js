@@ -4179,12 +4179,25 @@ function showBuddyRequestPrompt(fromPlayer, fromLevel, fromClass) {
 
 // Get current party info for UI
 function getPartyInfo() {
+    // Get all party members from onlinePlayers (including ourselves)
+    let allMembers = [];
+    if (playerParty.id) {
+        // Get other party members from onlinePlayers
+        const otherMembers = Object.values(onlinePlayers).filter(p => 
+            p.partyId === playerParty.id
+        ).map(p => p.playerName);
+        
+        // Make sure we include ourselves
+        allMembers = [...new Set([player.name, ...otherMembers])];
+    }
+    
     return {
         inParty: !!playerParty.id,
         isLeader: playerParty.leader === player.name,
         partyId: playerParty.id,
+        id: playerParty.id, // Alias for partyId
         leader: playerParty.leader,
-        members: playerParty.members
+        members: allMembers
     };
 }
 
