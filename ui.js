@@ -9759,7 +9759,7 @@ function openDialogue(npc) {
                     window.socket.emit('startPartyQuest', {
                         pqId: 'kerningPQ',
                         partyId: partyInfo.id,
-                        leaderId: player.odcId,
+                        leaderId: player.odId,
                         originalMap: currentMapId,
                         originalX: player.x,
                         originalY: player.y
