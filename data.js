@@ -943,7 +943,7 @@ const spriteData = {
             'Lucky Seven': { x: 48, y: 48 },
             'Nimble Body': { x: 64, y: 48 },
             // Pirate (Row 64)
-            'gsDouble Shot': { x: 0, y: 64 },
+            'Duo Shot': { x: 0, y: 64 },
             'Grenade': { x: 16, y: 64 },
             'Recoil Shot': { x: 32, y: 64 },
             'Burst Fire': { x: 48, y: 64 },
@@ -1679,7 +1679,7 @@ const skillData = {
             ]
         },
         {
-            name: 'gsDouble Shot', displayName: 'Double Shot', levelReq: 10, maxLevel: 15, type: 'projectile', projectile: 'bulletProjectile', hits: 2, homing: true, levels: [
+            name: 'Duo Shot', displayName: 'Duo Shot', levelReq: 10, maxLevel: 15, type: 'projectile', projectile: 'bulletProjectile', hits: 2, homing: true, levels: [
                 { mpCost: 8, damageMultiplier: 1.05, desc: 'Fires two bullets at once. DMG: 105% x2' }, { mpCost: 10, damageMultiplier: 1.25, desc: 'Fires two bullets at once. DMG: 125% x2' },
                 { mpCost: 12, damageMultiplier: 1.5, desc: 'Fires two bullets at once. DMG: 150% x2' }, { mpCost: 13, damageMultiplier: 1.6, desc: 'Fires two bullets at once. DMG: 160% x2' },
                 { mpCost: 14, damageMultiplier: 1.7, desc: 'Fires two bullets at once. DMG: 170% x2' }, { mpCost: 15, damageMultiplier: 1.8, desc: 'Fires two bullets at once. DMG: 180% x2' },
