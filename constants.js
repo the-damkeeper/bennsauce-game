@@ -38,8 +38,9 @@ const GAME_CONFIG = {
     EXP_RATE: 1.0,
     
     // EXP Curve - Single source of truth for all characters
-    BASE_EXP: 100,           // EXP needed for level 1 -> 2
-    EXP_GROWTH_RATE: 1.14,   // 14% increase per level
+    // Higher base and growth rate for slower, more meaningful progression
+    BASE_EXP: 200,           // EXP needed for level 1 -> 2
+    EXP_GROWTH_RATE: 1.25,   // 25% increase per level (compounds to ~70k at level 25)
     
     HP_REGEN_INTERVAL: 6000,
     HP_REGEN_AMOUNT: 4,
