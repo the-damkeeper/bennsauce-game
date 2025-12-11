@@ -1,5 +1,8 @@
 // in player.js (at the top)
 
+// BASE_GAME_HEIGHT is defined in game.js - use for physics calculations
+// This prevents exploits where players shrink their browser to bypass physics
+
 // --- Migration Code for Old items
 
 // in player.js (add this to the top of the file)
@@ -2193,7 +2196,7 @@ function handleLadderMovement(ladder) {
 
     // Move up or down with ground collision check
     const map = maps[currentMapId];
-    const groundLevel = (map.height || scalingContainer.clientHeight) - GROUND_Y;
+    const groundLevel = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GROUND_Y;
 
     // MODIFIED: Check the 'actions' object for movement
     if (actions['move-up']) {
@@ -2353,7 +2356,7 @@ function updatePlayer() {
         const playerCenterX = player.x + player.width / 2;
         const playerBottom = player.y + player.height;
         const scaledTileSize = 48;
-        const groundY = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+        const groundY = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
         
         // Expand hills into pairs of slopes for collision
         const allSlopes = [...(map.slopes || [])];
@@ -2500,7 +2503,7 @@ function updatePlayer() {
     }
     
     let onGround = false;
-    const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+    const groundLevel = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
     if (!onPlatform && player.y + player.height > groundLevel) {
         player.y = groundLevel - player.height;
         player.velocityY = 0;
@@ -2575,7 +2578,7 @@ function updatePlayer() {
     player.x = Math.max(0, Math.min(player.x, map.width - player.width));
 
     // Death boundary check
-    if (player.y > (map.height || scalingContainer.clientHeight)) handlePlayerDeath();
+    if (player.y > (map.height || GAME_CONFIG.BASE_GAME_HEIGHT)) handlePlayerDeath();
     handlePassiveRegen();
     player.previousY = player.y;
 }
@@ -5121,7 +5124,7 @@ function updatePet() {
 
     // Get map and ground level
     const map = maps[currentMapId];
-    const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+    const groundLevel = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
 
     // Platform collision detection (with yOffset applied)
     let onPlatform = false;

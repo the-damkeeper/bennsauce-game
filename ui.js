@@ -386,6 +386,10 @@ async function handleLoadFromRecoveryCode() {
         const charData = result.characterData;
         const charName = charData.name || 'RecoveredCharacter';
         
+        // Ensure required fields have defaults (recovery codes may be from older saves)
+        if (charData.x === undefined || charData.x === null) charData.x = 300;
+        if (charData.y === undefined || charData.y === null) charData.y = 0;
+        
         // Save the character to local storage so it appears in character selection
         if (typeof getSavedCharacters === 'function' && typeof saveManager !== 'undefined') {
             const characters = getSavedCharacters();
@@ -8930,7 +8934,8 @@ function updateMiniMap() {
         minimap.appendChild(minimapContent);
     }
 
-    const mapHeight = map.height || scalingContainer.clientHeight;
+    // Use GAME_CONFIG.BASE_GAME_HEIGHT for consistent physics (prevents browser resize exploits)
+    const mapHeight = map.height || GAME_CONFIG.BASE_GAME_HEIGHT;
     const mapWidth = map.width;
     
     // Get the minimap container width (user can resize this)

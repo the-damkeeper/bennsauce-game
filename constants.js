@@ -7,6 +7,11 @@ const GAME_CONFIG = {
     TARGET_FPS: 100, // Target 100 FPS cap
     FRAME_TIME: 1000 / 100,
     
+    // Base game dimensions - ALWAYS use these for physics calculations, not container size
+    // This prevents exploits where players shrink their browser to bypass physics
+    BASE_GAME_WIDTH: 1366,
+    BASE_GAME_HEIGHT: 768,
+    
     // Physics
     SCALE: 0.8,
     GRAVITY: 0.5, // Stronger gravity for less floaty feeling

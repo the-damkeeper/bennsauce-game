@@ -35,7 +35,9 @@ const classColors = {
     'Gunslinger': '#d68910'
 };
 window.classColors = classColors;
-
+// Firebase client API keys are safe to expose publicly
+// Security is enforced through Firebase Security Rules, not key secrecy
+// See: https://firebase.google.com/docs/projects/api-keys
 const firebaseConfig = {
     apiKey: "AIzaSyAIw5ox2HDWefSMFmJAZvX47jx88eYXmM4",
     authDomain: "bennsauce.firebaseapp.com",
@@ -445,6 +447,8 @@ function getCharacterDataForCloud() {
         exp: player.exp || 0,
         maxExp: player.maxExp || 100,
         gold: player.gold || 0,
+        x: player.x || 300,
+        y: player.y || 0,
         hp: player.hp || 100,
         maxHp: player.maxHp || 100,
         mp: player.mp || 50,

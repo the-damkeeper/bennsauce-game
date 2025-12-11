@@ -1,6 +1,10 @@
 /**
  * Elite Monster Event System
  */
+
+// BASE_GAME_HEIGHT is defined in game.js - use for physics calculations
+// This prevents exploits where players shrink their browser to bypass physics
+
 let currentEliteMonster = null;
 let eliteMonsterCheckInterval = null;
 
@@ -1825,7 +1829,7 @@ function updateMonsters() {
                 }
             });
 
-            const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+            const groundLevel = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
             const monsterCenterX = m.x + m.width / 2;
             const slopeSurfaceY = getSlopeSurfaceY(monsterCenterX, map, groundLevel, 48);
             const monsterBottom = m.y + anchorY;
@@ -1964,7 +1968,7 @@ function updateMonsters() {
 
         // Skip slope snapping during spawn grace period to prevent interference with spawn positioning
         if (!isSpawnGracePeriod) {
-            const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+            const groundLevel = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
             const monsterCenterX = m.x + m.width / 2;
             const slopeSurfaceY = getSlopeSurfaceY(monsterCenterX, map, groundLevel, 48);
             const monsterBottom = m.y + anchorY;
@@ -2144,7 +2148,7 @@ function updateSpawners() {
             if (currentLiveCount < 1 && now - (spawner.lastDefeatTime || 0) > monsterData.respawnTime) {
                 // If the spawner has a fixed position, use it
                 if (spawner.spawnX !== undefined) {
-                    const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+                    const groundLevel = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
                     const spawnY = groundLevel - monsterData.height;
                     createMonster(spawner.type, spawner.spawnX, spawnY);
                     addChatMessage(`${monsterData.name || spawner.type} has appeared!`, 'boss');
@@ -2173,7 +2177,7 @@ function spawnMonster(type) {
     }
 
     const scaledTileSize = 16 * PIXEL_ART_SCALE;
-    const baseGroundY = scalingContainer.clientHeight - GAME_CONFIG.GROUND_Y;
+    const baseGroundY = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
 
     // Helper function to check if a point is inside a hill/slope
     function isPointInsideHill(x, map) {

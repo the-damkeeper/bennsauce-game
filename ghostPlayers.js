@@ -1,5 +1,8 @@
 // ghostPlayers.js - Ghost NPCs that simulate player activity
 
+// BASE_GAME_HEIGHT is defined in game.js - use for physics calculations
+// This prevents exploits where players shrink their browser to bypass physics
+
 let ghostPlayers = [];
 
 // Debug logging system
@@ -259,7 +262,7 @@ function spawnGhostPlayersOnMap() {
     for (let i = 0; i < ghostCount; i++) {
         // Random spawn position
         const spawnX = Math.random() * (map.width - 100) + 50;
-        const baseGroundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+        const baseGroundLevel = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
         
         // Check for slope/hill at spawn position and adjust Y accordingly
         const slopeSurfaceY = typeof getSlopeSurfaceY === 'function' 
@@ -364,7 +367,7 @@ function updateGhostPlayers() {
         }
 
         // Ground collision
-        const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+        const groundLevel = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
         let onAnySurface = false;
         
         // Use anchor point like monsters do (feet position)
@@ -838,7 +841,7 @@ function updateGhostPlayersForMap(mapId) {
             if (!map) continue;
             
             const spawnX = Math.random() * (map.width - 100) + 50;
-            const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+            const groundLevel = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
             const spawnY = groundLevel - 60;
             
             createGhostPlayer(spawnX, spawnY, mapId);

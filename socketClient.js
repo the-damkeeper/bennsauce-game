@@ -1084,16 +1084,15 @@ function initMapMonstersOnServer() {
         }
     }
     
-    // Get map dimensions - match exactly how physics calculates groundLevel:
-    // groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y
+    // Get map dimensions - use GAME_CONFIG.BASE_GAME_HEIGHT for physics calculations
+    // This prevents exploits where players shrink their browser to bypass physics
     const scalingContainer = document.getElementById('scalingContainer');
-    const mapWidth = mapData.width || (scalingContainer ? scalingContainer.clientWidth : 1366);
-    const containerHeight = scalingContainer ? scalingContainer.clientHeight : 768;
-    const effectiveHeight = mapData.height || containerHeight;
-    const GROUND_Y = typeof GAME_CONFIG !== 'undefined' ? GAME_CONFIG.GROUND_Y : 281;
+    const mapWidth = mapData.width || (scalingContainer ? scalingContainer.clientWidth : GAME_CONFIG.BASE_GAME_WIDTH);
+    const effectiveHeight = mapData.height || GAME_CONFIG.BASE_GAME_HEIGHT;
+    const GROUND_Y = GAME_CONFIG.GROUND_Y;
     const groundY = effectiveHeight - GROUND_Y;
     
-    console.log('[Socket] Spawn calc - mapHeight:', mapData.height, 'containerHeight:', containerHeight, 'effectiveHeight:', effectiveHeight, 'groundY:', groundY);
+    console.log('[Socket] Spawn calc - mapHeight:', mapData.height, 'effectiveHeight:', effectiveHeight, 'groundY:', groundY);
     
     // Calculate spawn positions client-side (uses all the complex platform/slope logic)
     const spawnPositions = calculateMonsterSpawnPositions(mapData, mapWidth, groundY);

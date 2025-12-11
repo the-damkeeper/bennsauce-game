@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>BennSauce Level Editor</title>
+    <link rel="stylesheet" href="editor.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Top Toolbar -->
+        <div id="toolbar">
+            <div class="toolbar-section">
+                <button id="btn-new" title="New Map (Ctrl+N)">📄 New</button>
+                <button id="btn-load" title="Load Map (Ctrl+O)">📂 Load</button>
+                <button id="btn-save" title="Save Map (Ctrl+S)">💾 Save</button>
+                <button id="btn-export" title="Export to data.js">📤 Export</button>
+            </div>
+            <div class="toolbar-section">
+                <button id="btn-select" class="tool-btn active" data-tool="select" title="Select & Move (V)">🔲 Select</button>
+                <button id="btn-draw" class="tool-btn" data-tool="draw" title="Draw Tiles (B)">🖌️ Draw</button>
+                <button id="btn-erase" class="tool-btn" data-tool="erase" title="Erase (E)">🧹 Erase</button>
+            </div>
+            <div class="toolbar-section">
+                <label>Zoom:</label>
+                <input type="range" id="zoom-slider" min="25" max="200" value="100">
+                <span id="zoom-value">100%</span>
+                <button id="btn-fit" title="Fit to View">⬜ Fit</button>
+            </div>
+            <div class="toolbar-section">
+                <label>Grid:</label>
+                <input type="checkbox" id="show-grid" checked>
+                <label>Snap:</label>
+                <input type="checkbox" id="snap-grid" checked>
+                <label>Size:</label>
+                <input type="number" id="grid-size" value="48" min="8" max="128" step="8">
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div id="main-content">
+            <!-- Left Panel - Layers & Properties -->
+            <div id="left-panel">
+                <div class="panel-section">
+                    <h3>📚 Layers</h3>
+                    <div id="layers-list">
+                        <div class="layer-item active" data-layer="background">
+                            <input type="checkbox" checked> 🖼️ Background
+                        </div>
+                        <div class="layer-item" data-layer="platforms">
+                            <input type="checkbox" checked> 🧱 Platforms
+                        </div>
+                        <div class="layer-item" data-layer="structures">
+                            <input type="checkbox" checked> 🏛️ Structures
+                        </div>
+                        <div class="layer-item" data-layer="ladders">
+                            <input type="checkbox" checked> 🪜 Ladders
+                        </div>
+                        <div class="layer-item" data-layer="portals">
+                            <input type="checkbox" checked> 🌀 Portals
+                        </div>
+                        <div class="layer-item" data-layer="npcs">
+                            <input type="checkbox" checked> 👤 NPCs
+                        </div>
+                        <div class="layer-item" data-layer="monsters">
+                            <input type="checkbox" checked> 👾 Monster Spawns
+                        </div>
+                        <div class="layer-item" data-layer="collision">
+                            <input type="checkbox"> 🚧 Collision (Debug)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>⚙️ Properties</h3>
+                    <div id="properties-panel">
+                        <p class="hint">Select an object to edit properties</p>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>🗺️ Map Settings</h3>
+                    <div id="map-settings">
+                        <label>Map ID:</label>
+                        <input type="text" id="map-id" placeholder="e.g., dewdropVillage">
+                        
+                        <label>Display Name:</label>
+                        <input type="text" id="map-name" placeholder="e.g., Dewdrop Village">
+                        
+                        <label>Width:</label>
+                        <input type="number" id="map-width" value="2400" min="800" step="48">
+                        
+                        <label>Height:</label>
+                        <input type="number" id="map-height" value="720" min="400" step="48">
+                        
+                        <label>Ground Y:</label>
+                        <input type="number" id="map-ground-y" value="648" step="1">
+                        
+                        <label>Background Color:</label>
+                        <input type="color" id="map-bg-color" value="#87CEEB">
+                        
+                        <label>Parallax BG:</label>
+                        <select id="map-parallax-bg">
+                            <option value="">None</option>
+                            <option value="backgroundBluesky">Blue Sky</option>
+                            <option value="backgroundDesert">Desert</option>
+                        </select>
+                        
+                        <label>Ground Type:</label>
+                        <select id="map-ground-type">
+                            <option value="grass">Grass</option>
+                            <option value="dirt">Dirt</option>
+                            <option value="stone">Stone</option>
+                            <option value="moss">Moss</option>
+                            <option value="snow">Snow</option>
+                            <option value="brick">Brick</option>
+                            <option value="darkBrick">Dark Brick</option>
+                        </select>
+                        
+                        <label>BGM:</label>
+                        <select id="map-bgm">
+                            <option value="title">Title</option>
+                            <option value="dewdropIsland">Dewdrop Island</option>
+                            <option value="huntingground">Hunting Ground</option>
+                            <option value="ironHaven">Iron Haven</option>
+                            <option value="onyxCity">Onyx City</option>
+                            <option value="hauntedMansion">Haunted Mansion</option>
+                            <option value="stonepeak">Stonepeak</option>
+                            <option value="nautilus">Nautilus</option>
+                            <option value="florinaBeach">Florina Beach</option>
+                            <option value="elNath">El Nath</option>
+                            <option value="iceValley">Ice Valley</option>
+                            <option value="skypalace">Sky Palace</option>
+                            <option value="clockTower">Clock Tower</option>
+                            <option value="deepClocktower">Deep Clocktower</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas Area -->
+            <div id="canvas-container">
+                <div id="canvas-wrapper">
+                    <canvas id="editor-canvas"></canvas>
+                    <div id="selection-box" class="hidden"></div>
+                </div>
+                <div id="minimap">
+                    <canvas id="minimap-canvas"></canvas>
+                    <div id="minimap-viewport"></div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Tiles & Objects -->
+            <div id="right-panel">
+                <div class="panel-tabs">
+                    <button class="tab-btn active" data-tab="objects">📦 Objects</button>
+                    <button class="tab-btn" data-tab="monsters">👾 Monsters</button>
+                    <button class="tab-btn" data-tab="portals">🌀 Portals</button>
+                    <button class="tab-btn" data-tab="npcs">👤 NPCs</button>
+                </div>
+
+                <!-- Tiles Tab -->
+                <!-- Objects Tab -->
+                <div id="tab-objects" class="tab-content active">
+                    <div class="object-category">
+                        <h4>Platforms</h4>
+                        <p class="hint">Click + drag on canvas to draw</p>
+                        <div class="object-list" id="platform-objects">
+                            <div class="object-item" data-type="platform">
+                                <div class="object-preview platform-preview"></div>
+                                <span>Platform</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="object-category">
+                        <h4>Structures</h4>
+                        <div class="object-list" id="structure-objects">
+                            <div class="object-item" data-type="structure">
+                                <div class="object-preview structure-preview"></div>
+                                <span>Structure</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="object-category">
+                        <h4>Terrain</h4>
+                        <p class="hint">Click + drag to draw terrain shapes</p>
+                        <div class="object-list" id="terrain-objects">
+                            <div class="object-item" data-type="hill" data-subtype="medium">
+                                <div class="object-preview hill-preview">⛰️</div>
+                                <span>Hill</span>
+                            </div>
+                            <div class="object-item" data-type="slope" data-subtype="right">
+                                <div class="object-preview slope-preview">📐</div>
+                                <span>Slope</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="object-category">
+                        <h4>Ladders</h4>
+                        <p class="hint">Click twice: first Y1, then Y2</p>
+                        <div class="object-list" id="ladder-objects">
+                            <div class="object-item" data-type="ladder">
+                                <div class="object-preview ladder-preview">🪜</div>
+                                <span>Ladder</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monsters Tab -->
+                <div id="tab-monsters" class="tab-content">
+                    <p class="hint">Click + to add monster spawn to map</p>
+                    <div id="monster-list">
+                        <!-- Populated from EditorData.MONSTER_TYPES -->
+                    </div>
+                </div>
+
+                <!-- Portals Tab -->
+                <div id="tab-portals" class="tab-content">
+                    <div class="portal-tools">
+                        <button id="btn-add-portal" class="action-btn">➕ Add Portal</button>
+                        <button id="btn-link-portals" class="action-btn">🔗 Link Portals</button>
+                    </div>
+                    <div id="portal-list">
+                        <p class="hint">No portals on this map</p>
+                    </div>
+                    <div class="portal-connections">
+                        <h4>🔗 Portal Connections</h4>
+                        <canvas id="portal-graph-canvas"></canvas>
+                    </div>
+                </div>
+
+                <!-- NPCs Tab -->
+                <div id="tab-npcs" class="tab-content">
+                    <div class="npc-search">
+                        <input type="text" id="npc-search" placeholder="Search NPCs...">
+                    </div>
+                    <div id="npc-list">
+                        <!-- Will be populated from npcData -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Status Bar -->
+        <div id="status-bar">
+            <span id="status-coords">X: 0, Y: 0</span>
+            <span id="status-selection">No selection</span>
+            <span id="status-layer">Layer: Platforms</span>
+            <span id="status-tool">Tool: Select</span>
+            <span id="status-message"></span>
+        </div>
+    </div>
+
+    <!-- Modal for Load Map -->
+    <div id="modal-load" class="modal hidden">
+        <div class="modal-content">
+            <h2>📂 Load Map</h2>
+            <div class="modal-body">
+                <div class="map-list" id="existing-maps">
+                    <!-- Will be populated with existing maps from data.js -->
+                </div>
+                <div class="load-options">
+                    <button id="btn-load-file">📁 Load from File</button>
+                    <input type="file" id="file-input" accept=".json" hidden>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel">Cancel</button>
+                <button class="btn-confirm" id="btn-load-confirm">Load</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Export -->
+    <div id="modal-export" class="modal hidden">
+        <div class="modal-content modal-large">
+            <h2>📤 Export Map</h2>
+            <div class="modal-body">
+                <div class="export-preview">
+                    <h4>Generated Code:</h4>
+                    <textarea id="export-code" readonly></textarea>
+                </div>
+                <div class="export-options">
+                    <label><input type="checkbox" id="export-minify"> Minify output</label>
+                    <label><input type="checkbox" id="export-include-comments" checked> Include comments</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel">Cancel</button>
+                <button id="btn-copy-code">📋 Copy to Clipboard</button>
+                <button id="btn-download-json">💾 Download JSON</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for New Map -->
+    <div id="modal-new" class="modal hidden">
+        <div class="modal-content">
+            <h2>📄 Create New Map</h2>
+            <div class="modal-body">
+                <label>Map ID (unique identifier):</label>
+                <input type="text" id="new-map-id" placeholder="e.g., myNewMap">
+                
+                <label>Display Name:</label>
+                <input type="text" id="new-map-name" placeholder="e.g., My New Map">
+                
+                <label>Template:</label>
+                <select id="new-map-template">
+                    <option value="blank">Blank (empty)</option>
+                    <option value="field">Field (grass, basic platforms)</option>
+                    <option value="town">Town (buildings, NPCs)</option>
+                    <option value="dungeon">Dungeon (cave style)</option>
+                </select>
+                
+                <label>Width:</label>
+                <input type="number" id="new-map-width" value="2400" min="800" step="48">
+                
+                <label>Height:</label>
+                <input type="number" id="new-map-height" value="720" min="400" step="48">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel">Cancel</button>
+                <button class="btn-confirm" id="btn-create-map">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="context-menu" class="hidden">
+        <div class="context-item" data-action="duplicate">📋 Duplicate</div>
+        <div class="context-item" data-action="delete">🗑️ Delete</div>
+        <div class="context-separator"></div>
+        <div class="context-item" data-action="bring-front">⬆️ Bring to Front</div>
+        <div class="context-item" data-action="send-back">⬇️ Send to Back</div>
+        <div class="context-separator"></div>
+        <div class="context-item" data-action="properties">⚙️ Properties</div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="editor-data.js"></script>
+    <script src="editor-core.js"></script>
+    <script src="editor-tools.js"></script>
+    <script src="editor-render.js"></script>
+    <script src="editor-io.js"></script>
+    <script src="editor-ui.js"></script>
+    <script>
+        // Initialize editor when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.levelEditor = new LevelEditor();
+        });
+    </script>
+</body>
+</html>

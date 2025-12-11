@@ -38,7 +38,11 @@ document.addEventListener('keydown', (e) => {
 let player = {};
 let _lastValidPlayerState = null; // For anti-cheat validation
 
+// BASE_GAME_WIDTH and BASE_GAME_HEIGHT are defined in GAME_CONFIG (constants.js)
+// Use GAME_CONFIG.BASE_GAME_HEIGHT for physics calculations to prevent browser resize exploits
+
 // Anti-cheat: Track player state changes and detect suspicious modifications
+
 let _playerIntegrityCheck = {
     lastLevel: 1,
     lastGold: 0,
@@ -1889,7 +1893,7 @@ function updatePixelArtAnimation(entity) {
 function updateCamera() {
     const map = maps[currentMapId];
     const mapWidth = map.width;
-    let mapHeight = map.height || scalingContainer.clientHeight;
+    let mapHeight = map.height || GAME_CONFIG.BASE_GAME_HEIGHT;
 
     // Horizontal camera follows normally with dead zone
     const idealCameraX = player.x - (scalingContainer.clientWidth / 2);
@@ -1996,7 +2000,7 @@ function updateCamera() {
 function render() {
     const map = maps[currentMapId];
     const mapWidth = map.width;
-    const mapHeight = map.height || scalingContainer.clientHeight;
+    const mapHeight = map.height || GAME_CONFIG.BASE_GAME_HEIGHT;
 
     if (showHitboxes) {
         if (player.hitboxElement) {
@@ -2513,7 +2517,7 @@ function spawnMonster(monsterType) {
     if (!map) return;
 
     const scaledTileSize = 16 * PIXEL_ART_SCALE;
-    const baseGroundY = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+    const baseGroundY = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
 
     // Helper function to check if a point is inside a hill/slope
     function isPointInsideHill(x, map, groundY) {
@@ -2699,7 +2703,7 @@ function changeMap(mapId, spawnX, spawnY) {
     player.currentMapId = mapId;
 
     worldContent.style.width = `${map.width}px`;
-    worldContent.style.height = `${map.height || scalingContainer.clientHeight}px`;
+    worldContent.style.height = `${map.height || GAME_CONFIG.BASE_GAME_HEIGHT}px`;
 
     worldContent.style.backgroundImage = 'none';
     if (map.background && map.background.startsWith('data:')) {
@@ -2754,7 +2758,7 @@ function changeMap(mapId, spawnX, spawnY) {
     // Spawn clouds on every map
     const cloudTypes = ['cloud01', 'cloud02', 'cloud03'];
     const numClouds = Math.floor(map.width / 400) + 3; // ~1 cloud per 400px + 3 extra
-    const mapHeight = map.height || scalingContainer.clientHeight;
+    const mapHeight = map.height || GAME_CONFIG.BASE_GAME_HEIGHT;
     
     // Calculate cloud tint based on map background color
     const cloudTint = getCloudTintFromBackground(map.background || map.backgroundColor || '#87CEEB');
@@ -2891,7 +2895,7 @@ function changeMap(mapId, spawnX, spawnY) {
     if (currentMapId === 'onyxCityJumpQuest') {
         cameraY = player.y - (scalingContainer.clientHeight / 2);
     } else {
-        const mapHeight = map.height || scalingContainer.clientHeight;
+        const mapHeight = map.height || GAME_CONFIG.BASE_GAME_HEIGHT;
         const groundLevel = mapHeight - GAME_CONFIG.GROUND_Y;
         const distanceFromGround = Math.max(0, groundLevel - player.y);
         const maxOffsetDistance = 200;
@@ -2926,7 +2930,7 @@ function changeMap(mapId, spawnX, spawnY) {
             if (p.isHidden) {
                 portalEl.style.opacity = '0';
             }
-            const surfaceY = (p.y !== undefined ? p.y + GROUND_LEVEL_OFFSET : undefined) || (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+            const surfaceY = (p.y !== undefined ? p.y + GROUND_LEVEL_OFFSET : undefined) || (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
             const finalY = surfaceY - pHeight;
             const arrowEl = document.createElement('div');
             arrowEl.className = 'portal-arrow-prompt pixel-art';
@@ -2991,7 +2995,7 @@ function changeMap(mapId, spawnX, spawnY) {
     const bgCtx = bgFoliageCanvas.getContext('2d');
     const fgCtx = fgFoliageCanvas.getContext('2d');
     bgFoliageCanvas.width = fgFoliageCanvas.width = map.width;
-    bgFoliageCanvas.height = fgFoliageCanvas.height = map.height || scalingContainer.clientHeight;
+    bgFoliageCanvas.height = fgFoliageCanvas.height = map.height || GAME_CONFIG.BASE_GAME_HEIGHT;
     bgCtx.clearRect(0, 0, bgFoliageCanvas.width, bgFoliageCanvas.height);
     fgCtx.clearRect(0, 0, fgFoliageCanvas.width, fgFoliageCanvas.height);
 
@@ -3085,7 +3089,7 @@ function createPortals(portalData) {
         const sheetWidth = pData.frameWidth * pData.animations.idle.length * PIXEL_ART_SCALE;
         pEl.style.backgroundSize = `${sheetWidth}px ${pData.frameHeight * PIXEL_ART_SCALE}px`;
 
-        const surfaceY = p.y || (maps[currentMapId].height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+        const surfaceY = p.y || (maps[currentMapId].height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
         const finalY = surfaceY - pHeight;
 
         const arrowEl = document.createElement('div');
@@ -3439,12 +3443,12 @@ function createNpc(type, x, y) {
         // For NPCs without a Y, place them on the main ground
         if (usesPlayerSprite) {
             // Use same anchor point as player/ghost (feet at 55px from top)
-            spawnY = (maps[currentMapId].height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y - playerSpriteAnchorY;
+            spawnY = (maps[currentMapId].height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y - playerSpriteAnchorY;
         } else if (isPixelArt && spriteData[type]?.anchorPoint) {
             const anchorY = spriteData[type].anchorPoint.y * PIXEL_ART_SCALE;
-            spawnY = (maps[currentMapId].height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y - anchorY;
+            spawnY = (maps[currentMapId].height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y - anchorY;
         } else {
-            spawnY = (maps[currentMapId].height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y - npcHeight;
+            spawnY = (maps[currentMapId].height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y - npcHeight;
         }
     }
 
@@ -3511,7 +3515,7 @@ function drawTiledLayers() {
     const platformsCanvas = document.getElementById('platforms-canvas');
 
     groundCanvas.width = platformsCanvas.width = map.width;
-    groundCanvas.height = platformsCanvas.height = map.height || scalingContainer.clientHeight;
+    groundCanvas.height = platformsCanvas.height = map.height || GAME_CONFIG.BASE_GAME_HEIGHT;
 
     const groundCtx = groundCanvas.getContext('2d');
     const platCtx = platformsCanvas.getContext('2d');
@@ -3529,7 +3533,7 @@ function drawTiledLayers() {
     const currentTileSet = tileSets[map.groundType] || tileSets.grass;
     const tileSize = spriteData.ground.tileSize;
     const scaledTileSize = tileSize * PIXEL_ART_SCALE;
-    const groundSurfaceY = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+    const groundSurfaceY = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
 
     // Step 1: Draw the background part of SOLID STRUCTURES on the BACK canvas.
     // Sort structures by z-layer (lowest first) so they render in correct order
@@ -3543,7 +3547,7 @@ function drawTiledLayers() {
         const sideEdgeTile = currentTileSet.backgroundEdge;
         const sideFillTile = currentTileSet.background;
         const columnTopY = sY + scaledTileSize;
-        const columnBottomY = map.height || scalingContainer.clientHeight;
+        const columnBottomY = map.height || GAME_CONFIG.BASE_GAME_HEIGHT;
         for (let currentY = columnTopY; currentY < columnBottomY; currentY += scaledTileSize) {
             if (numTilesWide > 1) {
                 groundCtx.drawImage(tilesetImage, sideEdgeTile.x, sideEdgeTile.y, tileSize, tileSize, sX, currentY, scaledTileSize, scaledTileSize);
@@ -3569,7 +3573,7 @@ function drawTiledLayers() {
         groundCtx.drawImage(tilesetImage, currentTileSet.ground.x, currentTileSet.ground.y, tileSize, tileSize, destX, groundSurfaceY, scaledTileSize, scaledTileSize);
         
         // Calculate how many rows needed to fill to bottom of screen plus UI area
-        const mapHeight = map.height || scalingContainer.clientHeight;
+        const mapHeight = map.height || GAME_CONFIG.BASE_GAME_HEIGHT;
         const remainingHeight = mapHeight - groundSurfaceY - scaledTileSize;
         const maxRows = Math.max(10, Math.ceil(remainingHeight / scaledTileSize) + 4); // Ensure at least 10 rows with extra buffer
         
@@ -3681,7 +3685,7 @@ function drawTiledLayers() {
         
         if (!slopeTile) return;
         
-        const mapHeight = map.height || scalingContainer.clientHeight;
+        const mapHeight = map.height || GAME_CONFIG.BASE_GAME_HEIGHT;
         
         if (slope.direction === 'left') {
             // For hill down-slopes (isHillDownSlope), the slope starts at sX at the peak and goes DOWN to the right
@@ -4027,7 +4031,7 @@ function drawFoliage() {
     const fgCtx = fgFoliageCanvas.getContext('2d');
 
     bgFoliageCanvas.width = fgFoliageCanvas.width = map.width;
-    bgFoliageCanvas.height = fgFoliageCanvas.height = map.height || scalingContainer.clientHeight;
+    bgFoliageCanvas.height = fgFoliageCanvas.height = map.height || GAME_CONFIG.BASE_GAME_HEIGHT;
     bgCtx.clearRect(0, 0, bgFoliageCanvas.width, bgFoliageCanvas.height);
     fgCtx.clearRect(0, 0, fgFoliageCanvas.width, fgFoliageCanvas.height);
 
@@ -4346,7 +4350,7 @@ function updateProjectiles() {
         if (p.type === 'grenade' && !p.grounded) {
             let onSurface = false;
             const map = maps[currentMapId];
-            const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+            const groundLevel = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
 
             if (p.y + p.height >= groundLevel) {
                 p.y = groundLevel - p.height;
@@ -4384,7 +4388,8 @@ function updateProjectiles() {
         }
         // --- END OF FIX ---
 
-        if (p.x < -100 || p.x > maps[currentMapId].width + 100 || p.y < -200 || p.y > scalingContainer.clientHeight + 100) {
+        // Use BASE_GAME_HEIGHT for consistent boundary check
+        if (p.x < -100 || p.x > maps[currentMapId].width + 100 || p.y < -200 || p.y > (maps[currentMapId].height || GAME_CONFIG.BASE_GAME_HEIGHT) + 100) {
             p.element.remove();
             projectiles.splice(i, 1);
         }
@@ -5089,7 +5094,7 @@ function isGroundAt(x, y) {
     const map = maps[currentMapId];
     if (!map) return false;
 
-    const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+    const groundLevel = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
     
     // Check slope surface at this X position
     const slopeSurfaceY = getSlopeSurfaceY(x, map, groundLevel, 48);
@@ -5153,7 +5158,7 @@ function validatePlayerPosition() {
     // Check if player is out of bounds
     const map = maps[currentMapId];
     if (player.x < 0 || player.x + player.width > map.width || 
-        player.y < 0 || player.y + player.height > (map.height || scalingContainer.clientHeight)) {
+        player.y < 0 || player.y + player.height > (map.height || GAME_CONFIG.BASE_GAME_HEIGHT)) {
         isStuck = true;
         console.warn('Player detected out of bounds, teleporting to safety');
     }
@@ -5185,13 +5190,13 @@ function findSafeSpawnPosition(preferredX, preferredY) {
 
     const playerWidth = 30;
     const playerHeight = 60;
-    const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+    const groundLevel = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
     
     // Function to check if a position is safe (no collision with platforms, within bounds)
     function isPositionSafe(testX, testY) {
         // Check map boundaries
         if (testX < 0 || testX + playerWidth > map.width) return false;
-        if (testY < 0 || testY + playerHeight > (map.height || scalingContainer.clientHeight)) return false;
+        if (testY < 0 || testY + playerHeight > (map.height || GAME_CONFIG.BASE_GAME_HEIGHT)) return false;
         
         // Check for collision with platforms (player should not be inside them)
         const playerRect = { x: testX, y: testY, width: playerWidth, height: playerHeight };
@@ -5353,7 +5358,7 @@ function updateDroppedItems() {
 
         // Check for collision with ground (with slope support)
         const map = maps[currentMapId];
-        const groundLevel = (map.height || scalingContainer.clientHeight) - GAME_CONFIG.GROUND_Y;
+        const groundLevel = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
         const itemCenterX = item.x + item.width / 2;
         const slopeSurfaceY = getSlopeSurfaceY(itemCenterX, map, groundLevel, 48);
         if (!onSurface && item.y + anchorY > slopeSurfaceY) {
