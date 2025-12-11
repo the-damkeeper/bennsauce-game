@@ -1211,7 +1211,9 @@ function initMapMonstersOnServer() {
                 isTrialBoss: mt.isTrialBoss || false,
                 respawnTime: mt.respawnTime || 8000,
                 loot: mt.loot || [], // Include loot table for server-side drop generation
-                aiType: mt.aiType || 'patrolling' // Static monsters don't move
+                aiType: mt.aiType || 'patrolling', // Static monsters don't move
+                canJump: mt.canJump || false, // Whether monster can jump
+                jumpForce: mt.jumpForce || -8 // Jump strength (negative = upward)
             };
         }
     }
