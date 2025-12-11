@@ -2269,10 +2269,17 @@ function interpolateMonsterPositions() {
         const dx = m.serverTargetX - m.x;
         
         // Snap if very close, otherwise interpolate
+        // Use faster interpolation to catch up but cap max movement per frame to prevent teleporting
         if (Math.abs(dx) < 2) {
             m.x = m.serverTargetX;
+        } else if (Math.abs(dx) > 200) {
+            // Too far - snap to prevent rubberbanding
+            m.x = m.serverTargetX;
         } else {
-            m.x += dx * INTERPOLATION_SPEED;
+            // Smooth interpolation with speed cap
+            const maxMovePerFrame = 8; // Cap movement to prevent visual jumping
+            const moveAmount = Math.max(-maxMovePerFrame, Math.min(maxMovePerFrame, dx * INTERPOLATION_SPEED * 2));
+            m.x += moveAmount;
         }
         
         // When chasing (aiState from server), allow falling off platforms
