@@ -1368,13 +1368,18 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
             let spawnX, spawnY;
             let spawnSurface;
             
-            // Check if this is a fixed position spawn (like test dummy)
-            if (spawner.fixedPosition && spawner.x !== undefined && spawner.y !== undefined) {
-                // Use exact coordinates provided
+            // Check if this is a fixed position spawn (like test dummy or boss)
+            if (spawner.fixedPosition && spawner.x !== undefined) {
+                // Use exact X coordinate provided
                 spawnX = spawner.x;
-                spawnY = spawner.y;
-                // Use ground surface for patrol bounds (test dummy should be on ground)
+                // Use ground surface for patrol bounds
                 spawnSurface = allSpawnSurfaces[0]; // First surface is always ground
+                // If Y is provided, use it; otherwise calculate from ground
+                if (spawner.y !== undefined) {
+                    spawnY = spawner.y;
+                } else {
+                    spawnY = spawnSurface.y - anchorY;
+                }
             } else {
                 // Pick a random valid surface (matching game.js style)
                 spawnSurface = validSpawnPoints[Math.floor(Math.random() * validSpawnPoints.length)];
