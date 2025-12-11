@@ -1130,6 +1130,11 @@ function updateGameLogic() {
             }
         }
         
+        // Always update remote projectiles for multiplayer sync (visual only)
+        if (typeof updateRemoteProjectiles === 'function') {
+            updateRemoteProjectiles();
+        }
+        
         // Always update monsters, even when player is dead (server-authoritative)
         updateMonsters();
         
@@ -4261,6 +4266,11 @@ function createProjectile(spriteName, damageMultiplier, startX, startY, angle = 
 
     worldContent.appendChild(el);
     projectiles.push(projectile);
+    
+    // Broadcast projectile to other players for multiplayer sync
+    if (typeof broadcastProjectile === 'function') {
+        broadcastProjectile(spriteName, pX, pY, projectile.velocityX, projectile.velocityY, angle, spriteName === 'grenadeIcon', isHoming);
+    }
 }
 
 function explodeGrenade(grenade) {

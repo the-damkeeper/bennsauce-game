@@ -170,8 +170,9 @@ function setupSocketListeners() {
         socketInitialized = false; // Reset so reconnect is required
         stopPositionUpdates();
         
-        // Clear remote players
+        // Clear remote players and projectiles
         clearRemotePlayers();
+        clearRemoteProjectiles();
         
         // Only show notification if game was active (not during initial load)
         if (typeof showNotification === 'function' && typeof isGameActive !== 'undefined' && isGameActive) {
@@ -331,6 +332,11 @@ function setupSocketListeners() {
     // Remote player VFX (level up, quest complete, etc.)
     socket.on('remotePlayerVFX', (data) => {
         handleRemotePlayerVFX(data);
+    });
+    
+    // Remote player projectile (visual only, no damage)
+    socket.on('remoteProjectile', (data) => {
+        createRemoteProjectile(data);
     });
 }
 
@@ -504,6 +510,9 @@ function notifyMapChange(newMapId, x, y) {
 
     // Clear remote players from old map
     clearRemotePlayers();
+    
+    // Clear remote projectiles from old map
+    clearRemoteProjectiles();
     
     // Clear monster mapping for old map and reset server authority
     serverMonsterMapping = {};
@@ -2223,6 +2232,172 @@ function handleRemotePlayerVFX(data) {
     }
 }
 
+// =============================================
+// REMOTE PROJECTILE SYSTEM
+// =============================================
+
+// Store remote projectiles separately (visual only, no damage)
+let remoteProjectiles = [];
+
+/**
+ * Broadcast a projectile event to other players
+ * @param {string} spriteName - Name of the projectile sprite
+ * @param {number} x - Starting X position
+ * @param {number} y - Starting Y position
+ * @param {number} velocityX - X velocity
+ * @param {number} velocityY - Y velocity
+ * @param {number} angle - Angle in degrees
+ * @param {boolean} isGrenade - Whether this is a grenade projectile
+ * @param {boolean} isHoming - Whether this is a homing projectile
+ */
+function broadcastProjectile(spriteName, x, y, velocityX, velocityY, angle, isGrenade, isHoming) {
+    if (!socket || !isConnectedToServer) return;
+    
+    socket.emit('playerProjectile', {
+        spriteName: spriteName,
+        x: x,
+        y: y,
+        velocityX: velocityX,
+        velocityY: velocityY,
+        angle: angle || 0,
+        isGrenade: isGrenade || false,
+        isHoming: isHoming || false
+    });
+}
+
+/**
+ * Create a visual-only projectile from a remote player
+ * These projectiles don't deal damage - damage is handled by the originating player
+ * @param {Object} data - Projectile data from server
+ */
+function createRemoteProjectile(data) {
+    // Check if we have sprites available
+    if (typeof sprites === 'undefined' || !sprites[data.spriteName]) {
+        console.warn('[Projectile] Sprite not found:', data.spriteName);
+        return;
+    }
+    
+    const worldContent = document.getElementById('world-content');
+    if (!worldContent) return;
+    
+    const el = document.createElement('div');
+    el.className = 'projectile remote-projectile';
+    el.innerHTML = sprites[data.spriteName];
+    const pWidth = 20, pHeight = 20;
+    el.style.width = `${pWidth}px`;
+    el.style.height = `${pHeight}px`;
+    
+    // Apply initial transform based on direction/angle
+    if (data.angle && data.angle !== 0) {
+        el.style.transform = `rotate(${data.angle}deg)`;
+    } else if (data.velocityX < 0) {
+        el.style.transform = 'scaleX(-1)';
+    }
+    
+    const projectile = {
+        x: data.x,
+        y: data.y,
+        width: pWidth,
+        height: pHeight,
+        velocityX: data.velocityX,
+        velocityY: data.velocityY,
+        element: el,
+        createdAt: Date.now(),
+        isGrenade: data.isGrenade,
+        grounded: false
+    };
+    
+    worldContent.appendChild(el);
+    remoteProjectiles.push(projectile);
+}
+
+/**
+ * Update all remote projectiles (called from game loop)
+ * Visual updates only - no collision/damage logic
+ */
+function updateRemoteProjectiles() {
+    const now = Date.now();
+    const GRAVITY = typeof window.GRAVITY !== 'undefined' ? window.GRAVITY : 0.5;
+    
+    for (let i = remoteProjectiles.length - 1; i >= 0; i--) {
+        const p = remoteProjectiles[i];
+        
+        // Grenade physics (mimic local grenade behavior)
+        if (p.isGrenade) {
+            if (p.grounded) {
+                p.velocityX *= 0.92;
+                if (Math.abs(p.velocityX) < 0.1) p.velocityX = 0;
+            } else {
+                p.velocityY += GRAVITY;
+            }
+            
+            // Simple ground check using map height
+            const mapHeight = typeof maps !== 'undefined' && typeof currentMapId !== 'undefined' && maps[currentMapId] 
+                ? (maps[currentMapId].height || 768) 
+                : 768;
+            const groundY = mapHeight - 110; // Approximate ground level
+            
+            if (!p.grounded && p.y + p.height >= groundY) {
+                p.y = groundY - p.height;
+                p.grounded = true;
+                p.velocityY *= -0.4;
+                if (Math.abs(p.velocityY) < 1) {
+                    p.velocityY = 0;
+                } else {
+                    p.grounded = false;
+                }
+            }
+            
+            // Remove grenades after 2.5 seconds (a bit longer than fuse to account for explosion visual)
+            if (now - p.createdAt > 2500) {
+                p.element.remove();
+                remoteProjectiles.splice(i, 1);
+                continue;
+            }
+        } else {
+            // Regular projectiles expire after 500ms
+            if (now - p.createdAt > 500) {
+                p.element.remove();
+                remoteProjectiles.splice(i, 1);
+                continue;
+            }
+        }
+        
+        // Update position
+        p.x += p.velocityX;
+        p.y += p.velocityY;
+        
+        // Update visual position
+        p.element.style.left = `${p.x}px`;
+        p.element.style.top = `${p.y}px`;
+        
+        // Remove if out of bounds
+        const mapWidth = typeof maps !== 'undefined' && typeof currentMapId !== 'undefined' && maps[currentMapId] 
+            ? maps[currentMapId].width 
+            : 2000;
+        const mapHeight = typeof maps !== 'undefined' && typeof currentMapId !== 'undefined' && maps[currentMapId] 
+            ? (maps[currentMapId].height || 768) 
+            : 768;
+            
+        if (p.x < -100 || p.x > mapWidth + 100 || p.y < -200 || p.y > mapHeight + 100) {
+            p.element.remove();
+            remoteProjectiles.splice(i, 1);
+        }
+    }
+}
+
+/**
+ * Clear all remote projectiles (called on map change)
+ */
+function clearRemoteProjectiles() {
+    for (const p of remoteProjectiles) {
+        if (p.element) {
+            p.element.remove();
+        }
+    }
+    remoteProjectiles = [];
+}
+
 /**
  * Create quest complete VFX at a remote player's position
  */
@@ -2479,6 +2654,11 @@ window.isGMAuthorized = false; // Default to not authorized
 window.broadcastPlayerVFX = broadcastPlayerVFX;
 window.sendPlayerDeath = sendPlayerDeath;
 window.sendPlayerRespawn = sendPlayerRespawn;
+
+// Export projectile functions for multiplayer sync
+window.broadcastProjectile = broadcastProjectile;
+window.updateRemoteProjectiles = updateRemoteProjectiles;
+window.clearRemoteProjectiles = clearRemoteProjectiles;
 
 // Export interpolation function for game loop
 window.interpolateMonsterPositions = interpolateMonsterPositions;
