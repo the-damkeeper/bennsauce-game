@@ -348,6 +348,38 @@ function setupSocketListeners() {
     socket.on('remoteSkillVFX', (data) => {
         createRemoteSkillVFX(data);
     });
+    
+    // ==========================================
+    // PARTY QUEST SOCKET HANDLERS
+    // ==========================================
+    
+    // Party Quest started - warp all party members
+    socket.on('partyQuestStarted', (data) => {
+        handlePartyQuestStarted(data);
+    });
+    
+    // PQ stage cleared - unlock next portal
+    socket.on('pqStageCleared', (data) => {
+        handlePQStageCleared(data);
+    });
+    
+    // Party Quest completed
+    socket.on('partyQuestCompleted', (data) => {
+        handlePartyQuestCompleted(data);
+    });
+    
+    // Party member left PQ
+    socket.on('pqMemberLeft', (data) => {
+        handlePQMemberLeft(data);
+    });
+    
+    // PQ Error
+    socket.on('pqError', (data) => {
+        if (typeof showNotification === 'function') {
+            showNotification(data.message, 'error');
+        }
+        console.warn('[PQ] Error:', data.message);
+    });
 }
 
 /**
@@ -1645,6 +1677,9 @@ function handleMonsterKilledFromServer(data) {
         }
     }
     
+    // Check for Party Quest stage completion (defeat objective)
+    checkPQStageCompletion(data.type, localMonster);
+    
     // Remove monster element after death animation
     setTimeout(() => {
         const index = typeof monsters !== 'undefined' ? monsters.indexOf(localMonster) : -1;
@@ -2841,6 +2876,207 @@ function checkGMAuth() {
     socket.emit('checkGmAuth');
 }
 
+// ==========================================
+// PARTY QUEST HANDLER FUNCTIONS
+// ==========================================
+
+/**
+ * Handle party quest starting - warp party members to PQ
+ */
+function handlePartyQuestStarted(data) {
+    console.log('[PQ] Party Quest started:', data);
+    
+    // Check if this affects us
+    const partyInfo = typeof getPartyInfo === 'function' ? getPartyInfo() : null;
+    if (!partyInfo || partyInfo.id !== data.partyId) {
+        console.log('[PQ] Not in this party, ignoring');
+        return;
+    }
+    
+    // Show notification
+    if (typeof showNotification === 'function') {
+        showNotification('Party Quest Starting!', 'epic');
+    }
+    if (typeof addChatMessage === 'function') {
+        addChatMessage('Your party is entering the Kerning Party Quest!', 'quest-complete');
+    }
+    
+    // Warp to PQ lobby
+    if (typeof fadeAndChangeMap === 'function') {
+        fadeAndChangeMap(data.targetMap, data.targetX, data.targetY);
+    } else if (typeof changeMap === 'function') {
+        changeMap(data.targetMap, data.targetX, data.targetY);
+    }
+}
+
+/**
+ * Handle PQ stage cleared notification
+ */
+function handlePQStageCleared(data) {
+    console.log('[PQ] Stage cleared:', data);
+    
+    // Check if this affects us
+    const partyInfo = typeof getPartyInfo === 'function' ? getPartyInfo() : null;
+    if (!partyInfo || partyInfo.id !== data.partyId) {
+        return;
+    }
+    
+    // Show notification
+    if (typeof showNotification === 'function') {
+        showNotification(`Stage ${data.stage} Cleared!`, 'epic');
+    }
+    if (typeof addChatMessage === 'function') {
+        addChatMessage(`Stage ${data.stage} cleared by ${data.clearedBy}! The portal to the next stage is now open.`, 'quest-complete');
+    }
+    
+    // Store cleared stage for portal checking
+    if (typeof window !== 'undefined') {
+        window.pqClearedStages = window.pqClearedStages || {};
+        window.pqClearedStages[data.pqId] = window.pqClearedStages[data.pqId] || [];
+        if (!window.pqClearedStages[data.pqId].includes(data.stage)) {
+            window.pqClearedStages[data.pqId].push(data.stage);
+        }
+    }
+}
+
+/**
+ * Handle Party Quest completion
+ */
+function handlePartyQuestCompleted(data) {
+    console.log('[PQ] Party Quest completed:', data);
+    
+    // Check if this affects us
+    const partyInfo = typeof getPartyInfo === 'function' ? getPartyInfo() : null;
+    if (!partyInfo || partyInfo.id !== data.partyId) {
+        return;
+    }
+    
+    // Show big celebration notification
+    if (typeof showNotification === 'function') {
+        showNotification('Party Quest Complete!', 'legendary');
+    }
+    if (typeof addChatMessage === 'function') {
+        addChatMessage('🎉 Congratulations! Your party has completed the Kerning Party Quest!', 'quest-complete');
+    }
+    
+    // Could add achievement tracking here
+    if (typeof updateAchievementProgress === 'function') {
+        updateAchievementProgress('action', 'complete_party_quest');
+    }
+}
+
+/**
+ * Handle party member leaving PQ
+ */
+function handlePQMemberLeft(data) {
+    console.log('[PQ] Member left:', data);
+    
+    // Check if this affects us
+    const partyInfo = typeof getPartyInfo === 'function' ? getPartyInfo() : null;
+    if (!partyInfo || partyInfo.id !== data.partyId) {
+        return;
+    }
+    
+    // Notify remaining party members
+    if (typeof addChatMessage === 'function') {
+        addChatMessage(`${data.playerName} has left the Party Quest.`, 'system');
+    }
+}
+
+/**
+ * Check if a PQ stage has been cleared (for portal unlocking)
+ */
+function isPQStageCleared(pqId, stage) {
+    if (!window.pqClearedStages || !window.pqClearedStages[pqId]) {
+        return false;
+    }
+    return window.pqClearedStages[pqId].includes(stage);
+}
+
+/**
+ * Send stage complete notification to server
+ */
+function sendPQStageComplete(pqId, stage) {
+    if (!socket || !socket.connected) return;
+    
+    const partyInfo = typeof getPartyInfo === 'function' ? getPartyInfo() : null;
+    if (!partyInfo) return;
+    
+    socket.emit('pqStageComplete', {
+        pqId,
+        partyId: partyInfo.id,
+        stage
+    });
+}
+
+/**
+ * Send PQ completion notification to server
+ */
+function sendPQCompleted(pqId) {
+    if (!socket || !socket.connected) return;
+    
+    const partyInfo = typeof getPartyInfo === 'function' ? getPartyInfo() : null;
+    if (!partyInfo) return;
+    
+    socket.emit('pqCompleted', {
+        pqId,
+        partyId: partyInfo.id
+    });
+}
+
+/**
+ * Send leave PQ notification to server
+ */
+function sendLeavePQ(pqId) {
+    if (!socket || !socket.connected) return;
+    
+    const partyInfo = typeof getPartyInfo === 'function' ? getPartyInfo() : null;
+    if (!partyInfo) return;
+    
+    socket.emit('leavePQ', {
+        pqId,
+        partyId: partyInfo.id
+    });
+}
+
+/**
+ * Check if Party Quest stage is complete (all monsters defeated)
+ */
+function checkPQStageCompletion(monsterType, deadMonster) {
+    // Check if we're in a PQ map
+    if (typeof currentMapId === 'undefined' || typeof maps === 'undefined') return;
+    
+    const mapData = maps[currentMapId];
+    if (!mapData || !mapData.isPartyQuest) return;
+    
+    // Only check defeat objectives
+    if (mapData.pqObjective !== 'defeat' && mapData.pqObjective !== 'boss') return;
+    
+    // Count remaining alive monsters on this map
+    const aliveMonsters = (typeof monsters !== 'undefined') 
+        ? monsters.filter(m => m && !m.isDead && m !== deadMonster)
+        : [];
+    
+    console.log('[PQ] Monsters remaining after kill:', aliveMonsters.length);
+    
+    // If all monsters are dead, stage is complete!
+    if (aliveMonsters.length === 0) {
+        console.log('[PQ] All monsters defeated! Stage complete!');
+        
+        const stage = mapData.pqStage;
+        const pqId = mapData.pqId;
+        
+        // Send stage complete notification
+        sendPQStageComplete(pqId, stage);
+        
+        // If this was the boss stage, send PQ completion
+        if (mapData.pqObjective === 'boss') {
+            console.log('[PQ] Boss defeated! Party Quest complete!');
+            sendPQCompleted(pqId);
+        }
+    }
+}
+
 // Export GM auth functions
 window.requestGMAuth = requestGMAuth;
 window.checkGMAuth = checkGMAuth;
@@ -2860,6 +3096,12 @@ window.processPendingProjectileHits = processPendingProjectileHits;
 
 // Export skill VFX functions for multiplayer sync
 window.broadcastSkillVFX = broadcastSkillVFX;
+
+// Export Party Quest functions
+window.sendPQStageComplete = sendPQStageComplete;
+window.sendPQCompleted = sendPQCompleted;
+window.sendLeavePQ = sendLeavePQ;
+window.isPQStageCleared = isPQStageCleared;
 
 // Export interpolation function for game loop
 window.interpolateMonsterPositions = interpolateMonsterPositions;

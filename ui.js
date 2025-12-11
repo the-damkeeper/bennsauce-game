@@ -9448,6 +9448,40 @@ function openDialogue(npc) {
         optionsHtml += `<button id="transport-from-sky-palace">Return to Iron Haven</button>`;
     }
 
+    // Party Quest Interaction
+    if (npc.partyQuestInteraction) {
+        const partyInfo = getPartyInfo();
+        const isInParty = partyInfo && partyInfo.members && partyInfo.members.length >= 1;
+        const partySize = isInParty ? partyInfo.members.length : 0;
+        const minPlayers = npc.pqMinPlayers || 2;
+        const maxPlayers = npc.pqMaxPlayers || 4;
+        const minLevel = npc.pqMinLevel || 10;
+        const maxLevel = npc.pqMaxLevel || 50;
+        const meetsLevelReq = player.level >= minLevel && player.level <= maxLevel;
+        
+        if (!hasSetPrimaryDialogue) {
+            dialogueText = `<p>"Greetings, brave adventurer! I am the guardian of the <strong>Kerning Party Quest</strong>."</p>
+                <p>Requirements:</p>
+                <p>• Party size: ${minPlayers}-${maxPlayers} members</p>
+                <p>• Level range: ${minLevel}-${maxLevel}</p>
+                <p>• Work together to clear 4 challenging stages and defeat the boss!</p>
+                <br>
+                <p>Your party: ${partySize > 0 ? partySize + ' member(s)' : 'None'}</p>
+                <p>Your level: ${player.level} ${meetsLevelReq ? '✓' : '✗'}</p>`;
+            hasSetPrimaryDialogue = true;
+        }
+        
+        if (isInParty && partySize >= minPlayers && meetsLevelReq) {
+            optionsHtml += `<button id="enter-party-quest">Enter Party Quest</button>`;
+        } else if (!isInParty) {
+            optionsHtml += `<button id="enter-party-quest-disabled" disabled style="opacity: 0.5;">Enter Party Quest (Need a party)</button>`;
+        } else if (partySize < minPlayers) {
+            optionsHtml += `<button id="enter-party-quest-disabled" disabled style="opacity: 0.5;">Enter Party Quest (Need ${minPlayers}+ members)</button>`;
+        } else if (!meetsLevelReq) {
+            optionsHtml += `<button id="enter-party-quest-disabled" disabled style="opacity: 0.5;">Enter Party Quest (Level ${minLevel}-${maxLevel})</button>`;
+        }
+    }
+
     // --- Part 3: Render and add event listeners ---
     optionsHtml += `<button id="close-dialogue">Goodbye</button>`;
     content.innerHTML = dialogueText + optionsHtml;
@@ -9658,6 +9692,48 @@ function openDialogue(npc) {
         document.getElementById('retry-job-trial')?.addEventListener('click', () => {
             toggleWindow(dialogueWindowElement);
             openJobAdvancementWindow(30);
+        });
+        
+        // Party Quest Entry listener
+        document.getElementById('enter-party-quest')?.addEventListener('click', () => {
+            const partyInfo = getPartyInfo();
+            if (!partyInfo || partyInfo.members.length < 2) {
+                content.innerHTML = `<p>"You need at least 2 party members to enter the Party Quest!"</p><button id="close-dialogue">Okay</button>`;
+                document.getElementById('close-dialogue').addEventListener('click', () => toggleWindow(dialogueWindowElement));
+                return;
+            }
+            
+            // Check if player is party leader
+            if (partyInfo.leader !== player.name) {
+                content.innerHTML = `<p>"Only the party leader can initiate the Party Quest. Ask <strong>${partyInfo.leader}</strong> to start it!"</p><button id="close-dialogue">Okay</button>`;
+                document.getElementById('close-dialogue').addEventListener('click', () => toggleWindow(dialogueWindowElement));
+                return;
+            }
+            
+            // Show confirmation
+            content.innerHTML = `
+                <p><strong>Party Quest Entry</strong></p>
+                <p>Your party of ${partyInfo.members.length} will enter the Kerning Party Quest!</p>
+                <p>All party members will be transported to the PQ Lobby.</p>
+                <br>
+                <p>Are you ready to begin?</p>
+                <button id="confirm-pq-entry">Enter Party Quest</button>
+                <button id="close-dialogue">Not Yet</button>
+            `;
+            document.getElementById('close-dialogue').addEventListener('click', () => toggleWindow(dialogueWindowElement));
+            document.getElementById('confirm-pq-entry').addEventListener('click', () => {
+                toggleWindow(dialogueWindowElement);
+                // Emit socket event to start party quest for all members
+                if (window.socket && window.socket.connected) {
+                    window.socket.emit('startPartyQuest', {
+                        pqId: 'kerningPQ',
+                        partyId: partyInfo.id,
+                        leaderId: player.odcId
+                    });
+                }
+                addChatMessage("Entering the Party Quest!", 'quest-complete');
+                fadeAndChangeMap('pqLobby', 600, 300);
+            });
         });
         
         document.getElementById('expand-inventory-btn')?.addEventListener('click', () => {

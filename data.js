@@ -1359,6 +1359,9 @@ const itemData = {
     // SALAMI CELEBRATION EVENT
     'Salami Stick': { category: 'Etc', description: "A delicious salami stick piece. Mr. Salami is collecting these!", cost: 0, isEventItem: true },
     'Thick Salami Stick': { type: 'weapon', category: 'Cosmetic', zLevel: 11, zLevelOverrides: { climb: 13 }, description: "A mighty weapon crafted from the finest salami. Smells delicious!" },
+    
+    // PARTY QUEST ITEMS
+    'PQ Ticket': { category: 'Etc', description: "A mysterious ticket dropped by monsters in the Party Quest. Collect enough to unlock the next stage!", cost: 0, isPQItem: true },
     'Salami Slice Badge': { type: 'pendant', category: 'Equip', zLevel: 6, stats: { hp: 75, mp: 50, str: 8, dex: 8, int: 8, luk: 8, critChance: 10 }, variance: 3, levelReq: 25, cost: 0, canEnhance: false, rarity: 'legendary', description: "A legendary badge made from a perfect slice of salami. A symbol of the Salami Celebration!" },
     
     // Sky Palace ITEMS
@@ -3666,6 +3669,19 @@ const npcData = {
         attachmentPoints: { questIcon: { x: 1, y: -20 } },
         salamiEventShop: true
     },
+    
+    // === PARTY QUEST NPCs ===
+    'pqLana': {
+        name: "Lana the Dungeon Guide",
+        sprite: sprites.captainKyrin,
+        attachmentPoints: { questIcon: { x: 1, y: -20 } },
+        partyQuestInteraction: true,  // Special flag for party quest entry
+        pqId: 'kerningPQ',            // Party Quest identifier
+        pqMinPlayers: 2,              // Minimum party members required
+        pqMaxPlayers: 4,              // Maximum party members allowed
+        pqMinLevel: 10,               // Minimum level requirement
+        pqMaxLevel: 50                // Maximum level for entry
+    },
 };
 
 // NPC Appearance Configuration - defines how each NPC looks using player sprites
@@ -4096,6 +4112,21 @@ const npcAppearances = {
             eye: null
         }
     },
+    'pqLana': {
+        // Lana the Dungeon Guide - mystical party quest guide
+        customization: { hairStyle: 4, hairColor: 17, eyeColor: 4, skinTone: 4 }, // Long cyan/teal hair, purple eyes
+        equipped: {
+            top: 'White T-shirt',
+            bottom: 'Brown Pants',
+            shoes: 'Black Leather Boots',
+            helmet: 'Purple Bandana',
+            weapon: 'Sapphire Staff',
+            gloves: 'Purple Work Gloves',
+            cape: 'Purple Adventurer Cape',
+            face: null,
+            eye: null
+        }
+    },
     // Special NPCs that keep their original sprites
     'prizeBox': null, // Keep as sprite
     'skypalacePrizeBox': null, // Keep as sprite
@@ -4297,6 +4328,9 @@ const monsterTypes = {
     mushmom: { name: 'Mushmom', level: 23, hp: 3000, damage: 100, speed: 1.2, width: 144, height: 144, exp: 800, accuracy: 40, reqAccuracy: 12, canJump: true, isMiniBoss: true, respawnTime: 300000, isPixelArt: true, sprite: artAssets.mushmom, loot: [{ name: 'Gold', rate: 1, min: 800, max: 1500 }, { name: 'Mushmom Pendant', rate: 0.3 }, { name: 'Pink Adventurer Cape', rate: 0.01 }, { name: 'Enhancement Scroll', rate: 1 }, { name: 'Red Potion', rate: 0.2 }, { name: 'Blue Potion', rate: 0.2 }, { name: 'Gachapon Ticket', rate: 0.1 }] },
     stoneGolem: { name: 'Stone Golem', level: 28, hp: 6000, damage: 160, speed: 1, width: 80, height: 96, exp: 5000, accuracy: 70, reqAccuracy: 70, sprite: sprites.stoneGolem, isMiniBoss: true, respawnTime: 300000, loot: [{ name: 'Gold', rate: 1, min: 5000, max: 10000 }, { name: 'Golem Pendant', rate: 0.3 }, { name: 'Golden Greaves', rate: .03 }, { name: 'Elixir', rate: 0.1 }, { name: 'Red Potion', rate: 0.2 }, { name: 'Blue Potion', rate: 0.2 }, { name: 'Gachapon Ticket', rate: 0.1 }] },
     yeti: { name: 'Yeti', level: 30, hp: 12000, damage: 350, speed: 1.1, width: 64, height: 64, exp: 8000, accuracy: 80, reqAccuracy: 85, sprite: sprites.yeti, isMiniBoss: true, respawnTime: 300000, loot: [{ name: 'Gold', rate: 1, min: 7000, max: 12000 }, { name: 'Balrog Pendant', rate: 0.1 }, { name: 'Arc Bringer', rate: 0.1 }, { name: 'Gilded Handcannon', rate: 0.1 }, { name: 'Ruby Sceptre', rate: 0.1 }, { name: 'Venomous Edge', rate: 0.1 }, { name: 'Golden Greaves', rate: 0.1 }, { name: 'Enhancement Scroll', rate: 1 }, { name: 'Elixir', rate: 0.8 }, { name: 'Red Potion', rate: 0.2 }, { name: 'Blue Potion', rate: 0.2 }, { name: 'Gachapon Ticket', rate: 0.2 }] },
+    
+    // === PARTY QUEST BOSS ===
+    pqKingSlime: { name: 'King Slime', level: 25, hp: 25000, damage: 120, speed: 1.0, width: 144, height: 144, exp: 5000, accuracy: 50, reqAccuracy: 30, canJump: true, jumpForce: -12, isMiniBoss: true, isPQBoss: true, noKnockback: true, isPixelArt: true, sprite: artAssets.mano, loot: [{ name: 'Gold', rate: 1, min: 5000, max: 10000 }, { name: 'Enhancement Scroll', rate: 1 }, { name: 'Elixir', rate: 1 }, { name: 'Slime Crown', rate: 0.1 }, { name: 'Gachapon Ticket', rate: 0.3 }] },
     
     // === JOB ADVANCEMENT TRIAL BOSSES ===
     // Warrior Path Trial Bosses
@@ -4989,6 +5023,9 @@ const maps = {
         background: '#6e5630ff',
         bgm: 'onyxCity',
         groundType: 'stone',
+        npcs: [
+            { type: 'pqLana', x: 600 }
+        ],
         ladders: [
             { x: 500, y1: 443, y2: 600, type: 'pipe' },
             { x: 1150, y1: 443, y2: 600, type: 'pipe' }
@@ -6532,6 +6569,200 @@ const maps = {
         structures: [
             { x: -200, y: 1200, width: 1900 }
         ]
+    },
+    
+    // === PARTY QUEST MAPS ===
+    // Kerning-style party quest for 2-4 players, levels 10-50
+    pqLobby: {
+        width: 1200,
+        height: 600,
+        backgroundColor: '#1a1a2d',
+        bgm: 'deepClocktower',
+        groundType: 'darkBrick',
+        isPartyQuest: true,
+        pqId: 'kerningPQ',
+        pqStage: 0,
+        npcs: [],
+        monsters: [],
+        portals: [
+            { x: 50, targetMap: 'onyxCity', targetX: 600, pqExit: true },
+            { x: 1100, targetMap: 'pqStage1', targetX: 100, pqPortal: true, requireStageComplete: false }
+        ],
+        platforms: [
+            { x: 200, y: 400, width: 800, noSpawn: true }
+        ],
+        structures: []
+    },
+    pqStage1: {
+        width: 1600,
+        height: 800,
+        backgroundColor: '#1f1f3a',
+        bgm: 'deepClocktower',
+        groundType: 'darkBrick',
+        isPartyQuest: true,
+        pqId: 'kerningPQ',
+        pqStage: 1,
+        pqObjective: 'defeat', // Defeat all monsters
+        npcs: [],
+        monsters: [
+            { type: 'zombie', count: 15 }
+        ],
+        portals: [
+            { x: 50, targetMap: 'pqLobby', targetX: 1050, pqPortal: true },
+            { x: 1500, targetMap: 'pqStage2', targetX: 100, pqPortal: true, requireStageComplete: true }
+        ],
+        platforms: [
+            { x: 200, y: 500, width: 400 },
+            { x: 800, y: 400, width: 400 },
+            { x: 400, y: 300, width: 300 }
+        ],
+        structures: []
+    },
+    pqStage2: {
+        width: 1800,
+        height: 900,
+        backgroundColor: '#252550',
+        bgm: 'deepClocktower',
+        groundType: 'darkBrick',
+        isPartyQuest: true,
+        pqId: 'kerningPQ',
+        pqStage: 2,
+        pqObjective: 'defeat', // Defeat all monsters
+        npcs: [],
+        monsters: [
+            { type: 'phantom', count: 20 }
+        ],
+        portals: [
+            { x: 50, targetMap: 'pqStage1', targetX: 1450, pqPortal: true },
+            { x: 1700, targetMap: 'pqStage3', targetX: 100, pqPortal: true, requireStageComplete: true }
+        ],
+        platforms: [
+            { x: 100, y: 600, width: 400 },
+            { x: 600, y: 500, width: 300 },
+            { x: 1000, y: 400, width: 400 },
+            { x: 400, y: 350, width: 200 },
+            { x: 1300, y: 600, width: 400 }
+        ],
+        ladders: [
+            { x: 700, y1: 500, y2: 720 },
+            { x: 1100, y1: 400, y2: 720 }
+        ],
+        structures: []
+    },
+    pqStage3: {
+        width: 2000,
+        height: 1000,
+        backgroundColor: '#2a2a5a',
+        bgm: 'deepClocktower',
+        groundType: 'darkBrick',
+        isPartyQuest: true,
+        pqId: 'kerningPQ',
+        pqStage: 3,
+        pqObjective: 'defeat', // Defeat all monsters
+        npcs: [],
+        monsters: [
+            { type: 'jrWraith', count: 8 },
+            { type: 'zombie', count: 8 }
+        ],
+        portals: [
+            { x: 50, targetMap: 'pqStage2', targetX: 1650, pqPortal: true },
+            { x: 1900, targetMap: 'pqStage4', targetX: 100, pqPortal: true, requireStageComplete: true }
+        ],
+        platforms: [
+            { x: 200, y: 700, width: 500 },
+            { x: 800, y: 550, width: 400 },
+            { x: 1300, y: 700, width: 500 },
+            { x: 600, y: 400, width: 300 },
+            { x: 1000, y: 300, width: 400 }
+        ],
+        ladders: [
+            { x: 400, y1: 550, y2: 820 },
+            { x: 1500, y1: 550, y2: 820 }
+        ],
+        structures: []
+    },
+    pqStage4: {
+        width: 2200,
+        height: 1100,
+        backgroundColor: '#1e1e4a',
+        bgm: 'deepClocktower',
+        groundType: 'darkBrick',
+        isPartyQuest: true,
+        pqId: 'kerningPQ',
+        pqStage: 4,
+        pqObjective: 'defeat', // Defeat all monsters before boss
+        npcs: [],
+        monsters: [
+            { type: 'phantom', count: 10 },
+            { type: 'jrWraith', count: 10 }
+        ],
+        portals: [
+            { x: 50, targetMap: 'pqStage3', targetX: 1850, pqPortal: true },
+            { x: 2100, targetMap: 'pqBoss', targetX: 100, pqPortal: true, requireStageComplete: true }
+        ],
+        platforms: [
+            // Puzzle platforms - requires coordination
+            { x: 100, y: 800, width: 200 },
+            { x: 400, y: 700, width: 150 },
+            { x: 650, y: 600, width: 150 },
+            { x: 900, y: 500, width: 150 },
+            { x: 1150, y: 400, width: 150 },
+            { x: 1400, y: 500, width: 150 },
+            { x: 1650, y: 600, width: 150 },
+            { x: 1900, y: 700, width: 200 }
+        ],
+        ladders: [
+            { x: 300, y1: 700, y2: 920 },
+            { x: 2000, y1: 700, y2: 920 }
+        ],
+        structures: []
+    },
+    pqBoss: {
+        width: 1600,
+        height: 900,
+        backgroundColor: '#0f0f2a',
+        bgm: 'deepClocktower',
+        groundType: 'darkBrick',
+        isPartyQuest: true,
+        pqId: 'kerningPQ',
+        pqStage: 5,
+        pqObjective: 'boss',
+        npcs: [],
+        monsters: [
+            { type: 'pqKingSlime', count: 1, x: 800, fixedPosition: true }
+        ],
+        portals: [
+            { x: 50, targetMap: 'pqStage4', targetX: 2050, pqPortal: true },
+            { x: 1500, targetMap: 'pqReward', targetX: 600, pqPortal: true, requireStageComplete: true }
+        ],
+        platforms: [
+            { x: 200, y: 600, width: 400 },
+            { x: 1000, y: 600, width: 400 },
+            { x: 500, y: 450, width: 600 }
+        ],
+        structures: []
+    },
+    pqReward: {
+        width: 1000,
+        height: 600,
+        backgroundColor: '#2a2a4a',
+        bgm: 'dewdropIsland',
+        groundType: 'darkBrick',
+        isPartyQuest: true,
+        pqId: 'kerningPQ',
+        pqStage: 6,
+        pqObjective: 'reward',
+        npcs: [
+            { type: 'prizeBox', x: 500 }
+        ],
+        monsters: [],
+        portals: [
+            { x: 900, targetMap: 'onyxCity', targetX: 600, pqExit: true }
+        ],
+        platforms: [
+            { x: 300, y: 400, width: 400, noSpawn: true }
+        ],
+        structures: []
     }
 };
 
