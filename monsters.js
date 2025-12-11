@@ -1566,7 +1566,7 @@ function createMonster(type, x, y, initialState = null) {
         type, x, y, previousY: y,
         velocityX: 0, velocityY: 0,
         onPlatform: null,
-        spawnFrameCount: 15, // Skip gravity for 15 frames to ensure stable spawn positioning
+        spawnFrameCount: 105, // Skip gravity for ~1.75 seconds (105 frames at 60fps) to ensure stable spawn positioning
         spawnFadeFrames: -1, // -1 means fade hasn't started yet (starts after physics grace period)
         isSpawning: true, // Flag to prevent damage during spawn
         deathFadeFrames: 30, // For death fade-out animation (initialized to 30)
