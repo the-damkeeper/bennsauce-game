@@ -2232,6 +2232,8 @@ function handleMonsterPositionsFromServer(monsterPositions) {
         localMonster.serverDirection = pos.direction;
         localMonster.serverAiState = pos.aiState;
         localMonster.serverVelocityX = pos.velocityX || 0;
+        localMonster.serverVelocityY = pos.velocityY || 0;
+        localMonster.serverIsJumping = pos.isJumping || false;
         localMonster.lastServerUpdate = Date.now();
     }
 }
@@ -2281,6 +2283,14 @@ function interpolateMonsterPositions() {
                 // Significant drift - correct toward server position
                 m.y += dy * Y_CORRECTION_SPEED;
                 m.velocityY = 0; // Reset velocity to prevent fighting
+            }
+        }
+        
+        // Sync jumping state from server
+        if (m.serverIsJumping !== undefined) {
+            m.isJumping = m.serverIsJumping;
+            if (m.serverVelocityY !== undefined) {
+                m.velocityY = m.serverVelocityY;
             }
         }
         
@@ -2839,7 +2849,7 @@ function handleRemotePlayerDeath(data) {
     // Create gravestone
     const gravestone = document.createElement('div');
     gravestone.className = 'remote-player-gravestone';
-    gravestone.textContent = '🪦';
+    gravestone.textContent = '';
     gravestone.style.position = 'absolute';
     gravestone.style.fontSize = '64px';
     gravestone.style.zIndex = '9999';

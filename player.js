@@ -2873,7 +2873,7 @@ function showDeathScreen() {
     // Create gravestone element on player's body
     const gravestone = document.createElement('div');
     gravestone.id = 'player-gravestone';
-    gravestone.textContent = '🪦';
+    gravestone.textContent = '';
     gravestone.style.position = 'absolute';
     gravestone.style.fontSize = '64px';
     gravestone.style.zIndex = '9999';
