@@ -2888,9 +2888,24 @@ function handlePartyQuestStarted(data) {
     
     // Check if this affects us
     const partyInfo = typeof getPartyInfo === 'function' ? getPartyInfo() : null;
-    if (!partyInfo || partyInfo.id !== data.partyId) {
-        console.log('[PQ] Not in this party, ignoring');
+    console.log('[PQ] My party info:', partyInfo);
+    
+    if (!partyInfo || !partyInfo.id) {
+        console.log('[PQ] Not in a party, ignoring');
         return;
+    }
+    
+    if (partyInfo.id !== data.partyId) {
+        console.log('[PQ] Not in this party (' + partyInfo.id + ' vs ' + data.partyId + '), ignoring');
+        return;
+    }
+    
+    // Store original map for returning after PQ
+    if (typeof player !== 'undefined') {
+        player.pqOriginalMap = data.originalMap || currentMapId;
+        player.pqOriginalX = data.originalX || 600;
+        player.pqOriginalY = data.originalY || 300;
+        console.log('[PQ] Stored original map:', player.pqOriginalMap);
     }
     
     // Show notification
@@ -2898,10 +2913,11 @@ function handlePartyQuestStarted(data) {
         showNotification('Party Quest Starting!', 'epic');
     }
     if (typeof addChatMessage === 'function') {
-        addChatMessage('Your party is entering the Kerning Party Quest!', 'quest-complete');
+        addChatMessage('🎮 Your party is entering the Kerning Party Quest! Good luck!', 'quest-complete');
     }
     
-    // Warp to PQ lobby
+    // Warp to PQ Stage 1
+    console.log('[PQ] Warping to:', data.targetMap);
     if (typeof fadeAndChangeMap === 'function') {
         fadeAndChangeMap(data.targetMap, data.targetX, data.targetY);
     } else if (typeof changeMap === 'function') {
@@ -2926,7 +2942,7 @@ function handlePQStageCleared(data) {
         showNotification(`Stage ${data.stage} Cleared!`, 'epic');
     }
     if (typeof addChatMessage === 'function') {
-        addChatMessage(`Stage ${data.stage} cleared by ${data.clearedBy}! The portal to the next stage is now open.`, 'quest-complete');
+        addChatMessage(`🎉 Stage ${data.stage} cleared by ${data.clearedBy}!`, 'quest-complete');
     }
     
     // Store cleared stage for portal checking
@@ -2937,6 +2953,85 @@ function handlePQStageCleared(data) {
             window.pqClearedStages[data.pqId].push(data.stage);
         }
     }
+    
+    // Start countdown and auto-warp if next stage exists
+    if (data.nextMap && data.countdownSeconds) {
+        startPQCountdown(data.countdownSeconds, data.nextMap, data.nextX, data.nextY);
+    }
+}
+
+/**
+ * Start countdown before warping to next PQ stage
+ */
+function startPQCountdown(seconds, nextMap, nextX, nextY) {
+    let remaining = seconds;
+    
+    // Show initial countdown message
+    if (typeof addChatMessage === 'function') {
+        addChatMessage(`⏱️ Warping to next stage in ${remaining} seconds...`, 'system');
+    }
+    
+    // Create or update countdown display
+    let countdownDisplay = document.getElementById('pq-countdown-display');
+    if (!countdownDisplay) {
+        countdownDisplay = document.createElement('div');
+        countdownDisplay.id = 'pq-countdown-display';
+        countdownDisplay.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: #ffd700;
+            padding: 30px 50px;
+            border-radius: 10px;
+            font-size: 48px;
+            font-weight: bold;
+            z-index: 9999;
+            text-align: center;
+            border: 3px solid #ffd700;
+            animation: pulse 1s infinite;
+        `;
+        document.body.appendChild(countdownDisplay);
+        
+        // Add pulse animation if not exists
+        if (!document.getElementById('pq-countdown-style')) {
+            const style = document.createElement('style');
+            style.id = 'pq-countdown-style';
+            style.textContent = `
+                @keyframes pulse {
+                    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+                    50% { transform: translate(-50%, -50%) scale(1.05); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+    
+    countdownDisplay.innerHTML = `⏱️ ${remaining}`;
+    
+    const countdownInterval = setInterval(() => {
+        remaining--;
+        
+        if (remaining > 0) {
+            countdownDisplay.innerHTML = `⏱️ ${remaining}`;
+        } else {
+            // Clear countdown
+            clearInterval(countdownInterval);
+            countdownDisplay.remove();
+            
+            // Warp to next stage
+            if (typeof addChatMessage === 'function') {
+                addChatMessage('🚀 Warping to next stage!', 'quest-complete');
+            }
+            
+            if (typeof fadeAndChangeMap === 'function') {
+                fadeAndChangeMap(nextMap, nextX, nextY);
+            } else if (typeof changeMap === 'function') {
+                changeMap(nextMap, nextX, nextY);
+            }
+        }
+    }, 1000);
 }
 
 /**

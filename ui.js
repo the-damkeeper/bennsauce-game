@@ -9482,6 +9482,19 @@ function openDialogue(npc) {
         }
     }
 
+    // Party Quest Reward/Exit Interaction
+    if (npc.pqRewardInteraction) {
+        if (!hasSetPrimaryDialogue) {
+            dialogueText = `<p>"🎉 <strong>Congratulations, brave adventurers!</strong> 🎉"</p>
+                <p>"You have successfully completed the Kerning Party Quest!"</p>
+                <p>"Your teamwork and skill have proven worthy. Take these rewards as a token of your achievement!"</p>
+                <br>
+                <p>When you're ready, I can transport you back to where your journey began.</p>`;
+            hasSetPrimaryDialogue = true;
+        }
+        optionsHtml += `<button id="claim-pq-rewards">Claim Rewards & Exit</button>`;
+    }
+
     // --- Part 3: Render and add event listeners ---
     optionsHtml += `<button id="close-dialogue">Goodbye</button>`;
     content.innerHTML = dialogueText + optionsHtml;
@@ -9710,30 +9723,109 @@ function openDialogue(npc) {
                 return;
             }
             
-            // Show confirmation
+            // Show intro popup explaining the party quest
             content.innerHTML = `
-                <p><strong>Party Quest Entry</strong></p>
-                <p>Your party of ${partyInfo.members.length} will enter the Kerning Party Quest!</p>
-                <p>All party members will be transported to the PQ Lobby.</p>
+                <p><strong>🎮 Kerning Party Quest 🎮</strong></p>
+                <p style="margin: 10px 0;"><em>"Welcome, brave adventurers! This ancient dungeon awaits your party..."</em></p>
+                <hr style="margin: 10px 0; border-color: #444;">
+                <p><strong>Stages:</strong></p>
+                <p>📍 <strong>Stage 1:</strong> Defeat 15 Zombies</p>
+                <p>📍 <strong>Stage 2:</strong> Defeat 20 Phantoms</p>
+                <p>📍 <strong>Stage 3:</strong> Defeat Jr. Wraiths & Zombies</p>
+                <p>📍 <strong>Stage 4:</strong> Defeat Phantoms & Jr. Wraiths</p>
+                <p>👑 <strong>Boss:</strong> King Slime!</p>
+                <hr style="margin: 10px 0; border-color: #444;">
+                <p><strong>Rules:</strong></p>
+                <p>• Clear all monsters in each stage to unlock the next portal</p>
+                <p>• Work together - you have 10 seconds between stages!</p>
+                <p>• Defeat the boss to claim your rewards!</p>
                 <br>
-                <p>Are you ready to begin?</p>
-                <button id="confirm-pq-entry">Enter Party Quest</button>
+                <p>Party of ${partyInfo.members.length} ready?</p>
+                <button id="confirm-pq-entry">Begin Party Quest!</button>
                 <button id="close-dialogue">Not Yet</button>
             `;
             document.getElementById('close-dialogue').addEventListener('click', () => toggleWindow(dialogueWindowElement));
             document.getElementById('confirm-pq-entry').addEventListener('click', () => {
                 toggleWindow(dialogueWindowElement);
+                
+                // Store original map for all party members before entering
+                player.pqOriginalMap = currentMapId;
+                player.pqOriginalX = player.x;
+                player.pqOriginalY = player.y;
+                
                 // Emit socket event to start party quest for all members
+                // All members (including leader) will warp via the socket handler
                 if (window.socket && window.socket.connected) {
                     window.socket.emit('startPartyQuest', {
                         pqId: 'kerningPQ',
                         partyId: partyInfo.id,
-                        leaderId: player.odcId
+                        leaderId: player.odcId,
+                        originalMap: currentMapId,
+                        originalX: player.x,
+                        originalY: player.y
                     });
                 }
-                addChatMessage("Entering the Party Quest!", 'quest-complete');
-                fadeAndChangeMap('pqLobby', 600, 300);
+                // Note: Don't warp locally here - let the socket handler do it for consistency
             });
+        });
+        
+        // Party Quest Reward/Exit listener
+        document.getElementById('claim-pq-rewards')?.addEventListener('click', () => {
+            toggleWindow(dialogueWindowElement);
+            
+            // Give rewards
+            const expReward = 5000 * player.level;
+            const mesoReward = 10000 + (Math.random() * 5000 | 0);
+            
+            if (typeof gainExperience === 'function') {
+                gainExperience(expReward);
+            }
+            player.meso = (player.meso || 0) + mesoReward;
+            
+            // Show reward notifications
+            if (typeof showNotification === 'function') {
+                showNotification(`Gained ${expReward.toLocaleString()} EXP!`, 'epic');
+                setTimeout(() => showNotification(`Gained ${mesoReward.toLocaleString()} Meso!`, 'epic'), 500);
+            }
+            if (typeof addChatMessage === 'function') {
+                addChatMessage(`🎁 Party Quest Rewards: ${expReward.toLocaleString()} EXP, ${mesoReward.toLocaleString()} Meso!`, 'quest-complete');
+            }
+            
+            // Update achievement if exists
+            if (typeof updateAchievementProgress === 'function') {
+                updateAchievementProgress('action', 'complete_party_quest');
+            }
+            
+            // Clear PQ stage progress
+            if (typeof window !== 'undefined') {
+                window.pqClearedStages = {};
+            }
+            
+            // Update UI
+            if (typeof updateUI === 'function') {
+                updateUI();
+            }
+            
+            // Warp back to original map
+            const originalMap = player.pqOriginalMap || 'onyxCity';
+            const originalX = player.pqOriginalX || 600;
+            const originalY = player.pqOriginalY || 300;
+            
+            // Clear saved original map
+            delete player.pqOriginalMap;
+            delete player.pqOriginalX;
+            delete player.pqOriginalY;
+            
+            setTimeout(() => {
+                if (typeof addChatMessage === 'function') {
+                    addChatMessage('🚀 Returning to ' + (maps[originalMap]?.name || originalMap) + '...', 'system');
+                }
+                if (typeof fadeAndChangeMap === 'function') {
+                    fadeAndChangeMap(originalMap, originalX, originalY);
+                } else if (typeof changeMap === 'function') {
+                    changeMap(originalMap, originalX, originalY);
+                }
+            }, 1500);
         });
         
         document.getElementById('expand-inventory-btn')?.addEventListener('click', () => {

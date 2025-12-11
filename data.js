@@ -3682,6 +3682,14 @@ const npcData = {
         pqMinLevel: 10,               // Minimum level requirement
         pqMaxLevel: 50                // Maximum level for entry
     },
+    
+    'pqRewardMaster': {
+        name: "Reward Master Rex",
+        sprite: sprites.captainKyrin,
+        attachmentPoints: { questIcon: { x: 1, y: -20 } },
+        pqRewardInteraction: true,    // Special flag for PQ reward/exit
+        pqId: 'kerningPQ'
+    },
 };
 
 // NPC Appearance Configuration - defines how each NPC looks using player sprites
@@ -4123,6 +4131,21 @@ const npcAppearances = {
             weapon: 'Sapphire Staff',
             gloves: 'Purple Work Gloves',
             cape: 'Purple Adventurer Cape',
+            face: null,
+            eye: null
+        }
+    },
+    'pqRewardMaster': {
+        // Reward Master Rex - friendly merchant in the reward room
+        customization: { hairStyle: 0, hairColor: 12, eyeColor: 0, skinTone: 2 }, // Swoosh golden hair
+        equipped: {
+            top: 'White T-shirt',
+            bottom: 'Brown Pants',
+            shoes: 'Brown Leather Boots',
+            helmet: 'Golden Crown',
+            weapon: null,
+            gloves: 'Red Work Gloves',
+            cape: 'Red Adventurer Cape',
             face: null,
             eye: null
         }
@@ -6753,12 +6776,10 @@ const maps = {
         pqStage: 6,
         pqObjective: 'reward',
         npcs: [
-            { type: 'prizeBox', x: 500 }
+            { type: 'pqRewardMaster', x: 500 }
         ],
         monsters: [],
-        portals: [
-            { x: 900, targetMap: 'onyxCity', targetX: 600, pqExit: true }
-        ],
+        portals: [],
         platforms: [
             { x: 300, y: 400, width: 400, noSpawn: true }
         ],
