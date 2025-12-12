@@ -206,8 +206,8 @@ function setupSocketListeners() {
         }
     });
 
-    // Ping/Pong for latency measurement
-    socket.on('pong', () => {
+    // Ping/Pong for latency measurement (using custom event names to avoid Socket.io reserved names)
+    socket.on('latencyPong', () => {
         if (lastPingTime > 0) {
             connectionPing = Date.now() - lastPingTime;
         }
@@ -642,7 +642,7 @@ function stopPingMeasurement() {
 function measurePing() {
     if (!socket || !isConnectedToServer) return;
     lastPingTime = Date.now();
-    socket.emit('ping');
+    socket.emit('latencyPing');
 }
 
 /**
