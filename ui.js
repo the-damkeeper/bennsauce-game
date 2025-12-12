@@ -708,7 +708,7 @@ window.handleCreateRecoveryCode = handleCreateRecoveryCode;
 window.handleUpdateRecoveryCode = handleUpdateRecoveryCode;
 
 // =============================================
-// CHANGELOG MODAL - Fetches from GitHub API
+// CHANGELOG MODAL
 // =============================================
 
 let changelogCache = null;
@@ -716,36 +716,26 @@ let changelogLastFetch = 0;
 const CHANGELOG_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 async function fetchChangelogFromGitHub() {
-    const now = Date.now();
+    // Hardcoded changelog - update manually with each release
+    const changelog = [
+        { date: '12/12/2024, 02:00 PM', msg: 'Add optimistic knockback and improve high-latency combat experience', hash: '21a6fdd' },
+        { date: '12/12/2024, 01:30 PM', msg: 'Add client-side prediction system for combat - immediate feedback with server reconciliation', hash: '00bcd27' },
+        { date: '12/12/2024, 12:45 PM', msg: 'Fix ping measurement - use custom event names to avoid Socket.io reserved names', hash: 'b51d176' },
+        { date: '12/12/2024, 11:30 AM', msg: 'Add stats overlay toggle in options - shows FPS, ping, player count, monster count, and map name', hash: 'd98b419' },
+        { date: '12/11/2024, 08:15 PM', msg: 'Make changelog dynamic', hash: '1e27dd9' },
+        { date: '12/11/2024, 07:45 PM', msg: 'Add changelog button to title screen with recent updates', hash: 'ba0f81b' },
+        { date: '12/11/2024, 06:30 PM', msg: 'Increase spawn grace period to prevent flying-in monsters', hash: 'e194f82' },
+        { date: '12/11/2024, 05:20 PM', msg: 'Fix monster rubberbanding - snap if too far, cap movement', hash: '5b321f7' },
+        { date: '12/11/2024, 04:10 PM', msg: 'Client-side physics for monster jumps + ladder fixes', hash: '13fe3b5' },
+        { date: '12/11/2024, 03:00 PM', msg: 'Fix monster Y sync for jumping - use tighter threshold when airborne', hash: '8924699' },
+        { date: '12/10/2024, 09:45 PM', msg: 'Rebalance EXP curve - increase base to 200 and growth rate to 25% for slower progression', hash: '618338f' },
+        { date: '12/10/2024, 08:30 PM', msg: 'Add Kerning-style Party Quest system - 4 stages + King Slime boss for 2-4 players', hash: '6795358' },
+        { date: '12/10/2024, 06:15 PM', msg: 'Remove level requirement check for item drops - all items drop regardless of player level', hash: 'c3601cb' },
+        { date: '12/10/2024, 05:00 PM', msg: 'Add multiplayer projectile sync - projectiles now visible to other players', hash: 'a1d2176' },
+        { date: '12/09/2024, 07:30 PM', msg: 'Fix browser resize exploit, add level editor, fix recovery code loading', hash: '6c41f9e' }
+    ];
     
-    // Return cached data if still fresh
-    if (changelogCache && (now - changelogLastFetch) < CHANGELOG_CACHE_DURATION) {
-        return changelogCache;
-    }
-    
-    try {
-        // Fetch from GitHub API - public repo, no auth needed
-        const response = await fetch('https://api.github.com/repos/the-damkeeper/bennsauce-game/commits?per_page=50');
-        if (!response.ok) throw new Error('Failed to fetch');
-        
-        const commits = await response.json();
-        changelogCache = commits.map(commit => ({
-            date: new Date(commit.commit.author.date).toLocaleString('en-US', {
-                year: 'numeric',
-                month: '2-digit', 
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            }),
-            msg: commit.commit.message.split('\n')[0], // First line only
-            hash: commit.sha.substring(0, 7)
-        }));
-        changelogLastFetch = now;
-        return changelogCache;
-    } catch (error) {
-        console.warn('[Changelog] Failed to fetch from GitHub:', error);
-        return null;
-    }
+    return changelog;
 }
 
 async function showChangelogModal() {
@@ -757,11 +747,11 @@ async function showChangelogModal() {
     content.innerHTML = '<div style="color: #aaa; text-align: center; padding: 20px;">Loading changelog...</div>';
     modal.style.display = 'flex';
     
-    // Fetch commits from GitHub
+    // Fetch changelog
     const commits = await fetchChangelogFromGitHub();
     
     if (commits && commits.length > 0) {
-        let html = '<div style="color: #aaa; margin-bottom: 15px;">Recent updates (live from GitHub):</div>';
+        let html = '<div style="color: #aaa; margin-bottom: 15px;">Recent updates:</div>';
         commits.forEach(entry => {
             html += `<div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #333;">
                 <span style="color: #666; font-size: 10px; font-family: monospace;">${entry.hash}</span>
