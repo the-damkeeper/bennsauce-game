@@ -8352,14 +8352,6 @@ body {
         drop-shadow(0 0 4px rgba(125, 221, 240, 0.3));
 }
 
-/* Projectile bloom (subtle energy glow) */
-.projectile {
-    filter: 
-        brightness(1.15) 
-        drop-shadow(0 0 2px rgba(255, 255, 255, 0.4))
-        drop-shadow(0 0 4px rgba(255, 255, 255, 0.2));
-}
-
 /* Attack box bloom (subtle red glow) */
 .attack-box {
     filter: 

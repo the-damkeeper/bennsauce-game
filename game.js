@@ -4215,10 +4215,52 @@ function handlePlayerAttack(ability) {
 function createProjectile(spriteName, damageMultiplier, startX, startY, angle = 0, isHoming = false) {
     const el = document.createElement('div');
     el.className = 'projectile';
-    el.innerHTML = sprites[spriteName];
-    const pWidth = 20, pHeight = 20;
-    el.style.width = `${pWidth}px`;
-    el.style.height = `${pHeight}px`;
+    
+    // Check if this projectile has pixel art in basicProjectiles
+    const projectileData = artAssets.basicProjectiles;
+    const animationFrames = projectileData?.animations?.[spriteName];
+    
+    let usePixelArt = false;
+    let projectileCanvas = null;
+    let projectileImg = null;
+    
+    if (animationFrames && projectileData.image) {
+        usePixelArt = true;
+        // Use pixel art from sprite sheet with proper PIXEL_ART_SCALE
+        projectileCanvas = document.createElement('canvas');
+        projectileCanvas.width = projectileData.frameWidth * PIXEL_ART_SCALE;
+        projectileCanvas.height = projectileData.frameHeight * PIXEL_ART_SCALE;
+        const ctx = projectileCanvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false; // Keep pixel art crisp
+        
+        projectileImg = new Image();
+        projectileImg.src = projectileData.image;
+        
+        const drawFrame = (frameIndex) => {
+            const frame = animationFrames[frameIndex % animationFrames.length];
+            ctx.clearRect(0, 0, projectileCanvas.width, projectileCanvas.height);
+            ctx.drawImage(
+                projectileImg,
+                frame.x, frame.y, projectileData.frameWidth, projectileData.frameHeight,
+                0, 0, projectileCanvas.width, projectileCanvas.height
+            );
+        };
+        
+        projectileImg.onload = () => drawFrame(0);
+        if (projectileImg.complete) drawFrame(0);
+        
+        el.appendChild(projectileCanvas);
+        el.style.width = `${projectileCanvas.width}px`;
+        el.style.height = `${projectileCanvas.height}px`;
+    } else {
+        // Fallback to SVG sprites
+        el.innerHTML = sprites[spriteName] || '';
+        el.style.width = '20px';
+        el.style.height = '20px';
+    }
+    
+    const pWidth = usePixelArt ? projectileData.frameWidth * PIXEL_ART_SCALE : 20;
+    const pHeight = usePixelArt ? projectileData.frameHeight * PIXEL_ART_SCALE : 20;
 
     const pX = startX !== undefined ? startX : (player.facing === 'right' ? player.x + player.width : player.x - pWidth);
     const pY = startY !== undefined ? startY : player.y + player.height / 2 - pHeight / 2;
@@ -4228,7 +4270,15 @@ function createProjectile(spriteName, damageMultiplier, startX, startY, angle = 
         id: projectileId, // Unique ID for multiplayer sync
         x: pX, y: pY, width: pWidth, height: pHeight,
         damageMultiplier, element: el, hitMonsters: [],
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        // Animation properties for pixel art projectiles
+        usePixelArt: usePixelArt,
+        spriteName: spriteName,
+        canvas: projectileCanvas,
+        img: projectileImg,
+        animationFrames: animationFrames,
+        currentFrame: 0,
+        frameTimer: 0
     };
 
     if (isHoming) {
@@ -4326,8 +4376,28 @@ function explodeGrenade(grenade) {
 
 function updateProjectiles() {
     const now = Date.now();
+    const PROJECTILE_ANIMATION_SPEED = 8; // Frames between animation updates (lower = faster)
+    
     for (let i = projectiles.length - 1; i >= 0; i--) {
         const p = projectiles[i];
+        
+        // Update pixel art animation
+        if (p.usePixelArt && p.canvas && p.img && p.img.complete && p.animationFrames) {
+            p.frameTimer++;
+            if (p.frameTimer >= PROJECTILE_ANIMATION_SPEED) {
+                p.frameTimer = 0;
+                p.currentFrame = (p.currentFrame + 1) % p.animationFrames.length;
+                const frame = p.animationFrames[p.currentFrame];
+                const ctx = p.canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = false;
+                ctx.clearRect(0, 0, p.canvas.width, p.canvas.height);
+                ctx.drawImage(
+                    p.img,
+                    frame.x, frame.y, artAssets.basicProjectiles.frameWidth, artAssets.basicProjectiles.frameHeight,
+                    0, 0, p.canvas.width, p.canvas.height
+                );
+            }
+        }
 
         if (p.targetId) {
             const target = monsters.find(m => m.id === p.targetId && !m.isDead);

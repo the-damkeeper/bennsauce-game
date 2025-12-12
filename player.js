@@ -4423,7 +4423,7 @@ function getProjectileTypeForWeapon() {
     if (weaponName.includes('bow') || (weaponData && weaponData.classReq && weaponData.classReq.includes('bowman'))) {
         return 'arrowProjectile';
     } else if (weaponName.includes('staff') || (weaponData && weaponData.classReq && weaponData.classReq.includes('magician'))) {
-        return 'energyBoltProjectile';
+        return 'magicBasicProjectile';
     } else if (weaponName.includes('pistol') || weaponName.includes('gun') || (weaponData && weaponData.classReq && weaponData.classReq.includes('pirate'))) {
         return 'bulletProjectile';
     }
@@ -4434,7 +4434,7 @@ function getProjectileTypeForWeapon() {
         if (playerClass === 'bowman' || playerClass === 'hunter' || playerClass === 'crossbowman') {
             return 'arrowProjectile';
         } else if (playerClass === 'magician' || playerClass === 'wizard' || playerClass === 'cleric') {
-            return 'energyBoltProjectile';
+            return 'magicBasicProjectile';
         } else if (playerClass === 'pirate' || playerClass === 'gunslinger') {
             return 'bulletProjectile';
         }
