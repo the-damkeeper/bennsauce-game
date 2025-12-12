@@ -3,6 +3,7 @@
  * Handles real-time multiplayer connection to the game server
  * 
  * Phase 1: Player position synchronization
+ * Phase 2: Client-Side Prediction with Server Reconciliation
  */
 
 // Socket.io will be loaded from CDN in index.html
@@ -19,6 +20,52 @@ let lastJoinedOdId = null; // Track the odId we joined with (for character switc
 let connectionPing = -1; // Current ping in ms (-1 = not measured yet)
 let pingInterval = null;
 let lastPingTime = 0;
+
+// =============================================
+// CLIENT-SIDE PREDICTION SYSTEM
+// =============================================
+// Pending attacks awaiting server confirmation
+let pendingAttacks = {}; // { attackSeq: { timestamp, monsterId, predictedDamage, predictedHp, ... } }
+let attackSequence = 0; // Incrementing sequence number for attacks
+
+// Prediction configuration
+const PREDICTION_CONFIG = {
+    MAX_PENDING_ATTACKS: 20, // Maximum pending attacks before oldest are dropped
+    ATTACK_TIMEOUT: 3000, // ms before a pending attack is considered lost
+    CORRECTION_THRESHOLD: 50, // HP difference threshold before correction is needed
+    POSITION_CORRECTION_THRESHOLD: 100, // Position difference before snap correction
+    INTERPOLATION_SPEED: 0.15, // Lerp speed for smooth corrections
+    OBSERVER_BUFFER_MS: 100 // Delay buffer for observers watching combat (smoother view)
+};
+
+/**
+ * Generate a unique attack sequence number
+ */
+function generateAttackSequence() {
+    attackSequence++;
+    if (attackSequence > 999999) attackSequence = 1;
+    return attackSequence;
+}
+
+/**
+ * Clean up old pending attacks that timed out
+ */
+function cleanupPendingAttacks() {
+    const now = Date.now();
+    for (const seq in pendingAttacks) {
+        if (now - pendingAttacks[seq].timestamp > PREDICTION_CONFIG.ATTACK_TIMEOUT) {
+            console.log(`[Prediction] Attack ${seq} timed out, removing from pending`);
+            delete pendingAttacks[seq];
+        }
+    }
+    
+    // Also limit total pending attacks
+    const pendingKeys = Object.keys(pendingAttacks);
+    while (pendingKeys.length > PREDICTION_CONFIG.MAX_PENDING_ATTACKS) {
+        const oldestKey = pendingKeys.shift();
+        delete pendingAttacks[oldestKey];
+    }
+}
 
 // Configuration
 const SOCKET_CONFIG = {
@@ -290,6 +337,11 @@ function setupSocketListeners() {
     // Monster killed
     socket.on('monsterKilled', (data) => {
         handleMonsterKilledFromServer(data);
+    });
+
+    // Attack correction from server (prediction reconciliation)
+    socket.on('attackCorrection', (data) => {
+        handleAttackCorrection(data);
     });
 
     // Receive monster positions from server (server runs AI)
@@ -1624,8 +1676,45 @@ function handleMonsterDamageFromServer(data) {
     const localMonster = serverMonsterMapping[data.id];
     if (!localMonster) return;
     
-    // Update local HP
-    localMonster.hp = data.currentHp;
+    // Check if this is a response to our own attack (prediction reconciliation)
+    const seq = data.seq;
+    const pendingAttack = seq ? pendingAttacks[seq] : null;
+    const isOurAttack = (typeof player !== 'undefined' && data.attackerId === player.odId);
+    
+    if (pendingAttack && isOurAttack) {
+        // This is confirmation of our predicted attack
+        const hpDifference = Math.abs(localMonster.hp - data.currentHp);
+        
+        if (hpDifference <= PREDICTION_CONFIG.CORRECTION_THRESHOLD) {
+            // Prediction was close enough - just sync HP silently
+            console.log(`[Prediction] Attack ${seq} confirmed (HP diff: ${hpDifference})`);
+        } else {
+            // Significant mismatch - apply correction
+            console.log(`[Prediction] Attack ${seq} needs correction: local=${localMonster.hp} server=${data.currentHp} (diff=${hpDifference})`);
+        }
+        
+        // Remove from pending
+        delete pendingAttacks[seq];
+        
+        // Sync to server HP (authoritative)
+        localMonster.hp = data.currentHp;
+    } else if (isOurAttack) {
+        // Our attack but no sequence (legacy compatibility) - still sync HP
+        localMonster.hp = data.currentHp;
+    } else {
+        // Damage from another player - show visual feedback
+        localMonster.hp = data.currentHp;
+        
+        // Show damage number from other player
+        if (typeof showDamageNumber === 'function') {
+            showDamageNumber(data.damage, localMonster.x + localMonster.width / 2, localMonster.y, data.isCritical, { isOtherPlayer: true });
+        }
+        
+        // Flash effect
+        if (!localMonster.flashTimer || localMonster.flashTimer <= 0) {
+            localMonster.flashTimer = 10;
+        }
+    }
     
     // Update HP bar
     if (localMonster.hpBar) {
@@ -1654,12 +1743,60 @@ function handleMonsterDamageFromServer(data) {
         // Make monster face the player (opposite of knockback direction)
         localMonster.direction = data.knockbackVelocityX > 0 ? -1 : 1;
     }
+}
+
+/**
+ * Handle explicit attack correction from server
+ * This is sent when the server detects a significant mismatch with client prediction
+ */
+function handleAttackCorrection(data) {
+    console.log('[Prediction] Received attack correction:', data);
     
-    // If this damage wasn't from us, show the damage number
-    if (typeof player !== 'undefined' && data.attackerId !== player.odId) {
-        // Show damage from other player (could add different color)
-        if (typeof showDamageNumber === 'function') {
-            showDamageNumber(data.damage, localMonster.x + localMonster.width / 2, localMonster.y, false, { isOtherPlayer: true });
+    const localMonster = serverMonsterMapping[data.monsterId];
+    if (!localMonster) return;
+    
+    // Remove the pending attack if we have it
+    if (data.seq && pendingAttacks[data.seq]) {
+        delete pendingAttacks[data.seq];
+    }
+    
+    // Check correction type
+    if (data.type === 'hp_correction') {
+        // HP mismatch - smoothly correct local HP
+        const oldHp = localMonster.hp;
+        localMonster.hp = data.correctHp;
+        console.log(`[Prediction] HP corrected: ${oldHp} -> ${data.correctHp}`);
+        
+        // Update HP bar
+        if (localMonster.hpBar && data.maxHp) {
+            localMonster.hpBar.style.width = `${Math.max(0, data.correctHp) / data.maxHp * 100}%`;
+        }
+        
+        // Update boss HP bars
+        if (localMonster.isMiniBoss && typeof updateMiniBossHPBar === 'function') {
+            updateMiniBossHPBar(localMonster);
+        }
+        if (localMonster.isEliteMonster && typeof updateEliteMonsterHPBar === 'function') {
+            updateEliteMonsterHPBar(localMonster);
+        }
+    } else if (data.type === 'attack_invalid') {
+        // Attack was rejected - restore HP if we predicted damage
+        console.log(`[Prediction] Attack rejected by server: ${data.reason}`);
+        if (data.correctHp !== undefined) {
+            localMonster.hp = data.correctHp;
+        }
+        // Could show feedback to player that attack didn't register
+    } else if (data.type === 'death_rollback') {
+        // Monster wasn't actually dead - resurrect it
+        console.log('[Prediction] Death rollback - monster not dead');
+        localMonster.isDying = false;
+        localMonster.pendingDeath = false;
+        localMonster.hp = data.correctHp || 1;
+        
+        // Make sure visual is restored
+        if (localMonster.element) {
+            localMonster.element.classList.remove('monster-death');
+            localMonster.element.style.opacity = '1';
         }
     }
 }
@@ -1853,7 +1990,8 @@ function handleMonsterKilledFromServer(data) {
 }
 
 /**
- * Send attack to server (instead of applying damage locally)
+ * Send attack to server with client-side prediction
+ * The client immediately applies damage (optimistic update) and waits for server confirmation
  */
 function sendMonsterAttack(monsterId, damage, isCritical, attackType) {
     console.log('[Socket] sendMonsterAttack called:', { monsterId, damage, isCritical, serverAuth: serverAuthoritativeMonsters, connected: isConnectedToServer });
@@ -1864,9 +2002,11 @@ function sendMonsterAttack(monsterId, damage, isCritical, attackType) {
     
     // Find the server ID for this monster
     let serverId = null;
+    let localMonsterRef = null;
     for (const [sid, localMonster] of Object.entries(serverMonsterMapping)) {
         if (localMonster.id === monsterId || localMonster === monsterId || localMonster.serverId === monsterId) {
             serverId = sid;
+            localMonsterRef = localMonster;
             break;
         }
     }
@@ -1876,15 +2016,88 @@ function sendMonsterAttack(monsterId, damage, isCritical, attackType) {
         return false;
     }
     
+    // Generate sequence number for this attack
+    const seq = generateAttackSequence();
+    
+    // Get current monster HP for prediction tracking
+    const currentHp = localMonsterRef?.hp ?? 0;
+    const predictedHp = Math.max(0, currentHp - damage);
+    
+    // Store pending attack for reconciliation
+    pendingAttacks[seq] = {
+        timestamp: Date.now(),
+        monsterId: serverId,
+        localMonsterId: monsterId,
+        predictedDamage: damage,
+        predictedHp: predictedHp,
+        isCritical: isCritical || false,
+        attackType: attackType || 'normal'
+    };
+    
+    // Clean up old pending attacks
+    cleanupPendingAttacks();
+    
+    console.log(`[Prediction] Attack seq=${seq} sent: monster=${serverId}, dmg=${damage}, predictedHp=${predictedHp}`);
+    
     socket.emit('attackMonster', {
+        seq: seq, // Include sequence number for server reconciliation
         monsterId: serverId,
         damage: damage,
         isCritical: isCritical || false,
         attackType: attackType || 'normal',
-        playerDirection: typeof player !== 'undefined' && player.facing ? (player.facing === 'right' ? 1 : -1) : 1
+        playerDirection: typeof player !== 'undefined' && player.facing ? (player.facing === 'right' ? 1 : -1) : 1,
+        predictedHp: predictedHp // Tell server what we expect
     });
     
+    // OPTIMISTIC UPDATE: Apply damage locally immediately for instant feedback
+    // The server will correct us if we're wrong
+    applyOptimisticDamage(monsterId, damage, isCritical, attackType, seq);
+    
     return true;
+}
+
+/**
+ * Apply damage locally for immediate feedback (optimistic update)
+ * Server will reconcile if there's a mismatch
+ */
+function applyOptimisticDamage(monsterId, damage, isCritical, attackType, seq) {
+    // Find the local monster
+    if (typeof monsters === 'undefined' || !Array.isArray(monsters)) return;
+    
+    const monster = monsters.find(m => m && (m.id === monsterId || m.serverId === monsterId));
+    if (!monster || monster.isDying) return;
+    
+    console.log(`[Prediction] Applying optimistic damage: seq=${seq}, monster=${monsterId}, dmg=${damage}, hp before=${monster.hp}`);
+    
+    // Apply damage locally
+    monster.hp = Math.max(0, monster.hp - damage);
+    
+    // Show damage number immediately
+    if (typeof showDamageNumber === 'function') {
+        const monsterCenterX = monster.x + monster.width / 2;
+        const monsterCenterY = monster.y + monster.height / 2;
+        showDamageNumber(damage, monsterCenterX, monsterCenterY, isCritical);
+    }
+    
+    // Flash effect for hit feedback
+    if (!monster.flashTimer || monster.flashTimer <= 0) {
+        monster.flashTimer = 10;
+    }
+    
+    // Play hit sound (if available)
+    if (typeof audioManager !== 'undefined' && audioManager.playSound) {
+        audioManager.playSound('hit');
+    }
+    
+    // Check for death (optimistic)
+    if (monster.hp <= 0 && !monster.isDying) {
+        // Mark as dying but don't fully kill yet - wait for server confirmation
+        monster.pendingDeath = true;
+        monster.pendingDeathSeq = seq;
+        console.log(`[Prediction] Monster ${monsterId} predicted death, awaiting server confirmation`);
+    }
+    
+    console.log(`[Prediction] Optimistic damage applied: hp after=${monster.hp}`);
 }
 
 /**

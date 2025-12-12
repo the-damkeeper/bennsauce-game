@@ -4760,14 +4760,16 @@ function checkCollisions() {
                 // Server-authoritative monsters: send damage to server instead of applying locally
                 const isServerAuth = typeof isServerAuthoritativeMonsters === 'function' && isServerAuthoritativeMonsters();
                 if (isServerAuth && m.serverId) {
-                    // Send damage to server - server will broadcast results
+                    // Send damage to server - the sendMonsterAttack function now handles
+                    // optimistic damage application, damage numbers, and hit feedback
                     if (typeof sendMonsterAttack === 'function') {
                         sendMonsterAttack(m.serverId, finalDamage, isCritical, attack.type || 'normal');
                     }
-                    // Still show visual feedback locally
+                    // Play hit sound and show VFX (optimistic damage handled in sendMonsterAttack)
                     playSound('monsterHit');
                     spawnHitSquibVFX(m, attack, isCritical);
-                    showDamageNumber(totalDamage, m.x + m.width / 2, m.y, false, { isCritical });
+                    
+                    // Shadow partner damage shown separately
                     if (shadowPartnerDamage > 0) {
                         setTimeout(() => {
                             showDamageNumber(shadowPartnerDamage, m.x + m.width / 2 + 20, m.y - 10, false, { isShadowPartner: true });
