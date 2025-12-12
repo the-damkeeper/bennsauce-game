@@ -1689,15 +1689,42 @@ function handleMonsterDamageFromServer(data) {
             // Prediction was close enough - just sync HP silently
             console.log(`[Prediction] Attack ${seq} confirmed (HP diff: ${hpDifference})`);
         } else {
-            // Significant mismatch - apply correction
-            console.log(`[Prediction] Attack ${seq} needs correction: local=${localMonster.hp} server=${data.currentHp} (diff=${hpDifference})`);
+            // Significant mismatch - apply correction with smooth transition
+            console.log(`[Prediction] Attack ${seq} correction: local=${localMonster.hp} server=${data.currentHp} (diff=${hpDifference})`);
         }
         
         // Remove from pending
         delete pendingAttacks[seq];
         
-        // Sync to server HP (authoritative)
+        // Sync to server HP (authoritative) - we already showed damage number optimistically
         localMonster.hp = data.currentHp;
+        
+        // Update HP bar to authoritative value
+        if (localMonster.hpBar) {
+            localMonster.hpBar.style.width = `${Math.max(0, data.currentHp) / data.maxHp * 100}%`;
+        }
+        
+        // Server knockback confirms/overrides our optimistic knockback
+        // Only apply if significantly different from what we predicted
+        if (data.knockbackVelocityX !== undefined && !localMonster.noKnockback) {
+            // Server knockback takes priority over our prediction
+            // But only if we're not mid-knockback animation
+            if (!localMonster.knockbackEndTime || Date.now() > localMonster.knockbackEndTime - 400) {
+                localMonster.velocityX = data.knockbackVelocityX;
+                localMonster.knockbackEndTime = Date.now() + 500;
+                localMonster.direction = data.knockbackVelocityX > 0 ? -1 : 1;
+            }
+        }
+        
+        // Clear pending death visual if monster isn't actually dead
+        if (data.currentHp > 0 && localMonster.pendingDeath) {
+            localMonster.pendingDeath = false;
+            if (localMonster.element) {
+                localMonster.element.style.opacity = '1';
+            }
+        }
+        
+        return; // Skip redundant visual updates - we did them optimistically
     } else if (isOurAttack) {
         // Our attack but no sequence (legacy compatibility) - still sync HP
         localMonster.hp = data.currentHp;
@@ -1705,14 +1732,21 @@ function handleMonsterDamageFromServer(data) {
         // Damage from another player - show visual feedback
         localMonster.hp = data.currentHp;
         
-        // Show damage number from other player
+        // Show damage number from other player (with slight delay for observer buffer)
         if (typeof showDamageNumber === 'function') {
             showDamageNumber(data.damage, localMonster.x + localMonster.width / 2, localMonster.y, data.isCritical, { isOtherPlayer: true });
         }
         
-        // Flash effect
+        // Flash effect for other player's hits
         if (!localMonster.flashTimer || localMonster.flashTimer <= 0) {
             localMonster.flashTimer = 10;
+        }
+        
+        // Apply knockback from other player's attack
+        if (data.knockbackVelocityX !== undefined && data.knockbackVelocityX !== 0 && !localMonster.noKnockback) {
+            localMonster.velocityX = data.knockbackVelocityX;
+            localMonster.knockbackEndTime = Date.now() + 500;
+            localMonster.direction = data.knockbackVelocityX > 0 ? -1 : 1;
         }
     }
     
@@ -1731,18 +1765,9 @@ function handleMonsterDamageFromServer(data) {
         updateEliteMonsterHPBar(localMonster);
     }
     
-    // Show HP bar and nameplate on hit (same as local damage)
+    // Show HP bar and nameplate on hit
     if (localMonster.hpBarContainer) localMonster.hpBarContainer.style.display = 'block';
     if (localMonster.nameplateElement) localMonster.nameplateElement.style.display = 'block';
-    
-    // Apply knockback when PLAYER hits monster (not when monster hits player)
-    if (data.knockbackVelocityX !== undefined && data.knockbackVelocityX !== 0) {
-        localMonster.velocityX = data.knockbackVelocityX;
-        // Set knockback timer - prevents server interpolation for 500ms
-        localMonster.knockbackEndTime = Date.now() + 500;
-        // Make monster face the player (opposite of knockback direction)
-        localMonster.direction = data.knockbackVelocityX > 0 ? -1 : 1;
-    }
 }
 
 /**
@@ -1803,6 +1828,7 @@ function handleAttackCorrection(data) {
 
 /**
  * Handle monster death from server
+ * Server is authoritative for death - this triggers loot, exp, and cleanup
  */
 function handleMonsterKilledFromServer(data) {
     console.log('[Socket] Monster killed from server:', data);
@@ -1813,8 +1839,17 @@ function handleMonsterKilledFromServer(data) {
         return;
     }
     
-    // Mark as dead
+    // Clear any pending attack tracking for this monster
+    for (const seq in pendingAttacks) {
+        if (pendingAttacks[seq].monsterId === data.id) {
+            delete pendingAttacks[seq];
+        }
+    }
+    
+    // Mark as dead (server authoritative)
     localMonster.isDead = true;
+    localMonster.isDying = true;
+    localMonster.pendingDeath = false; // Confirmed by server
     localMonster.hp = 0;
     
     // Handle elite monster death
@@ -1837,8 +1872,9 @@ function handleMonsterKilledFromServer(data) {
         }
     }
     
-    // Play death animation
+    // Play death animation (if not already started from prediction)
     if (localMonster.element) {
+        localMonster.element.style.opacity = '1'; // Reset from prediction fade
         localMonster.element.classList.add('monster-death');
         localMonster.velocityY = -5;
         localMonster.velocityX = 8;
@@ -2059,6 +2095,7 @@ function sendMonsterAttack(monsterId, damage, isCritical, attackType) {
 /**
  * Apply damage locally for immediate feedback (optimistic update)
  * Server will reconcile if there's a mismatch
+ * Includes: damage numbers, knockback, flash effect, HP bar update
  */
 function applyOptimisticDamage(monsterId, damage, isCritical, attackType, seq) {
     // Find the local monster
@@ -2079,22 +2116,57 @@ function applyOptimisticDamage(monsterId, damage, isCritical, attackType, seq) {
         showDamageNumber(damage, monsterCenterX, monsterCenterY, isCritical);
     }
     
+    // Update HP bar immediately for visual feedback
+    if (monster.hpBar && monster.maxHp) {
+        monster.hpBar.style.width = `${Math.max(0, monster.hp) / monster.maxHp * 100}%`;
+    }
+    
+    // Update boss HP bars if applicable
+    if (monster.isMiniBoss && typeof updateMiniBossHPBar === 'function') {
+        updateMiniBossHPBar(monster);
+    }
+    if (monster.isEliteMonster && typeof updateEliteMonsterHPBar === 'function') {
+        updateEliteMonsterHPBar(monster);
+    }
+    
+    // Show HP bar and nameplate on hit
+    if (monster.hpBarContainer) monster.hpBarContainer.style.display = 'block';
+    if (monster.nameplateElement) monster.nameplateElement.style.display = 'block';
+    
     // Flash effect for hit feedback
     if (!monster.flashTimer || monster.flashTimer <= 0) {
         monster.flashTimer = 10;
     }
     
-    // Play hit sound (if available)
-    if (typeof audioManager !== 'undefined' && audioManager.playSound) {
-        audioManager.playSound('hit');
+    // OPTIMISTIC KNOCKBACK - Apply immediately for fluid feel
+    // Server position sync will smoothly correct any mismatch
+    if (!monster.noKnockback && typeof player !== 'undefined') {
+        const knockbackForce = 6; // Match server KNOCKBACK_FORCE
+        const knockbackDirection = player.facing === 'right' ? 1 : -1;
+        
+        // Apply knockback velocity
+        monster.velocityX = knockbackDirection * knockbackForce;
+        
+        // Make monster face the player (opposite of knockback)
+        monster.direction = -knockbackDirection;
+        
+        // Set knockback timer to prevent server interpolation from fighting
+        monster.knockbackEndTime = Date.now() + 500;
+        
+        console.log(`[Prediction] Optimistic knockback: dir=${knockbackDirection}, velocityX=${monster.velocityX}`);
     }
     
-    // Check for death (optimistic)
+    // Check for death (optimistic) - but DON'T award loot/exp (server does that)
     if (monster.hp <= 0 && !monster.isDying) {
         // Mark as dying but don't fully kill yet - wait for server confirmation
         monster.pendingDeath = true;
         monster.pendingDeathSeq = seq;
         console.log(`[Prediction] Monster ${monsterId} predicted death, awaiting server confirmation`);
+        
+        // Start death animation early for responsiveness
+        if (monster.element) {
+            monster.element.style.opacity = '0.5';
+        }
     }
     
     console.log(`[Prediction] Optimistic damage applied: hp after=${monster.hp}`);
