@@ -22,7 +22,18 @@
 
             <div id="game-clock">08:00</div>
             
-            <div id="hair-debug-panel" style="position: absolute; top: 40px; left: 10px; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; font-family: 'Courier New', monospace; font-size: 10px; z-index: 10000; border: 1px solid #0f0; display: none; max-width: 300px;">
+            <!-- Stats Overlay - FPS, Ping, etc. -->
+            <div id="stats-overlay" style="display: none;">
+                <div id="stats-overlay-content">
+                    <div class="stat-row"><span class="stat-label">FPS:</span><span id="stats-fps">--</span></div>
+                    <div class="stat-row"><span class="stat-label">Ping:</span><span id="stats-ping">--</span></div>
+                    <div class="stat-row"><span class="stat-label">Players:</span><span id="stats-players">--</span></div>
+                    <div class="stat-row"><span class="stat-label">Monsters:</span><span id="stats-monsters">--</span></div>
+                    <div class="stat-row"><span class="stat-label">Map:</span><span id="stats-map">--</span></div>
+                </div>
+            </div>
+            
+            <div id="hair-debug-panel" style="position: absolute; top: 40px; left: 10px; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; font-family: 'Ari9500', monospace; font-size: 10px; z-index: 10000; border: 1px solid #0f0; display: none; max-width: 300px;">
                 <div style="color: #ff0; font-weight: bold; margin-bottom: 5px;">HAIR DEBUG INFO</div>
                 <div id="hair-debug-content"></div>
             </div>
@@ -324,6 +335,13 @@
                             <label for="ghost-players-toggle">
                                 <input type="checkbox" id="ghost-players-toggle">
                                 Enable Ghost Players
+                            </label>
+                        </div>
+                        <h3 style="margin-top: 20px;">Debug</h3>
+                        <div class="option-item">
+                            <label for="stats-overlay-toggle">
+                                <input type="checkbox" id="stats-overlay-toggle">
+                                Show Stats Overlay (FPS, Ping, etc.)
                             </label>
                         </div>
                     </div>
@@ -770,7 +788,7 @@
                     <button id="create-new-char-btn">Create New Character</button>
                     <button id="account-btn" onclick="showAccountModal()">Login / Register</button>
                     <button id="recovery-code-btn" onclick="showRecoveryCodeModal()">Recovery Code</button>
-                    <button id="changelog-btn" onclick="showChangelogModal()">📋 Changelog</button>
+                    <button id="changelog-btn" onclick="showChangelogModal()">Changelog</button>
                 </div>
             </div>
             
@@ -778,11 +796,11 @@
             <div id="changelog-modal" class="modal-overlay" style="display: none;">
                 <div class="modal-content" style="max-width: 600px; max-height: 80vh;">
                     <div class="modal-header">
-                        <h2>📋 Changelog</h2>
+                        <h2>Changelog</h2>
                         <button class="modal-close" onclick="hideChangelogModal()">✖</button>
                     </div>
                     <div class="modal-body" style="overflow-y: auto; max-height: 60vh;">
-                        <div id="changelog-content" style="font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.6; text-align: left;"></div>
+                        <div id="changelog-content" style="font-family: 'Ari9500'; font-size: 12px; line-height: 1.6; text-align: left;"></div>
                     </div>
                 </div>
             </div>
@@ -911,7 +929,7 @@
             </div>
             
             <!-- Ghost Debug Overlay -->
-            <div id="ghost-debug-overlay" style="position: fixed; top: 10px; right: 10px; background: rgba(0, 0, 0, 0.85); color: #00ff00; padding: 10px; font-family: 'Courier New', monospace; font-size: var(--font-small);; border: 2px solid #00ff00; border-radius: 5px; max-width: 350px; max-height: 400px; overflow-y: auto; z-index: 9999; display: none;">
+            <div id="ghost-debug-overlay" style="position: fixed; top: 10px; right: 10px; background: rgba(0, 0, 0, 0.85); color: #00ff00; padding: 10px; font-family: 'Ari9500', monospace; font-size: var(--font-small);; border: 2px solid #00ff00; border-radius: 5px; max-width: 350px; max-height: 400px; overflow-y: auto; z-index: 9999; display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #00ff00; padding-bottom: 5px;">
                     <strong style="color: #00ffff;">👻 GHOST DEBUG</strong>
                     <div style="display: flex; gap: 5px;">

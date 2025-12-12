@@ -6742,7 +6742,7 @@ const maps = {
         pqId: 'kerningPQ',
         pqStage: 5,
         pqObjective: 'boss',
-        pqObjectiveText: '👑 BOSS: Defeat King Slime!',
+        pqObjectiveText: 'BOSS: Defeat King Slime!',
         npcs: [],
         monsters: [
             { type: 'pqKingSlime', count: 1, x: 800, fixedPosition: true }

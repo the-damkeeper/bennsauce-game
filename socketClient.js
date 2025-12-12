@@ -15,11 +15,17 @@ let positionUpdateInterval = null;
 let lastSentPosition = { x: 0, y: 0 };
 let lastJoinedOdId = null; // Track the odId we joined with (for character switching)
 
+// Ping/Latency tracking
+let connectionPing = -1; // Current ping in ms (-1 = not measured yet)
+let pingInterval = null;
+let lastPingTime = 0;
+
 // Configuration
 const SOCKET_CONFIG = {
     SERVER_URL: 'https://bennsauce-server.onrender.com', // Change this for production
     POSITION_UPDATE_RATE: 33, // Send position every 33ms (~30 times/sec) for smoother movement
-    POSITION_THRESHOLD: 1 // Only send if moved more than 1 pixel
+    POSITION_THRESHOLD: 1, // Only send if moved more than 1 pixel
+    PING_INTERVAL: 5000 // Measure ping every 5 seconds
 };
 
 /**
@@ -157,6 +163,9 @@ function setupSocketListeners() {
         // Start sending position updates
         startPositionUpdates();
         
+        // Start ping measurement
+        startPingMeasurement();
+        
         // Only show notification if game is already running (reconnection)
         if (typeof showNotification === 'function' && typeof isGameActive !== 'undefined' && isGameActive) {
             showNotification('Reconnected to multiplayer server', 'success');
@@ -170,6 +179,8 @@ function setupSocketListeners() {
         hasJoinedServer = false;
         socketInitialized = false; // Reset so reconnect is required
         stopPositionUpdates();
+        stopPingMeasurement();
+        connectionPing = -1;
         
         // Clear remote players and projectiles
         clearRemotePlayers();
@@ -192,6 +203,13 @@ function setupSocketListeners() {
         if (serverStatusText) {
             serverStatusText.textContent = '⏳ Server is waking up, please wait... (this can take 30-60 seconds)';
             serverStatusText.style.color = '#f39c12';
+        }
+    });
+
+    // Ping/Pong for latency measurement
+    socket.on('pong', () => {
+        if (lastPingTime > 0) {
+            connectionPing = Date.now() - lastPingTime;
         }
     });
 
@@ -589,6 +607,50 @@ function stopPositionUpdates() {
         clearInterval(positionUpdateInterval);
         positionUpdateInterval = null;
     }
+}
+
+/**
+ * Start measuring ping to the server
+ */
+function startPingMeasurement() {
+    if (pingInterval) {
+        clearInterval(pingInterval);
+    }
+    
+    // Measure immediately
+    measurePing();
+    
+    // Then measure periodically
+    pingInterval = setInterval(() => {
+        measurePing();
+    }, SOCKET_CONFIG.PING_INTERVAL);
+}
+
+/**
+ * Stop measuring ping
+ */
+function stopPingMeasurement() {
+    if (pingInterval) {
+        clearInterval(pingInterval);
+        pingInterval = null;
+    }
+}
+
+/**
+ * Send a ping to measure latency
+ */
+function measurePing() {
+    if (!socket || !isConnectedToServer) return;
+    lastPingTime = Date.now();
+    socket.emit('ping');
+}
+
+/**
+ * Get the current connection ping
+ * @returns {number} Ping in milliseconds, or -1 if not connected
+ */
+function getConnectionPing() {
+    return connectionPing;
 }
 
 /**

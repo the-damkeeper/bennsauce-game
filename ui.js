@@ -21,6 +21,12 @@ let previewAccumulator = 0;
 let debugBorderVisible = false;
 let debugBorderElement = null;
 
+// Stats overlay variables
+let statsOverlayInterval = null;
+let lastFpsTime = 0;
+let fpsFrameCount = 0;
+let currentFps = 0;
+
 let lastHudState = {
     name: null,
     class: null,
@@ -34,6 +40,128 @@ window.playerActivity = 'exploring';
 function setPlayerActivity(activity) {
     window.playerActivity = activity;
     // Activity will be synced on next presence update
+}
+
+// =============================================
+// STATS OVERLAY FUNCTIONS
+// =============================================
+
+/**
+ * Start updating the stats overlay
+ */
+function startStatsOverlayUpdates() {
+    if (statsOverlayInterval) {
+        clearInterval(statsOverlayInterval);
+    }
+    
+    lastFpsTime = performance.now();
+    fpsFrameCount = 0;
+    
+    // Update FPS counter every frame via requestAnimationFrame
+    const updateFps = () => {
+        fpsFrameCount++;
+        const now = performance.now();
+        const elapsed = now - lastFpsTime;
+        
+        if (elapsed >= 1000) {
+            currentFps = Math.round((fpsFrameCount * 1000) / elapsed);
+            fpsFrameCount = 0;
+            lastFpsTime = now;
+        }
+        
+        const statsOverlay = document.getElementById('stats-overlay');
+        if (statsOverlay && statsOverlay.style.display !== 'none') {
+            requestAnimationFrame(updateFps);
+        }
+    };
+    requestAnimationFrame(updateFps);
+    
+    // Update other stats at a lower rate (twice per second)
+    statsOverlayInterval = setInterval(updateStatsOverlay, 500);
+    updateStatsOverlay(); // Initial update
+}
+
+/**
+ * Stop updating the stats overlay
+ */
+function stopStatsOverlayUpdates() {
+    if (statsOverlayInterval) {
+        clearInterval(statsOverlayInterval);
+        statsOverlayInterval = null;
+    }
+}
+
+/**
+ * Update all stats in the overlay
+ */
+function updateStatsOverlay() {
+    const overlay = document.getElementById('stats-overlay');
+    if (!overlay || overlay.style.display === 'none') return;
+    
+    // Update FPS
+    const fpsElement = document.getElementById('stats-fps');
+    if (fpsElement) {
+        fpsElement.textContent = currentFps > 0 ? currentFps : '--';
+        // Color code based on FPS
+        if (currentFps >= 50) {
+            fpsElement.style.color = '#2ecc71'; // Green
+        } else if (currentFps >= 30) {
+            fpsElement.style.color = '#f1c40f'; // Yellow
+        } else {
+            fpsElement.style.color = '#e74c3c'; // Red
+        }
+    }
+    
+    // Update Ping
+    const pingElement = document.getElementById('stats-ping');
+    if (pingElement) {
+        const ping = typeof getConnectionPing === 'function' ? getConnectionPing() : -1;
+        if (ping >= 0) {
+            pingElement.textContent = ping + 'ms';
+            // Color code based on ping
+            if (ping < 100) {
+                pingElement.style.color = '#2ecc71'; // Green
+            } else if (ping < 200) {
+                pingElement.style.color = '#f1c40f'; // Yellow
+            } else {
+                pingElement.style.color = '#e74c3c'; // Red
+            }
+        } else if (typeof isConnectedToServer !== 'undefined' && isConnectedToServer) {
+            pingElement.textContent = '...';
+            pingElement.style.color = '#3498db';
+        } else {
+            pingElement.textContent = 'N/A';
+            pingElement.style.color = '#95a5a6';
+        }
+    }
+    
+    // Update Players count
+    const playersElement = document.getElementById('stats-players');
+    if (playersElement) {
+        let playerCount = 1; // Count self
+        if (typeof remotePlayers !== 'undefined') {
+            playerCount += Object.keys(remotePlayers).length;
+        }
+        playersElement.textContent = playerCount;
+    }
+    
+    // Update Monsters count
+    const monstersElement = document.getElementById('stats-monsters');
+    if (monstersElement) {
+        const monsterCount = typeof monsters !== 'undefined' ? monsters.length : 0;
+        monstersElement.textContent = monsterCount;
+    }
+    
+    // Update Map name
+    const mapElement = document.getElementById('stats-map');
+    if (mapElement) {
+        if (typeof currentMapId !== 'undefined' && currentMapId && typeof maps !== 'undefined' && maps[currentMapId]) {
+            mapElement.textContent = maps[currentMapId].name || currentMapId;
+            mapElement.title = maps[currentMapId].name || currentMapId; // Tooltip for full name
+        } else {
+            mapElement.textContent = '--';
+        }
+    }
 }
 
 // =============================================
@@ -9869,15 +9997,15 @@ function openDialogue(npc) {
             
             // Show intro popup explaining the party quest
             content.innerHTML = `
-                <p><strong>🎮 Kerning Party Quest 🎮</strong></p>
+                <p><strong>Onyx City Party Dungeon</strong></p>
                 <p style="margin: 10px 0;"><em>"Welcome, brave adventurers! This ancient dungeon awaits your party..."</em></p>
                 <hr style="margin: 10px 0; border-color: #444;">
                 <p><strong>Stages:</strong></p>
-                <p>📍 <strong>Stage 1:</strong> Defeat 15 Zombies</p>
-                <p>📍 <strong>Stage 2:</strong> Defeat 20 Phantoms</p>
-                <p>📍 <strong>Stage 3:</strong> Defeat Jr. Wraiths & Zombies</p>
-                <p>📍 <strong>Stage 4:</strong> Defeat Phantoms & Jr. Wraiths</p>
-                <p>👑 <strong>Boss:</strong> King Slime!</p>
+                <p><strong>Stage 1:</strong> Defeat 15 Zombies</p>
+                <p><strong>Stage 2:</strong> Defeat 20 Phantoms</p>
+                <p><strong>Stage 3:</strong> Defeat Jr. Wraiths & Zombies</p>
+                <p><strong>Stage 4:</strong> Defeat Phantoms & Jr. Wraiths</p>
+                <p><strong>Boss:</strong> King Slime!</p>
                 <hr style="margin: 10px 0; border-color: #444;">
                 <p><strong>Rules:</strong></p>
                 <p>• Clear all monsters in each stage to unlock the next portal</p>
@@ -9944,7 +10072,7 @@ function openDialogue(npc) {
                 setTimeout(() => showNotification(`Gained ${goldReward.toLocaleString()} Gold!`, 'epic'), 500);
             }
             if (typeof addChatMessage === 'function') {
-                addChatMessage(`🎁 Party Quest Rewards: ${expReward.toLocaleString()} EXP, ${goldReward.toLocaleString()} Gold!`, 'quest-complete');
+                addChatMessage(`Party Quest Rewards: ${expReward.toLocaleString()} EXP, ${goldReward.toLocaleString()} Gold!`, 'quest-complete');
             }
             
             // Update achievement if exists
@@ -9974,7 +10102,7 @@ function openDialogue(npc) {
             
             setTimeout(() => {
                 if (typeof addChatMessage === 'function') {
-                    addChatMessage('🚀 Returning to ' + (maps[originalMap]?.name || originalMap) + '...', 'system');
+                    addChatMessage('Returning to ' + (maps[originalMap]?.name || originalMap) + '...', 'system');
                 }
                 if (typeof fadeAndChangeMap === 'function') {
                     fadeAndChangeMap(originalMap, originalX, originalY);
@@ -12460,6 +12588,42 @@ document.addEventListener('DOMContentLoaded', () => {
                     cleanupGhostPlayers();
                 }
                 addChatMessage("Ghost players disabled.", 'info');
+            }
+        });
+    }
+    
+    // Stats Overlay toggle
+    const statsOverlayToggle = document.getElementById('stats-overlay-toggle');
+    if (statsOverlayToggle) {
+        // Load saved preference
+        const savedPref = localStorage.getItem('evergreenRPG_statsOverlayEnabled');
+        if (savedPref !== null) {
+            statsOverlayToggle.checked = savedPref === 'true';
+        }
+        
+        // Apply initial state
+        const statsOverlay = document.getElementById('stats-overlay');
+        if (statsOverlay) {
+            statsOverlay.style.display = statsOverlayToggle.checked ? 'block' : 'none';
+            if (statsOverlayToggle.checked) {
+                startStatsOverlayUpdates();
+            }
+        }
+        
+        statsOverlayToggle.addEventListener('change', () => {
+            const enabled = statsOverlayToggle.checked;
+            localStorage.setItem('evergreenRPG_statsOverlayEnabled', enabled);
+            
+            const overlay = document.getElementById('stats-overlay');
+            if (overlay) {
+                overlay.style.display = enabled ? 'block' : 'none';
+                if (enabled) {
+                    startStatsOverlayUpdates();
+                    addChatMessage("Stats overlay enabled.", 'success');
+                } else {
+                    stopStatsOverlayUpdates();
+                    addChatMessage("Stats overlay disabled.", 'info');
+                }
             }
         });
     }

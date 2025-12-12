@@ -383,6 +383,64 @@ input[type="text"], textarea, input[type="number"] {
     text-shadow: 1px 1px 2px #000;
 }
 
+/* Stats Overlay - Shows FPS, Ping, etc. */
+#stats-overlay {
+    position: absolute;
+    top: 35px;
+    right: 10px;
+    z-index: 150;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--ui-border);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-family: 'Ari9500', monospace;
+    font-size: var(--font-small);
+    color: #e0e0e0;
+    min-width: 120px;
+    pointer-events: none;
+    user-select: none;
+}
+
+#stats-overlay-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+#stats-overlay .stat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+#stats-overlay .stat-label {
+    color: #aaa;
+}
+
+#stats-overlay #stats-fps {
+    color: #2ecc71;
+}
+
+#stats-overlay #stats-ping {
+    color: #3498db;
+}
+
+#stats-overlay #stats-players {
+    color: #e67e22;
+}
+
+#stats-overlay #stats-monsters {
+    color: #e74c3c;
+}
+
+#stats-overlay #stats-map {
+    color: #f1c40f;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 #chat-log-container {
     position: absolute;
     bottom: 100%; /* Connects to UI bar */
