@@ -1916,7 +1916,10 @@ function handleMonsterKilledFromServer(data) {
         localMonster.element.style.opacity = '1'; // Reset from prediction fade
         localMonster.element.classList.add('monster-death');
         localMonster.velocityY = -5;
-        localMonster.velocityX = 8;
+        // Use player's facing direction for death knockback if we killed it, otherwise default right
+        const weKilledIt = (typeof player !== 'undefined' && data.lootRecipient === player.odId);
+        const deathKnockbackDir = weKilledIt && player.facing ? (player.facing === 'right' ? 1 : -1) : 1;
+        localMonster.velocityX = deathKnockbackDir * 8;
     }
     
     // Check if we get the loot
