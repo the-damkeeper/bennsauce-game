@@ -2181,7 +2181,8 @@ function applyOptimisticDamage(monsterId, damage, isCritical, attackType, seq) {
     // Server position sync will smoothly correct any mismatch
     if (!monster.noKnockback && typeof player !== 'undefined') {
         const knockbackForce = 6; // Match server KNOCKBACK_FORCE
-        const knockbackDirection = player.facing === 'right' ? 1 : -1;
+        // Default to 'right' (1) if facing is not set - matches server fallback
+        const knockbackDirection = player.facing ? (player.facing === 'right' ? 1 : -1) : 1;
         
         // Apply knockback velocity
         monster.velocityX = knockbackDirection * knockbackForce;

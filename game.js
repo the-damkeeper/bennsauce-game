@@ -4906,7 +4906,9 @@ function checkCollisions() {
                 // Apply knockback unless monster has noKnockback flag (world bosses have no knockback)
                 const monsterData = monsterTypes[m.type];
                 if (monsterData && !monsterData.noKnockback && !m.isWorldBoss) {
-                    m.velocityX = player.facing === 'right' ? KNOCKBACK_FORCE : -KNOCKBACK_FORCE;
+                    // Default to right if facing is not set
+                    const knockbackDir = player.facing ? (player.facing === 'right' ? 1 : -1) : 1;
+                    m.velocityX = knockbackDir * KNOCKBACK_FORCE;
                 }
                 
                 showDamageNumber(totalDamage, m.x + m.width / 2, m.y, false, { isCritical });
@@ -6384,7 +6386,8 @@ document.addEventListener('DOMContentLoaded', () => {
             m.hitboxElement.remove();
             m.element.classList.add('monster-death');
             m.velocityY = -5;
-            m.velocityX = player.facing === 'right' ? 8 : -8;
+            const deathKnockbackDir = player.facing ? (player.facing === 'right' ? 1 : -1) : 1;
+            m.velocityX = deathKnockbackDir * 8;
 
             // Award EXP
             gainExp(m.exp);

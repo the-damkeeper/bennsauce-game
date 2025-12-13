@@ -396,7 +396,7 @@ function createCharacter(name) {
         sp: 0,
         beginnerSp: 0,
         baseStats: { str: creationStats.str, dex: creationStats.dex, int: creationStats.int, luk: creationStats.luk }, // Store rolled base stats
-        stats: { ...creationStats, defense: 0, critChance: 5, minCritDamage: 1.5, maxCritDamage: 2.5, goldSpent: 0, accuracy: 5, avoidability: 5, totalGoldEarned: 0, totalKills: 0, enhanceSuccessCount: 0, potionsUsed: 0, talkedNPCs: new Set(), deathCount: 0 },
+        stats: { ...creationStats, defense: 0, critChance: 5, minCritDamage: 1.5, maxCritDamage: 2.5, goldSpent: 0, accuracy: 3, avoidability: 3, totalGoldEarned: 0, totalKills: 0, enhanceSuccessCount: 0, potionsUsed: 0, talkedNPCs: new Set(), deathCount: 0 },
         bestiary: { monsterKills: {}, dropsFound: {}, firstKillTimestamp: {} },
         bestiaryRewards: {},
         specialMedals: {},
@@ -421,6 +421,7 @@ function createCharacter(name) {
         yOffset: -6,
         previousY: 300,
         velocityX: 0, velocityY: 0, isJumping: false, isInvincible: false, isDead: false,
+        facing: 'right', // Direction player is facing for attacks/knockback
         lastAttackTime: {}, attackCooldown: 500,
         lastGlobalAttackTime: 0, // Global cooldown for all attacks/abilities
         lastMpRegenTime: 0, lastHpRegenTime: 0,
@@ -1760,6 +1761,9 @@ function initializePlayerStats() {
     if (!player.cosmeticEquipped) {
         player.cosmeticEquipped = { weapon: null, helmet: null, top: null, bottom: null, gloves: null, shoes: null, earring: null, ring: null, pendant: null, shield: null, face: null, eye: null };
     }
+    
+    // Initialize facing direction (for knockback calculations)
+    if (!player.facing) player.facing = 'right';
     
     // Initialize basic stats
     if (!player.stats.goldSpent) player.stats.goldSpent = 0;
