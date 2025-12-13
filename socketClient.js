@@ -161,8 +161,9 @@ function initializeSocket() {
     try {
         socket = io(SOCKET_CONFIG.SERVER_URL, {
             reconnection: true,
-            reconnectionAttempts: 10, // More attempts for server wake-up
+            reconnectionAttempts: 5, // Limit attempts to avoid spam
             reconnectionDelay: 3000, // Wait 3 seconds between attempts
+            reconnectionDelayMax: 10000, // Max 10 seconds between attempts
             timeout: 60000 // 60 second timeout for server wake-up
         });
 
@@ -251,6 +252,31 @@ function setupSocketListeners() {
             serverStatusText.textContent = '⏳ Server is waking up, please wait... (this can take 30-60 seconds)';
             serverStatusText.style.color = '#f39c12';
         }
+    });
+    
+    // Reconnection failed after all attempts
+    socket.io.on('reconnect_failed', () => {
+        console.error('[Socket] Reconnection failed after all attempts');
+        isConnectedToServer = false;
+        socketInitialized = true; // Mark as initialized so game can continue offline
+        
+        // Show disconnection modal if in game
+        if (typeof isGameActive !== 'undefined' && isGameActive) {
+            showDisconnectionModal();
+        }
+    });
+    
+    // Reconnection attempt
+    socket.io.on('reconnect_attempt', (attempt) => {
+        console.log(`[Socket] Reconnection attempt ${attempt}`);
+        if (typeof showNotification === 'function' && typeof isGameActive !== 'undefined' && isGameActive) {
+            showNotification(`Reconnecting... (attempt ${attempt}/5)`, 'warning');
+        }
+    });
+    
+    // Successful reconnection
+    socket.io.on('reconnect', (attempt) => {
+        console.log(`[Socket] Reconnected after ${attempt} attempts`);
     });
 
     // Ping/Pong for latency measurement (using custom event names to avoid Socket.io reserved names)
@@ -3591,6 +3617,128 @@ function checkPQStageCompletion(monsterType, deadMonster) {
 // Export GM auth functions
 window.requestGMAuth = requestGMAuth;
 window.checkGMAuth = checkGMAuth;
+/**
+ * Show disconnection modal with reconnect option
+ */
+function showDisconnectionModal() {
+    // Check if modal already exists
+    let modal = document.getElementById('disconnection-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        return;
+    }
+    
+    // Create modal
+    modal = document.createElement('div');
+    modal.id = 'disconnection-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100000;
+    `;
+    
+    const content = document.createElement('div');
+    content.style.cssText = `
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border: 2px solid #e74c3c;
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        max-width: 400px;
+        box-shadow: 0 0 30px rgba(231, 76, 60, 0.3);
+    `;
+    
+    content.innerHTML = `
+        <h2 style="color: #e74c3c; margin: 0 0 15px 0; font-size: 24px;">⚠️ Connection Lost</h2>
+        <p style="color: #ecf0f1; margin: 0 0 20px 0; font-size: 14px;">
+            Lost connection to the game server. This may be due to inactivity or server maintenance.
+        </p>
+        <p style="color: #95a5a6; margin: 0 0 25px 0; font-size: 12px;">
+            You can continue playing in offline mode, or try to reconnect.
+        </p>
+        <div style="display: flex; gap: 15px; justify-content: center;">
+            <button id="reconnect-btn" style="
+                background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+                border: none;
+                padding: 12px 25px;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: transform 0.2s, box-shadow 0.2s;
+            ">🔄 Reconnect</button>
+            <button id="continue-offline-btn" style="
+                background: linear-gradient(135deg, #7f8c8d 0%, #95a5a6 100%);
+                border: none;
+                padding: 12px 25px;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: transform 0.2s, box-shadow 0.2s;
+            ">Continue Offline</button>
+            <button id="logout-btn" style="
+                background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+                border: none;
+                padding: 12px 25px;
+                color: white;
+                font-size: 14px;
+                font-weight: bold;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: transform 0.2s, box-shadow 0.2s;
+            ">🚪 Logout</button>
+        </div>
+    `;
+    
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    
+    // Button handlers
+    document.getElementById('reconnect-btn').addEventListener('click', () => {
+        modal.style.display = 'none';
+        // Attempt reconnection
+        if (socket) {
+            socket.connect();
+            if (typeof showNotification === 'function') {
+                showNotification('Attempting to reconnect...', 'info');
+            }
+        } else {
+            initializeSocket();
+        }
+    });
+    
+    document.getElementById('continue-offline-btn').addEventListener('click', () => {
+        modal.style.display = 'none';
+        if (typeof showNotification === 'function') {
+            showNotification('Playing in offline mode', 'info');
+        }
+    });
+    
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        // Disconnect socket completely
+        if (socket) {
+            socket.disconnect();
+        }
+        // Call logout function if available
+        if (typeof logout === 'function') {
+            logout();
+        } else {
+            // Fallback: reload page
+            window.location.reload();
+        }
+    });
+}
+
 window.isGMAuthorized = false; // Default to not authorized
 
 // Export broadcast function for other scripts
