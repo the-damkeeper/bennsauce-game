@@ -7113,7 +7113,7 @@ const specialMedals = {
         tier: 'epic',
         category: 'event',
         requirement: { type: 'manual' },
-        stats: { str: 10, dex: 10, int: 10, luk: 10, critChance: 2 }
+        stats: { hp: 30, mp: 30, str: 1, dex: 1, int: 1, luk: 1 }
     },
     foundingPlayer: {
         id: 'foundingPlayer',
@@ -7123,7 +7123,7 @@ const specialMedals = {
         tier: 'epic',
         category: 'server',
         requirement: { type: 'first_players', count: 100 },
-        stats: { str: 3, dex: 3, int: 3, luk: 3 }
+        stats: { hp: 30, mp: 30, str: 1, dex: 1, int: 1, luk: 1 }
     },
     
     // === LOCAL MILESTONE MEDALS ===

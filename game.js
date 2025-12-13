@@ -3501,12 +3501,11 @@ function createNpc(type, x, y) {
         e.preventDefault();
         e.stopPropagation();
 
-        // MODIFIED CHECK: Ignores passive windows like the Quest Helper
-        const isAnyBlockingWindowOpen = Array.from(document.querySelectorAll('.window')).some(
-            win => win.style.display !== 'none' && win.dataset.isPassive !== 'true'
-        );
+        // Allow NPC interaction even with other windows open - only block if dialogue is already open
+        const dialogueWindow = document.getElementById('dialogue-window');
+        const isDialogueOpen = dialogueWindow && dialogueWindow.style.display !== 'none';
 
-        if (!player.isDead && !isAnyBlockingWindowOpen) {
+        if (!player.isDead && !isDialogueOpen) {
             openDialogue(npcObject);
         }
     });
