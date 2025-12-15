@@ -9266,7 +9266,17 @@ function updateMiniMap() {
             // Safety check for monster type data
             const monsterInfo = monsterTypes[m.type];
             if (!monsterInfo) return null;
-            return { type: 'monster', x: m.x, y: m.y, element: monsterInfo.isMiniBoss ? 'minimap-boss' : 'minimap-monster' };
+            
+            // Hide monsters that are still spawning (before fade-in starts)
+            if (m.spawnFrameCount > 0 || m.spawnFadeFrames === -1) return null;
+            
+            // Calculate opacity for fading monsters
+            let opacity = 1;
+            if (m.spawnFadeFrames !== undefined && m.spawnFadeFrames > 0) {
+                opacity = 1 - (m.spawnFadeFrames / 30);
+            }
+            
+            return { type: 'monster', x: m.x, y: m.y, element: monsterInfo.isMiniBoss ? 'minimap-boss' : 'minimap-monster', opacity: opacity };
         }).filter(Boolean), // Filter out any null entries from dead/invalid monsters
         ...npcs.filter(n => n.y !== undefined).map(n => ({ type: 'npc', x: n.x, y: n.y, element: 'minimap-npc', questStatus: getNpcQuestStatus(n) })),
         ...portals.filter(p => p.y !== undefined).map(p => ({ type: 'portal', x: p.x, y: p.y, element: 'minimap-portal' })),
@@ -9278,6 +9288,12 @@ function updateMiniMap() {
         if (data.type === 'player') dot.id = 'minimap-player';
         dot.style.left = `${data.x * scale}px`;
         dot.style.top = `${data.y * scale}px`;
+        
+        // Apply opacity for fading monsters
+        if (data.opacity !== undefined && data.opacity < 1) {
+            dot.style.opacity = data.opacity;
+        }
+        
         minimapContent.appendChild(dot);
 
         if (data.type === 'npc' && data.questStatus) {
