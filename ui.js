@@ -4741,6 +4741,14 @@ function getRewardText(reward) {
         const quantity = reward.quantity || 1;
         rewardText.push(`${quantity > 1 ? quantity + 'x ' : ''}${itemName}`);
     }
+    if (reward.classItem) {
+        // Show the class-specific item for the player's base class
+        const playerBaseClass = typeof getBaseClass === 'function' ? getBaseClass(player.class) : player.class.toLowerCase();
+        const classItemName = reward.classItem[playerBaseClass];
+        if (classItemName) {
+            rewardText.push(classItemName);
+        }
+    }
     return rewardText.join(', ') || 'None';
 }
 

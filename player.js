@@ -163,6 +163,24 @@ let creationStats = { str: 5, dex: 5, int: 5, luk: 5 };
 
 // --- Player Creation & Save/Load ---
 
+// Helper function to get the base (tier 1) class for a player's current class
+function getBaseClass(currentClass) {
+    if (!currentClass) return 'beginner';
+    const classLower = currentClass.toLowerCase();
+    const classInfo = classHierarchy[classLower];
+    if (!classInfo) return classLower;
+    
+    // If tier 1, this IS the base class
+    if (classInfo.tier <= 1) return classLower;
+    
+    // Otherwise, walk up the parent chain to find the tier 1 class
+    let parentClass = classInfo.parent;
+    while (parentClass && classHierarchy[parentClass] && classHierarchy[parentClass].tier > 1) {
+        parentClass = classHierarchy[parentClass].parent;
+    }
+    return parentClass || classLower;
+}
+
 // Helper function to render a guild icon sprite into a DOM element
 function renderGuildIconToElement(element, iconId, scale = 2) {
     if (!element || typeof spriteData === 'undefined' || !spriteData.guildIcons ||
@@ -4803,7 +4821,16 @@ function completeQuest(questId) {
     }
 
     // Handle reward items (both singular and array)
-    const rewardItems = quest.reward.item ? [quest.reward.item] : (quest.reward.items || []);
+    let rewardItems = quest.reward.item ? [quest.reward.item] : (quest.reward.items || []);
+    
+    // Handle class-specific item rewards
+    if (quest.reward.classItem) {
+        const playerBaseClass = getBaseClass(player.class);
+        const classItemName = quest.reward.classItem[playerBaseClass];
+        if (classItemName) {
+            rewardItems.push({ name: classItemName });
+        }
+    }
     
     for (const rewardItem of rewardItems) {
         const newItem = {
