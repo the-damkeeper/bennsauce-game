@@ -846,8 +846,17 @@ function addRemotePlayer(playerData) {
     el.style.cursor = 'pointer'; // Show pointer cursor on hover
     el.style.zIndex = '10';
     
-    // Add double-click event to open inspector
-    el.addEventListener('dblclick', () => {
+    // Add double-click event to open inspector (NPCs take priority)
+    el.addEventListener('dblclick', (e) => {
+        // Check if there's an NPC at this click location - NPC should take priority
+        const elementsAtPoint = document.elementsFromPoint(e.clientX, e.clientY);
+        const npcAtPoint = elementsAtPoint.find(el => el.classList.contains('npc'));
+        if (npcAtPoint) {
+            // NPC is behind this player - let the NPC handle it instead
+            npcAtPoint.dispatchEvent(new MouseEvent('dblclick', { bubbles: false }));
+            return;
+        }
+        
         if (typeof inspectPlayer === 'function') {
             inspectPlayer(playerData.name);
         }
