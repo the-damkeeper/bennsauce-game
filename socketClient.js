@@ -1743,17 +1743,10 @@ function handleMonsterDamageFromServer(data) {
             localMonster.hpBar.style.width = `${Math.max(0, data.currentHp) / data.maxHp * 100}%`;
         }
         
-        // Server knockback confirms/overrides our optimistic knockback
-        // Only apply if significantly different from what we predicted
-        if (data.knockbackVelocityX !== undefined && !localMonster.noKnockback) {
-            // Server knockback takes priority over our prediction
-            // But only if we're not mid-knockback animation
-            if (!localMonster.knockbackEndTime || Date.now() > localMonster.knockbackEndTime - 400) {
-                localMonster.velocityX = data.knockbackVelocityX;
-                localMonster.knockbackEndTime = Date.now() + 500;
-                localMonster.direction = data.knockbackVelocityX > 0 ? -1 : 1;
-            }
-        }
+        // For our own attacks, we already applied knockback optimistically
+        // DON'T apply server knockback again - it would cause double knockback
+        // Server position sync via interpolation will handle any minor corrections
+        // (Knockback from OTHER players' attacks is handled in the else branch below)
         
         // Clear pending death visual if monster isn't actually dead
         if (data.currentHp > 0 && localMonster.pendingDeath) {
@@ -2669,8 +2662,17 @@ function interpolateMonsterPositions() {
         // Skip if update is too old (stale data)
         if (timeSinceUpdate > INTERP_CONFIG.STALE_THRESHOLD) continue;
         
-        // Skip during knockback (local physics takes over)
+        // Skip during active knockback (local physics takes over)
         if (m.knockbackEndTime && now < m.knockbackEndTime) continue;
+        
+        // After knockback ends, sync client position TO server authoritatively
+        // This prevents the "snap back" by trusting the server's knockback result
+        if (m.knockbackEndTime && now >= m.knockbackEndTime && now < m.knockbackEndTime + 100) {
+            // Just ended knockback - snap to server position to prevent snap-back
+            m.x = m.serverTargetX;
+            m.knockbackEndTime = null; // Clear so we don't keep snapping
+            continue;
+        }
         
         // Use server position directly - minimal extrapolation for smooth movement
         let targetX = m.serverTargetX;
