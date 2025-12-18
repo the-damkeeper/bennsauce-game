@@ -2697,13 +2697,14 @@ function interpolateMonsterPositions() {
         // Skip during active knockback (local physics takes over)
         if (m.knockbackEndTime && now < m.knockbackEndTime) continue;
         
-        // After knockback ends, sync client position TO server authoritatively
-        // This prevents the "snap back" by trusting the server's knockback result
-        if (m.knockbackEndTime && now >= m.knockbackEndTime && now < m.knockbackEndTime + 100) {
-            // Just ended knockback - snap to server position to prevent snap-back
-            m.x = m.serverTargetX;
-            m.knockbackEndTime = null; // Clear so we don't keep snapping
-            continue;
+        // After knockback ends, smoothly transition back to server position
+        // Use faster lerp for post-knockback recovery but don't snap
+        let postKnockbackRecovery = false;
+        if (m.knockbackEndTime && now >= m.knockbackEndTime && now < m.knockbackEndTime + 300) {
+            postKnockbackRecovery = true;
+            // Don't clear knockbackEndTime yet - let it expire naturally after 300ms
+        } else if (m.knockbackEndTime && now >= m.knockbackEndTime + 300) {
+            m.knockbackEndTime = null; // Clear after recovery window
         }
         
         // Use server position directly - minimal extrapolation for smooth movement
@@ -2735,16 +2736,21 @@ function interpolateMonsterPositions() {
             // Smooth lerp interpolation
             let lerp = INTERP_CONFIG.BASE_LERP;
             
-            // Only slightly increase lerp for high ping (subtle adjustment)
-            if (ping > 150) {
-                lerp *= 1.2; // 20% faster for high ping
-            }
-            
-            // Gradual speed increase for larger distances (not sudden)
-            if (absDx > INTERP_CONFIG.SOFT_SNAP_THRESHOLD) {
-                lerp *= 1.3; // 30% faster, not 50%
-            } else if (absDx > 50) {
-                lerp *= 1.1; // Slight boost for medium distances
+            // After knockback, use faster lerp to catch up smoothly
+            if (postKnockbackRecovery) {
+                lerp = 0.15; // Faster lerp during recovery, but still smooth
+            } else {
+                // Only slightly increase lerp for high ping (subtle adjustment)
+                if (ping > 150) {
+                    lerp *= 1.2; // 20% faster for high ping
+                }
+                
+                // Gradual speed increase for larger distances (not sudden)
+                if (absDx > INTERP_CONFIG.SOFT_SNAP_THRESHOLD) {
+                    lerp *= 1.3; // 30% faster, not 50%
+                } else if (absDx > 50) {
+                    lerp *= 1.1; // Slight boost for medium distances
+                }
             }
             
             // Cap maximum lerp to prevent jitter
