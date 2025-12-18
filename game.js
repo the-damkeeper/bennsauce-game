@@ -865,6 +865,8 @@ let accumulator = 0;
 // Fixed timestep for consistent physics (100 FPS = 10ms per update)
 const FIXED_TIMESTEP = 10; // milliseconds
 const MAX_FRAME_TIME = 50; // Cap to prevent spiral of death
+const TARGET_FPS = 60; // Target frame rate cap
+const MIN_FRAME_TIME = 1000 / TARGET_FPS; // Minimum ms between frames (~16.67ms for 60 FPS)
 
 /**
  * Spawns a hit squib VFX at the closest filled pixel on the monster sprite to the hit location
@@ -1023,13 +1025,22 @@ function spawnHitSquibVFX(monster, attack, isCritical = false) {
 /**
  * The main game loop, called every frame via requestAnimationFrame.
  * This function orchestrates all the update and render calls.
+ * FPS is capped to ensure consistent game speed across all monitor refresh rates.
  */
-// In game.js
-
 function gameLoop(currentTime = 0) {
+    // Schedule next frame first
+    gameLoopId = requestAnimationFrame(gameLoop);
+    
+    // Calculate time since last frame
     deltaTime = currentTime - lastFrameTime;
+    
+    // FPS CAP: Skip this frame if not enough time has passed
+    // This ensures the game runs at the same speed on 60Hz, 144Hz, and 240Hz monitors
+    if (deltaTime < MIN_FRAME_TIME) {
+        return; // Skip this frame, wait for next requestAnimationFrame
+    }
 
-    // Cap frame time to prevent huge jumps
+    // Cap frame time to prevent huge jumps (e.g., when tab was inactive)
     if (deltaTime > MAX_FRAME_TIME) {
         deltaTime = MAX_FRAME_TIME;
     }
@@ -1066,8 +1077,6 @@ function gameLoop(currentTime = 0) {
     if (frameCount % 60 === 0) {
         fpsDisplay = Math.round(1000 / deltaTime);
     }
-
-    gameLoopId = requestAnimationFrame(gameLoop);
 }
 
 /**
