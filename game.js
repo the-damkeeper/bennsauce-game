@@ -865,7 +865,6 @@ let accumulator = 0;
 // Fixed timestep for consistent physics (100 FPS = 10ms per update)
 const FIXED_TIMESTEP = 10; // milliseconds
 const MAX_FRAME_TIME = 50; // Cap to prevent spiral of death
-const TARGET_FPS = 60; // Target frame rate cap
 const MIN_FRAME_TIME = 1000 / TARGET_FPS; // Minimum ms between frames (~16.67ms for 60 FPS)
 
 /**
