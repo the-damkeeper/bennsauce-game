@@ -1880,9 +1880,12 @@ function handleMonsterKilledFromServer(data) {
     
     // Mark as dead (server authoritative)
     localMonster.isDead = true;
-    localMonster.isDying = true;
     localMonster.pendingDeath = false; // Confirmed by server
     localMonster.hp = 0;
+    
+    // Only start death animation if we haven't already (optimistic prediction may have started it)
+    const alreadyDying = localMonster.isDying;
+    localMonster.isDying = true;
     
     // Handle elite monster death
     if (data.isEliteMonster || localMonster.isEliteMonster) {
@@ -1904,9 +1907,8 @@ function handleMonsterKilledFromServer(data) {
         }
     }
     
-    // Play death animation (if not already started from prediction)
-    if (localMonster.element) {
-        localMonster.element.style.opacity = '1'; // Reset from prediction fade
+    // Play death animation only if not already started from optimistic prediction
+    if (localMonster.element && !alreadyDying) {
         localMonster.element.classList.add('monster-death');
         localMonster.velocityY = -5;
         // Use player's facing direction for death knockback if we killed it, otherwise default right
@@ -2192,17 +2194,26 @@ function applyOptimisticDamage(monsterId, damage, isCritical, attackType, seq) {
         console.log(`[Prediction] Optimistic knockback: dir=${knockbackDirection}, velocityX=${monster.velocityX}`);
     }
     
-    // Check for death (optimistic) - but DON'T award loot/exp (server does that)
+    // Check for death (optimistic) - start death animation immediately for responsiveness
+    // Server will confirm and award loot/exp
     if (monster.hp <= 0 && !monster.isDying) {
-        // Mark as dying but don't fully kill yet - wait for server confirmation
         monster.pendingDeath = true;
         monster.pendingDeathSeq = seq;
-        console.log(`[Prediction] Monster ${monsterId} predicted death, awaiting server confirmation`);
+        monster.isDying = true; // Start dying immediately
+        console.log(`[Prediction] Monster ${monsterId} predicted death - starting death animation`);
         
-        // Start death animation early for responsiveness
+        // Start full death animation immediately (not just fade)
         if (monster.element) {
-            monster.element.style.opacity = '0.5';
+            monster.element.classList.add('monster-death');
+            monster.velocityY = -5; // Death bounce
+            // Use player's facing direction for death knockback
+            const deathKnockbackDir = player.facing ? (player.facing === 'right' ? 1 : -1) : 1;
+            monster.velocityX = deathKnockbackDir * 8;
         }
+        
+        // Hide HP bar immediately
+        if (monster.hpBarContainer) monster.hpBarContainer.style.display = 'none';
+        if (monster.nameplateElement) monster.nameplateElement.style.display = 'none';
     }
     
     console.log(`[Prediction] Optimistic damage applied: hp after=${monster.hp}`);
