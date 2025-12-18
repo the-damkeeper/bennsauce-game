@@ -1333,17 +1333,33 @@ let serverMonsterMapping = {}; // Maps server monster IDs to local monster objec
  * Initialize map monsters on server (called when entering a new map)
  */
 function initMapMonstersOnServer() {
-    if (!socket || !isConnectedToServer) return;
-    if (typeof currentMapId === 'undefined' || !currentMapId) return;
-    if (typeof maps === 'undefined' || !maps[currentMapId]) return;
+    console.log('[Socket] initMapMonstersOnServer called - currentMapId:', currentMapId);
+    if (!socket || !isConnectedToServer) {
+        console.log('[Socket] Skipping init - not connected');
+        return;
+    }
+    if (typeof currentMapId === 'undefined' || !currentMapId) {
+        console.log('[Socket] Skipping init - no mapId');
+        return;
+    }
+    if (typeof maps === 'undefined' || !maps[currentMapId]) {
+        console.log('[Socket] Skipping init - no map data');
+        return;
+    }
     
     // Don't re-initialize if already done for this map
     if (serverAuthoritativeMonsters && Object.keys(serverMonsterMapping).length > 0) {
+        console.log('[Socket] Skipping init - already have', Object.keys(serverMonsterMapping).length, 'monsters');
         return;
     }
     
     const mapData = maps[currentMapId];
-    if (!mapData.monsters || mapData.monsters.length === 0) return;
+    if (!mapData.monsters || mapData.monsters.length === 0) {
+        console.log('[Socket] Skipping init - no monster config');
+        return;
+    }
+    
+    console.log('[Socket] Proceeding with monster init...');
     
     // Collect monster type data to send to server
     const monsterTypesData = {};
