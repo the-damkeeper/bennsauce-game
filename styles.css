@@ -7151,8 +7151,9 @@ body.gamepad-active #notification-container {
     color: var(--success-color); /* Green ? */
 }
 .monster-death {
-    transition: opacity 0.5s linear, transform 0.5s ease-out;
+    transition: opacity 0.5s linear;
     opacity: 0;
+    pointer-events: none;
 }
 #gm-window {
     width: 450px;

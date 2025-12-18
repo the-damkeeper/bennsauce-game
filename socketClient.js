@@ -2211,9 +2211,10 @@ function applyOptimisticDamage(monsterId, damage, isCritical, attackType, seq) {
             monster.velocityX = deathKnockbackDir * 8;
         }
         
-        // Hide HP bar immediately
-        if (monster.hpBarContainer) monster.hpBarContainer.style.display = 'none';
+        // Keep HP bar visible briefly showing 0% before fading with monster
+        // Hide nameplate but let HP bar fade with the death animation
         if (monster.nameplateElement) monster.nameplateElement.style.display = 'none';
+        // HP bar will be cleaned up when monster is fully removed
     }
     
     console.log(`[Prediction] Optimistic damage applied: hp after=${monster.hp}`);
