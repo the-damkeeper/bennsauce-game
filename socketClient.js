@@ -2634,16 +2634,17 @@ function handleMonsterPositionsFromServer(monsterPositions, serverTimestamp) {
 }
 
 /**
- * Interpolation configuration for high-latency compensation
+ * Interpolation configuration for smooth monster movement
+ * Tuned to prevent snapping while still handling high latency
  */
 const INTERP_CONFIG = {
-    BASE_LERP: 0.12,           // Base interpolation speed
-    MAX_LERP: 0.4,             // Maximum lerp for very high ping
-    SNAP_THRESHOLD: 200,       // Instantly snap if >200px off (teleport/major desync)
-    SOFT_SNAP_THRESHOLD: 100,  // Use faster lerp if >100px off
-    EXTRAPOLATION_MAX: 150,    // Max ms to extrapolate into future
+    BASE_LERP: 0.08,           // Slower base interpolation for smoother movement
+    MAX_LERP: 0.25,            // Lower max lerp to prevent jitter
+    SNAP_THRESHOLD: 400,       // Only snap for major teleports (was 200)
+    SOFT_SNAP_THRESHOLD: 150,  // Slightly faster lerp if >150px off (was 100)
+    EXTRAPOLATION_MAX: 80,     // Reduced extrapolation to prevent overshooting (was 150)
     STALE_THRESHOLD: 1000,     // Ignore updates older than 1 second
-    VELOCITY_SMOOTHING: 0.3    // Smooth velocity changes
+    VELOCITY_SMOOTHING: 0.5    // More smoothing on velocity changes
 };
 
 /**
@@ -2671,16 +2672,19 @@ function interpolateMonsterPositions() {
         // Skip during knockback (local physics takes over)
         if (m.knockbackEndTime && now < m.knockbackEndTime) continue;
         
-        // Calculate extrapolated target position based on velocity and time
-        // This predicts where the monster should be NOW, not where it was when server sent
+        // Use server position directly - minimal extrapolation for smooth movement
         let targetX = m.serverTargetX;
-        const velocity = m.serverVelocityX || 0;
         
-        if (Math.abs(velocity) > 0.1) {
-            // Extrapolate position based on velocity and elapsed time
-            // Cap extrapolation to prevent overshooting
-            const extrapolationTime = Math.min(timeSinceUpdate + halfPing, INTERP_CONFIG.EXTRAPOLATION_MAX);
-            const extrapolation = velocity * (extrapolationTime / 16.67); // Normalize to frame time
+        // Only extrapolate for high ping (>100ms) and only a small amount
+        const serverVelocity = m.serverVelocityX || 0;
+        if (ping > 100 && Math.abs(serverVelocity) > 0.5) {
+            // Smooth velocity to prevent sudden direction changes
+            m.smoothedVelocityX = m.smoothedVelocityX || 0;
+            m.smoothedVelocityX += (serverVelocity - m.smoothedVelocityX) * INTERP_CONFIG.VELOCITY_SMOOTHING;
+            
+            // Conservative extrapolation - only predict a fraction of the ping time
+            const extrapolationTime = Math.min(halfPing * 0.5, INTERP_CONFIG.EXTRAPOLATION_MAX);
+            const extrapolation = m.smoothedVelocityX * (extrapolationTime / 16.67);
             targetX += extrapolation;
         }
         
@@ -2690,20 +2694,23 @@ function interpolateMonsterPositions() {
         // Instant snap for large desyncs (teleports, major lag spikes)
         if (absDx > INTERP_CONFIG.SNAP_THRESHOLD) {
             m.x = targetX;
-        } else if (absDx < 1) {
+        } else if (absDx < 0.5) {
             // Close enough, snap to exact position
             m.x = targetX;
         } else {
-            // Adaptive lerp based on ping and distance
+            // Smooth lerp interpolation
             let lerp = INTERP_CONFIG.BASE_LERP;
             
-            // Increase lerp for high ping players (faster catch-up)
-            const pingFactor = Math.min(ping / 100, 2.5); // Cap at 250ms effect
-            lerp *= (1 + pingFactor * 0.3);
+            // Only slightly increase lerp for high ping (subtle adjustment)
+            if (ping > 150) {
+                lerp *= 1.2; // 20% faster for high ping
+            }
             
-            // Increase lerp if far behind (soft snap zone)
+            // Gradual speed increase for larger distances (not sudden)
             if (absDx > INTERP_CONFIG.SOFT_SNAP_THRESHOLD) {
-                lerp *= 1.5;
+                lerp *= 1.3; // 30% faster, not 50%
+            } else if (absDx > 50) {
+                lerp *= 1.1; // Slight boost for medium distances
             }
             
             // Cap maximum lerp to prevent jitter
