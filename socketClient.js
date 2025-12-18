@@ -1384,6 +1384,9 @@ function initMapMonstersOnServer() {
     // Calculate spawn positions client-side (uses all the complex platform/slope logic)
     const spawnPositions = calculateMonsterSpawnPositions(mapData, mapWidth, groundY);
     
+    console.log(`[Socket] Calculated ${spawnPositions.length} spawn positions for ${mapData.monsters?.length || 0} monster types`);
+    console.log('[Socket] Monster config:', mapData.monsters);
+    
     socket.emit('initMapMonsters', {
         mapId: currentMapId,
         monsters: mapData.monsters,
@@ -1504,6 +1507,7 @@ function calculateMonsterSpawnPositions(mapData, mapWidth, groundY) {
     
     for (const spawner of mapData.monsters) {
         const count = spawner.count || 5;
+        console.log(`[Socket] Processing spawner: type=${spawner.type}, count=${count}`);
         const monsterData = typeof monsterTypes !== 'undefined' ? monsterTypes[spawner.type] : null;
         const monsterWidth = monsterData?.width || 40;
         const monsterHeight = monsterData?.height || 40;
