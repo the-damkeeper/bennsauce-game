@@ -3066,7 +3066,25 @@ const questData = {
         inProgressText: "The Stone Golem is incredibly powerful. Use everything I've taught you!",
         completeText: "Incredible! You've truly become a master warrior. This weapon is worthy of your skill.",
         objective: { type: 'kill', target: 'stoneGolem', count: 1 },
-        reward: { exp: 3000, gold: 6000, classItem: { warrior: 'Master Forged Blade', thief: 'Venomous Edge', bowman: 'Arc Bringer', pirate: 'Gilded Handcannon', magician: 'Rupy Sceptre' } }
+        reward: { exp: 3000, gold: 6000, classItem: { 
+            // First job classes
+            warrior: 'Master Forged Blade', 
+            thief: 'Venomous Edge', 
+            bowman: 'Arc Bringer', 
+            pirate: 'Gilded Handcannon', 
+            magician: 'Rupy Sceptre',
+            // Second job classes (inherit from parent)
+            fighter: 'Master Forged Blade',
+            spearman: 'Master Forged Blade',
+            assassin: 'Venomous Edge',
+            bandit: 'Venomous Edge',
+            hunter: 'Arc Bringer',
+            crossbowman: 'Arc Bringer',
+            brawler: 'Gilded Handcannon',
+            gunslinger: 'Gilded Handcannon',
+            cleric: 'Rupy Sceptre',
+            wizard: 'Rupy Sceptre'
+        } }
     },
     // QUEST CHAINS - Series 3: The Lumberjack's Legacy
     'forestGuardian1': {

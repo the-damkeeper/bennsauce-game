@@ -385,7 +385,7 @@ function setupSocketListeners() {
 
     // Receive monster positions from server (server runs AI)
     socket.on('monsterPositions', (data) => {
-        handleMonsterPositionsFromServer(data.monsters);
+        handleMonsterPositionsFromServer(data.monsters, data.t);
     });
 
     // Monster transformed to elite (broadcast from server)
@@ -2609,12 +2609,18 @@ window.partyMemberStats = window.partyMemberStats || {};
  * Server controls X position and AI state only
  * Client handles Y physics (gravity, jumping) locally using original offline logic
  */
-function handleMonsterPositionsFromServer(monsterPositions) {
+function handleMonsterPositionsFromServer(monsterPositions, serverTimestamp) {
     if (!monsterPositions || !Array.isArray(monsterPositions)) return;
+    
+    const receiveTime = Date.now();
     
     for (const pos of monsterPositions) {
         const localMonster = serverMonsterMapping[pos.id];
         if (!localMonster || localMonster.isDead) continue;
+        
+        // Store previous position for velocity estimation if server velocity is 0
+        localMonster.prevServerX = localMonster.serverTargetX;
+        localMonster.prevServerTime = localMonster.serverTimestamp;
         
         // Store server X for interpolation
         localMonster.serverTargetX = pos.x;
@@ -2622,41 +2628,90 @@ function handleMonsterPositionsFromServer(monsterPositions) {
         localMonster.serverDirection = pos.direction;
         localMonster.serverAiState = pos.aiState;
         localMonster.serverVelocityX = pos.velocityX || 0;
-        localMonster.lastServerUpdate = Date.now();
+        localMonster.serverTimestamp = pos.t || serverTimestamp || receiveTime;
+        localMonster.lastServerUpdate = receiveTime;
     }
 }
 
 /**
+ * Interpolation configuration for high-latency compensation
+ */
+const INTERP_CONFIG = {
+    BASE_LERP: 0.12,           // Base interpolation speed
+    MAX_LERP: 0.4,             // Maximum lerp for very high ping
+    SNAP_THRESHOLD: 200,       // Instantly snap if >200px off (teleport/major desync)
+    SOFT_SNAP_THRESHOLD: 100,  // Use faster lerp if >100px off
+    EXTRAPOLATION_MAX: 150,    // Max ms to extrapolate into future
+    STALE_THRESHOLD: 1000,     // Ignore updates older than 1 second
+    VELOCITY_SMOOTHING: 0.3    // Smooth velocity changes
+};
+
+/**
  * Interpolate monster X positions toward server positions
+ * Uses extrapolation and adaptive lerp for high-latency compensation
  * Server controls X, client handles all Y physics locally
  */
 function interpolateMonsterPositions() {
     if (!serverAuthoritativeMonsters) return;
     
     const now = Date.now();
+    const ping = connectionPing > 0 ? connectionPing : 50; // Default 50ms if not measured
+    const halfPing = ping / 2; // One-way latency estimate
     
     for (const serverId in serverMonsterMapping) {
         const m = serverMonsterMapping[serverId];
         if (!m || m.isDead) continue;
         if (m.serverTargetX === undefined) continue;
         
-        // Skip if update is too old
-        if (now - (m.lastServerUpdate || 0) > 1000) continue;
+        const timeSinceUpdate = now - (m.lastServerUpdate || 0);
         
-        // Skip during knockback
+        // Skip if update is too old (stale data)
+        if (timeSinceUpdate > INTERP_CONFIG.STALE_THRESHOLD) continue;
+        
+        // Skip during knockback (local physics takes over)
         if (m.knockbackEndTime && now < m.knockbackEndTime) continue;
         
-        // Simple X interpolation - lerp toward server position
-        const dx = m.serverTargetX - m.x;
-        if (Math.abs(dx) < 1) {
-            m.x = m.serverTargetX;
-        } else {
-            // Smooth interpolation
-            m.x += dx * 0.15;
+        // Calculate extrapolated target position based on velocity and time
+        // This predicts where the monster should be NOW, not where it was when server sent
+        let targetX = m.serverTargetX;
+        const velocity = m.serverVelocityX || 0;
+        
+        if (Math.abs(velocity) > 0.1) {
+            // Extrapolate position based on velocity and elapsed time
+            // Cap extrapolation to prevent overshooting
+            const extrapolationTime = Math.min(timeSinceUpdate + halfPing, INTERP_CONFIG.EXTRAPOLATION_MAX);
+            const extrapolation = velocity * (extrapolationTime / 16.67); // Normalize to frame time
+            targetX += extrapolation;
         }
         
-        // Server is authoritative for X position - no client-side clamping
-        // Server handles patrol bounds and updates them when aggro ends
+        const dx = targetX - m.x;
+        const absDx = Math.abs(dx);
+        
+        // Instant snap for large desyncs (teleports, major lag spikes)
+        if (absDx > INTERP_CONFIG.SNAP_THRESHOLD) {
+            m.x = targetX;
+        } else if (absDx < 1) {
+            // Close enough, snap to exact position
+            m.x = targetX;
+        } else {
+            // Adaptive lerp based on ping and distance
+            let lerp = INTERP_CONFIG.BASE_LERP;
+            
+            // Increase lerp for high ping players (faster catch-up)
+            const pingFactor = Math.min(ping / 100, 2.5); // Cap at 250ms effect
+            lerp *= (1 + pingFactor * 0.3);
+            
+            // Increase lerp if far behind (soft snap zone)
+            if (absDx > INTERP_CONFIG.SOFT_SNAP_THRESHOLD) {
+                lerp *= 1.5;
+            }
+            
+            // Cap maximum lerp to prevent jitter
+            lerp = Math.min(lerp, INTERP_CONFIG.MAX_LERP);
+            
+            // Apply interpolation
+            m.x += dx * lerp;
+        }
         
         // Update facing/direction
         if (m.serverDirection !== undefined) {

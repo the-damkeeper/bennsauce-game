@@ -4612,10 +4612,18 @@ function useAbility(abilityName) {
         playAttackAnimation();
         playSound('attack');
         if (ability.name === 'Arrow Rain') {
-            const rainX = player.x + (player.facing === 'right' ? 100 : -150);
+            // Rain arrows directly on the player's position
+            const rainCenterX = player.x + player.width / 2;
+            const rainWidth = 150; // Total width of arrow rain area
+            
+            // Show attack radius indicator
+            showArrowRainIndicator(rainCenterX, rainWidth);
+            
             for (let i = 0; i < 5; i++) {
                 setTimeout(() => {
-                    createProjectile('arrowProjectile', ability.damageMultiplier, rainX + (Math.random() * 100 - 50), player.y - 250, 90);
+                    // Rain arrows centered on player with random spread
+                    const arrowX = rainCenterX + (Math.random() * rainWidth - rainWidth / 2);
+                    createProjectile('arrowProjectile', ability.damageMultiplier, arrowX, player.y - 250, 90);
                 }, i * 80);
             }
         } else if (ability.name === 'Grenade') {
@@ -4628,6 +4636,52 @@ function useAbility(abilityName) {
         startChanneling(ability);
     }
     updateUI();
+}
+
+/**
+ * Shows a visual indicator for Arrow Rain attack area
+ * @param {number} centerX - Center X position of the rain area
+ * @param {number} width - Width of the rain area
+ */
+function showArrowRainIndicator(centerX, width) {
+    const worldContent = document.getElementById('world-content');
+    if (!worldContent) return;
+    
+    // Get ground level for this position
+    const map = maps[currentMapId];
+    const groundLevel = (map.height || GAME_CONFIG.BASE_GAME_HEIGHT) - GAME_CONFIG.GROUND_Y;
+    const groundY = typeof getSlopeSurfaceY === 'function' 
+        ? getSlopeSurfaceY(centerX, map, groundLevel, 48) 
+        : groundLevel;
+    
+    // Create the indicator element
+    const indicator = document.createElement('div');
+    indicator.className = 'arrow-rain-indicator';
+    indicator.style.cssText = `
+        position: absolute;
+        left: ${centerX - width / 2}px;
+        top: ${groundY - 20}px;
+        width: ${width}px;
+        height: 20px;
+        background: radial-gradient(ellipse, rgba(255, 50, 50, 0.5) 0%, rgba(255, 0, 0, 0.3) 60%, transparent 100%);
+        border: 2px solid rgba(255, 50, 50, 0.6);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 50;
+        box-shadow: 0 0 15px rgba(255, 50, 50, 0.4), inset 0 0 10px rgba(255, 0, 0, 0.3);
+        animation: arrowRainPulse 0.4s ease-in-out infinite;
+    `;
+    
+    worldContent.appendChild(indicator);
+    
+    // Remove after arrows finish falling (5 arrows * 80ms delay + travel time)
+    setTimeout(() => {
+        indicator.style.transition = 'opacity 0.3s ease-out';
+        // Force reflow before changing opacity
+        indicator.offsetHeight;
+        indicator.style.opacity = '0';
+        setTimeout(() => indicator.remove(), 300);
+    }, 600);
 }
 
 /**
