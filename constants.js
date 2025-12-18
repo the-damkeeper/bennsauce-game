@@ -18,7 +18,7 @@ const GAME_CONFIG = {
     JUMP_FORCE: -8, // Stronger jump force to compensate
     GROUND_FRICTION: 0.85,
     AIR_FRICTION: 0.97,
-    KNOCKBACK_FORCE: 4, // Stronger knockback
+    KNOCKBACK_FORCE: 2, // Stronger knockback
     LADDER_SPEED: 1.5,
     
     // Rendering
