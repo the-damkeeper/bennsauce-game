@@ -4,7 +4,7 @@ const GAME_CONFIG = {
     VERSION: '0.853',
     
     // Performance
-    TARGET_FPS: 60, // Target 60 FPS cap for consistent speed on all monitors
+    TARGET_FPS: 100, // Target 100 FPS cap for consistent speed on all monitors
     FRAME_TIME: 1000 / 100,
     
     // Base game dimensions - ALWAYS use these for physics calculations, not container size
